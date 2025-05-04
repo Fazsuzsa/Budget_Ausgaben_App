@@ -14,23 +14,29 @@ function Navbar() {
       <img src={logo} style={{ height: "40px" }} />
 
       <div>
+        <a href="/" style={styles.link}>
+          Budget Manager
+        </a>
+      </div>
+
+      <div>
         <a href="/login" style={styles.link}>
           LOGIN
         </a>
       </div>
 
       <a href="/about" style={styles.link}>
-        ZENS
+        About ZENS
       </a>
       <div>
         <a href="/eng_ger" style={styles.link}>
-          english/german
+          English/German
         </a>
       </div>
 
       <div>
         <a href="/dark_light" style={styles.link}>
-          dark/light
+          Dark/Light
         </a>
       </div>
     </div>
