@@ -23,13 +23,13 @@ function Navbar() {
         ZENS
       </a>
       <div>
-        <a href="/ENG-GER" style={styles.link}>
+        <a href="/eng_ger" style={styles.link}>
           english/german
         </a>
       </div>
 
       <div>
-        <a href="/dark-light" style={styles.link}>
+        <a href="/dark_light" style={styles.link}>
           dark/light
         </a>
       </div>
