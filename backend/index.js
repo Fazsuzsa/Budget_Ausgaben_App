@@ -25,7 +25,7 @@ const createTable = async () => {
             );
         `;
     await client.query(queryText);
-    console.log("✅ Table 'Users' created!");
+    console.log("✅ Table 'users' exists / created!");
   } catch (err) {
     console.error("❌ Error creating table:", err);
   } finally {
@@ -40,7 +40,7 @@ app.use(express.json()); // Ermöglicht Express Json aus einem Body auszulesen
 app.use(express.static("public"));
 
 app.get("/expenses", async (req, res) => {
-  const result = await pool.query("SELECT * FROM Expenses");
+  const result = await pool.query("SELECT * FROM expenses");
   res.json(result.rows);
 });
 
