@@ -20,6 +20,12 @@ function Navbar() {
       </div>
 
       <div>
+        <a href="/expenses" style={styles.link}>
+          Expenses
+        </a>
+      </div>
+
+      <div>
         <a href="/login" style={styles.link}>
           LOGIN
         </a>
