@@ -5,7 +5,7 @@ const { Pool } = require('pg');
 
 
 const app = express();
-const PORT = 3000
+const PORT = 5005
 const pool = new Pool({
     user: process.env.DB_USER, // Dein PostgreSQL-Benutzername
     host: process.env.DB_HOST, // z. B. 'localhost'
@@ -41,6 +41,12 @@ createTable();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static("public"));
+
+app.get("/expenses", async (req, res) => {
+    const result = await pool.query("SELECT * FROM expenses");
+    res.json(result.rows);
+});
 
 
 
