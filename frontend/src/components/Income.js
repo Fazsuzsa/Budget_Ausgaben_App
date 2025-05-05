@@ -38,9 +38,9 @@ function Income() {
             <tr>
               <th>ID</th>
               <th>User ID</th>
-              {/* <th>Name</th> */}
+              <th>Name</th>
               <th>Amount (€)</th>
-              {/* <th>Category ID</th> */}
+              <th>Category ID</th>
               <th>Frequency</th>
               <th>Date</th>
             </tr>
