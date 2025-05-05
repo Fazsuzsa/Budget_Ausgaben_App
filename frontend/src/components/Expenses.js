@@ -41,7 +41,7 @@ function Expenses() {
               <th>Name</th>
               <th>Amount (€)</th>
               <th>Category ID</th>
-              <th>Frequency</th>
+
               <th>Date</th>
             </tr>
           </thead>
@@ -51,9 +51,9 @@ function Expenses() {
                 <td>{expense.id}</td>
                 <td>{expense.user_id}</td>
                 <td>{expense.name}</td>
-                <td>{expense["amount(€)"]}</td>
+                <td>{expense.amount}</td>
                 <td>{expense.category_id}</td>
-                <td>{expense.frequency || "-"}</td>
+
                 <td>{expense.date}</td>
               </tr>
             ))}
