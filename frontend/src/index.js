@@ -9,6 +9,7 @@ import Login from "./components/Login";
 import Eng_ger from "./components/Eng_ger";
 import Dark_light from "./components/Dark_light";
 import Expenses from "./components/Expenses";
+import Income from "./components/Income";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -17,6 +18,7 @@ root.render(
       <Routes>
         <Route path="/" element={<App></App>}></Route>
         <Route path="/expenses" element={<Expenses></Expenses>}></Route>
+        <Route path="/income" element={<Income></Income>}></Route>
         <Route path="/about" element={<About></About>}></Route>
         <Route path="/login" element={<Login></Login>}></Route>
         <Route path="/eng_ger" element={<Eng_ger></Eng_ger>}></Route>
