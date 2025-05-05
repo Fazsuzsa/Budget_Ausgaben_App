@@ -25,23 +25,23 @@ SET default_table_access_method = heap;
 
 --
 -- TOC entry 217 (class 1259 OID 16399)
--- Name: Categories; Type: TABLE; Schema: public; Owner: postgres
+-- Name: categories; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public."Categories" (
+CREATE TABLE public."categories" (
     id integer NOT NULL,
     name character varying(100) NOT NULL
 );
 
 
-ALTER TABLE public."Categories" OWNER TO postgres;
+ALTER TABLE public."categories" OWNER TO postgres;
 
 --
 -- TOC entry 218 (class 1259 OID 16402)
--- Name: Categories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: categories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE public."Categories_id_seq"
+CREATE SEQUENCE public."categories_id_seq"
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -50,23 +50,23 @@ CREATE SEQUENCE public."Categories_id_seq"
     CACHE 1;
 
 
-ALTER SEQUENCE public."Categories_id_seq" OWNER TO postgres;
+ALTER SEQUENCE public."categories_id_seq" OWNER TO postgres;
 
 --
 -- TOC entry 4959 (class 0 OID 0)
 -- Dependencies: 218
--- Name: Categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public."Categories_id_seq" OWNED BY public."Categories".id;
+ALTER SEQUENCE public."categories_id_seq" OWNED BY public."categories".id;
 
 
 --
 -- TOC entry 219 (class 1259 OID 16403)
--- Name: Expenses; Type: TABLE; Schema: public; Owner: postgres
+-- Name: expenses; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public."Expenses" (
+CREATE TABLE public."expenses" (
     id integer NOT NULL,
     user_id integer NOT NULL,
     amount real NOT NULL,
@@ -76,14 +76,14 @@ CREATE TABLE public."Expenses" (
 );
 
 
-ALTER TABLE public."Expenses" OWNER TO postgres;
+ALTER TABLE public."expenses" OWNER TO postgres;
 
 --
 -- TOC entry 220 (class 1259 OID 16406)
--- Name: Expenses_category_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: expenses_category_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE public."Expenses_category_id_seq"
+CREATE SEQUENCE public."expenses_category_id_seq"
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -92,23 +92,23 @@ CREATE SEQUENCE public."Expenses_category_id_seq"
     CACHE 1;
 
 
-ALTER SEQUENCE public."Expenses_category_id_seq" OWNER TO postgres;
+ALTER SEQUENCE public."expenses_category_id_seq" OWNER TO postgres;
 
 --
 -- TOC entry 4960 (class 0 OID 0)
 -- Dependencies: 220
--- Name: Expenses_category_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: expenses_category_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public."Expenses_category_id_seq" OWNED BY public."Expenses".category_id;
+ALTER SEQUENCE public."expenses_category_id_seq" OWNED BY public."expenses".category_id;
 
 
 --
 -- TOC entry 221 (class 1259 OID 16407)
--- Name: Expenses_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: expenses_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE public."Expenses_id_seq"
+CREATE SEQUENCE public."expenses_id_seq"
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -117,23 +117,23 @@ CREATE SEQUENCE public."Expenses_id_seq"
     CACHE 1;
 
 
-ALTER SEQUENCE public."Expenses_id_seq" OWNER TO postgres;
+ALTER SEQUENCE public."expenses_id_seq" OWNER TO postgres;
 
 --
 -- TOC entry 4961 (class 0 OID 0)
 -- Dependencies: 221
--- Name: Expenses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: expenses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public."Expenses_id_seq" OWNED BY public."Expenses".id;
+ALTER SEQUENCE public."expenses_id_seq" OWNED BY public."expenses".id;
 
 
 --
 -- TOC entry 222 (class 1259 OID 16408)
--- Name: Expenses_user_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: expenses_user_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE public."Expenses_user_id_seq"
+CREATE SEQUENCE public."expenses_user_id_seq"
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -142,24 +142,24 @@ CREATE SEQUENCE public."Expenses_user_id_seq"
     CACHE 1;
 
 
-ALTER SEQUENCE public."Expenses_user_id_seq" OWNER TO postgres;
+ALTER SEQUENCE public."expenses_user_id_seq" OWNER TO postgres;
 
 --
 -- TOC entry 4962 (class 0 OID 0)
 -- Dependencies: 222
--- Name: Expenses_user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: expenses_user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public."Expenses_user_id_seq" OWNED BY public."Expenses".user_id;
+ALTER SEQUENCE public."expenses_user_id_seq" OWNED BY public."expenses".user_id;
 
 
 --
 -- TOC entry 229 (class 1259 OID 16453)
--- Name: Incomes; Type: TABLE; Schema: public; Owner: postgres
+-- Name: incomes; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public."Incomes" (
-    id integer DEFAULT nextval('public."Categories_id_seq"'::regclass) NOT NULL,
+CREATE TABLE public."incomes" (
+    id integer DEFAULT nextval('public."categories_id_seq"'::regclass) NOT NULL,
     user_id integer NOT NULL,
     amount real NOT NULL,
     name character varying(50) NOT NULL,
@@ -167,15 +167,15 @@ CREATE TABLE public."Incomes" (
 );
 
 
-ALTER TABLE public."Incomes" OWNER TO postgres;
+ALTER TABLE public."incomes" OWNER TO postgres;
 
 --
 -- TOC entry 228 (class 1259 OID 16446)
--- Name: Monthly_expenses; Type: TABLE; Schema: public; Owner: postgres
+-- Name: monthly_expenses; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public."Monthly_expenses" (
-    id integer DEFAULT nextval('public."Categories_id_seq"'::regclass) NOT NULL,
+CREATE TABLE public."monthly_expenses" (
+    id integer DEFAULT nextval('public."categories_id_seq"'::regclass) NOT NULL,
     user_id integer NOT NULL,
     amount real NOT NULL,
     name character varying(50) NOT NULL,
@@ -183,14 +183,14 @@ CREATE TABLE public."Monthly_expenses" (
 );
 
 
-ALTER TABLE public."Monthly_expenses" OWNER TO postgres;
+ALTER TABLE public."monthly_expenses" OWNER TO postgres;
 
 --
 -- TOC entry 225 (class 1259 OID 16413)
--- Name: Monthly_incomes ; Type: TABLE; Schema: public; Owner: postgres
+-- Name: monthly_incomes ; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public."Monthly_incomes " (
+CREATE TABLE public."monthly_incomes " (
     id integer NOT NULL,
     user_id integer NOT NULL,
     amount real NOT NULL,
@@ -198,14 +198,14 @@ CREATE TABLE public."Monthly_incomes " (
 );
 
 
-ALTER TABLE public."Monthly_incomes " OWNER TO postgres;
+ALTER TABLE public."monthly_incomes " OWNER TO postgres;
 
 --
 -- TOC entry 223 (class 1259 OID 16409)
--- Name: Users; Type: TABLE; Schema: public; Owner: postgres
+-- Name: users; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public."Users" (
+CREATE TABLE public."users" (
     id integer NOT NULL,
     name character varying(50) NOT NULL,
     password character varying(255) NOT NULL,
@@ -213,14 +213,14 @@ CREATE TABLE public."Users" (
 );
 
 
-ALTER TABLE public."Users" OWNER TO postgres;
+ALTER TABLE public."users" OWNER TO postgres;
 
 --
 -- TOC entry 224 (class 1259 OID 16412)
--- Name: Users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE public."Users_id_seq"
+CREATE SEQUENCE public."users_id_seq"
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -229,15 +229,15 @@ CREATE SEQUENCE public."Users_id_seq"
     CACHE 1;
 
 
-ALTER SEQUENCE public."Users_id_seq" OWNER TO postgres;
+ALTER SEQUENCE public."users_id_seq" OWNER TO postgres;
 
 --
 -- TOC entry 4963 (class 0 OID 0)
 -- Dependencies: 224
--- Name: Users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public."Users_id_seq" OWNED BY public."Users".id;
+ALTER SEQUENCE public."users_id_seq" OWNED BY public."users".id;
 
 
 --
@@ -262,7 +262,7 @@ ALTER SEQUENCE public."incomes _id_seq" OWNER TO postgres;
 -- Name: incomes _id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public."incomes _id_seq" OWNED BY public."Monthly_incomes ".id;
+ALTER SEQUENCE public."incomes _id_seq" OWNED BY public."monthly_incomes ".id;
 
 
 --
@@ -287,72 +287,72 @@ ALTER SEQUENCE public."incomes _user_id_seq" OWNER TO postgres;
 -- Name: incomes _user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public."incomes _user_id_seq" OWNED BY public."Monthly_incomes ".user_id;
+ALTER SEQUENCE public."incomes _user_id_seq" OWNED BY public."monthly_incomes ".user_id;
 
 
 --
 -- TOC entry 4768 (class 2604 OID 16420)
--- Name: Categories id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: categories id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Categories" ALTER COLUMN id SET DEFAULT nextval('public."Categories_id_seq"'::regclass);
+ALTER TABLE ONLY public."categories" ALTER COLUMN id SET DEFAULT nextval('public."categories_id_seq"'::regclass);
 
 
 --
 -- TOC entry 4769 (class 2604 OID 16421)
--- Name: Expenses id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: expenses id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Expenses" ALTER COLUMN id SET DEFAULT nextval('public."Expenses_id_seq"'::regclass);
+ALTER TABLE ONLY public."expenses" ALTER COLUMN id SET DEFAULT nextval('public."expenses_id_seq"'::regclass);
 
 
 --
 -- TOC entry 4770 (class 2604 OID 16422)
--- Name: Expenses user_id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: expenses user_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Expenses" ALTER COLUMN user_id SET DEFAULT nextval('public."Expenses_user_id_seq"'::regclass);
+ALTER TABLE ONLY public."expenses" ALTER COLUMN user_id SET DEFAULT nextval('public."expenses_user_id_seq"'::regclass);
 
 
 --
 -- TOC entry 4771 (class 2604 OID 16423)
--- Name: Expenses category_id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: expenses category_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Expenses" ALTER COLUMN category_id SET DEFAULT nextval('public."Expenses_category_id_seq"'::regclass);
+ALTER TABLE ONLY public."expenses" ALTER COLUMN category_id SET DEFAULT nextval('public."expenses_category_id_seq"'::regclass);
 
 
 --
 -- TOC entry 4773 (class 2604 OID 16425)
--- Name: Monthly_incomes  id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: monthly_incomes  id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Monthly_incomes " ALTER COLUMN id SET DEFAULT nextval('public."incomes _id_seq"'::regclass);
+ALTER TABLE ONLY public."monthly_incomes " ALTER COLUMN id SET DEFAULT nextval('public."incomes _id_seq"'::regclass);
 
 
 --
 -- TOC entry 4774 (class 2604 OID 16426)
--- Name: Monthly_incomes  user_id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: monthly_incomes  user_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Monthly_incomes " ALTER COLUMN user_id SET DEFAULT nextval('public."incomes _user_id_seq"'::regclass);
+ALTER TABLE ONLY public."monthly_incomes " ALTER COLUMN user_id SET DEFAULT nextval('public."incomes _user_id_seq"'::regclass);
 
 
 --
 -- TOC entry 4772 (class 2604 OID 16424)
--- Name: Users id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Users" ALTER COLUMN id SET DEFAULT nextval('public."Users_id_seq"'::regclass);
+ALTER TABLE ONLY public."users" ALTER COLUMN id SET DEFAULT nextval('public."users_id_seq"'::regclass);
 
 
 --
 -- TOC entry 4941 (class 0 OID 16399)
 -- Dependencies: 217
--- Data for Name: Categories; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: categories; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Categories" (id, name) FROM stdin;
+COPY public."categories" (id, name) FROM stdin;
 1	Shopping
 2	Entertainment
 3	Transport
@@ -364,10 +364,10 @@ COPY public."Categories" (id, name) FROM stdin;
 --
 -- TOC entry 4943 (class 0 OID 16403)
 -- Dependencies: 219
--- Data for Name: Expenses; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: expenses; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Expenses" (id, user_id, amount, name, category_id, date) FROM stdin;
+COPY public."expenses" (id, user_id, amount, name, category_id, date) FROM stdin;
 1	1	35	jeans	1	2025-04-01
 7	1	95	Lebensmittel	1	2025-04-07
 8	1	69	Lebensmittel	1	2025-04-14
@@ -389,10 +389,10 @@ COPY public."Expenses" (id, user_id, amount, name, category_id, date) FROM stdin
 --
 -- TOC entry 4953 (class 0 OID 16453)
 -- Dependencies: 229
--- Data for Name: Incomes; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: incomes; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Incomes" (id, user_id, amount, name, date) FROM stdin;
+COPY public."incomes" (id, user_id, amount, name, date) FROM stdin;
 6	1	150	Mamas Geschenk	2025-04-16
 \.
 
@@ -400,10 +400,10 @@ COPY public."Incomes" (id, user_id, amount, name, date) FROM stdin;
 --
 -- TOC entry 4952 (class 0 OID 16446)
 -- Dependencies: 228
--- Data for Name: Monthly_expenses; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: monthly_expenses; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Monthly_expenses" (id, user_id, amount, name, category_id) FROM stdin;
+COPY public."monthly_expenses" (id, user_id, amount, name, category_id) FROM stdin;
 5	1	4.99	netflix abo	2
 4	1	60	gym abo	2
 3	1	42.99	internet	4
@@ -415,10 +415,10 @@ COPY public."Monthly_expenses" (id, user_id, amount, name, category_id) FROM std
 --
 -- TOC entry 4949 (class 0 OID 16413)
 -- Dependencies: 225
--- Data for Name: Monthly_incomes ; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: monthly_incomes ; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Monthly_incomes " (id, user_id, amount, name) FROM stdin;
+COPY public."monthly_incomes " (id, user_id, amount, name) FROM stdin;
 1	1	520	Minijob
 \.
 
@@ -426,10 +426,10 @@ COPY public."Monthly_incomes " (id, user_id, amount, name) FROM stdin;
 --
 -- TOC entry 4947 (class 0 OID 16409)
 -- Dependencies: 223
--- Data for Name: Users; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Users" (id, name, password, e_mail) FROM stdin;
+COPY public."users" (id, name, password, e_mail) FROM stdin;
 1	Tina	Tina1234	tina@zens.de
 \.
 
@@ -437,46 +437,46 @@ COPY public."Users" (id, name, password, e_mail) FROM stdin;
 --
 -- TOC entry 4966 (class 0 OID 0)
 -- Dependencies: 218
--- Name: Categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Categories_id_seq"', 10, true);
+SELECT pg_catalog.setval('public."categories_id_seq"', 10, true);
 
 
 --
 -- TOC entry 4967 (class 0 OID 0)
 -- Dependencies: 220
--- Name: Expenses_category_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: expenses_category_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Expenses_category_id_seq"', 1, false);
+SELECT pg_catalog.setval('public."expenses_category_id_seq"', 1, false);
 
 
 --
 -- TOC entry 4968 (class 0 OID 0)
 -- Dependencies: 221
--- Name: Expenses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: expenses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Expenses_id_seq"', 20, true);
+SELECT pg_catalog.setval('public."expenses_id_seq"', 20, true);
 
 
 --
 -- TOC entry 4969 (class 0 OID 0)
 -- Dependencies: 222
--- Name: Expenses_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: expenses_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Expenses_user_id_seq"', 1, false);
+SELECT pg_catalog.setval('public."expenses_user_id_seq"', 1, false);
 
 
 --
 -- TOC entry 4970 (class 0 OID 0)
 -- Dependencies: 224
--- Name: Users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Users_id_seq"', 1, true);
+SELECT pg_catalog.setval('public."users_id_seq"', 1, true);
 
 
 --
@@ -499,119 +499,119 @@ SELECT pg_catalog.setval('public."incomes _user_id_seq"', 1, false);
 
 --
 -- TOC entry 4779 (class 2606 OID 16428)
--- Name: Categories Categories_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: categories categories_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Categories"
-    ADD CONSTRAINT "Categories_pkey" PRIMARY KEY (id);
+ALTER TABLE ONLY public."categories"
+    ADD CONSTRAINT "categories_pkey" PRIMARY KEY (id);
 
 
 --
 -- TOC entry 4781 (class 2606 OID 16430)
--- Name: Expenses Expenses_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: expenses expenses_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Expenses"
-    ADD CONSTRAINT "Expenses_pkey" PRIMARY KEY (id);
+ALTER TABLE ONLY public."expenses"
+    ADD CONSTRAINT "expenses_pkey" PRIMARY KEY (id);
 
 
 --
 -- TOC entry 4789 (class 2606 OID 16457)
--- Name: Incomes Incomes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: incomes incomes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Incomes"
-    ADD CONSTRAINT "Incomes_pkey" PRIMARY KEY (id);
+ALTER TABLE ONLY public."incomes"
+    ADD CONSTRAINT "incomes_pkey" PRIMARY KEY (id);
 
 
 --
 -- TOC entry 4787 (class 2606 OID 16450)
--- Name: Monthly_expenses Monthly_expenses_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: monthly_expenses monthly_expenses_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Monthly_expenses"
-    ADD CONSTRAINT "Monthly_expenses_pkey" PRIMARY KEY (id);
+ALTER TABLE ONLY public."monthly_expenses"
+    ADD CONSTRAINT "monthly_expenses_pkey" PRIMARY KEY (id);
 
 
 --
 -- TOC entry 4785 (class 2606 OID 16452)
--- Name: Monthly_incomes  Monthly_incomes _pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: monthly_incomes  monthly_incomes _pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Monthly_incomes "
-    ADD CONSTRAINT "Monthly_incomes _pkey" PRIMARY KEY (id);
+ALTER TABLE ONLY public."monthly_incomes "
+    ADD CONSTRAINT "monthly_incomes _pkey" PRIMARY KEY (id);
 
 
 --
 -- TOC entry 4783 (class 2606 OID 16432)
--- Name: Users Users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Users"
-    ADD CONSTRAINT "Users_pkey" PRIMARY KEY (id);
+ALTER TABLE ONLY public."users"
+    ADD CONSTRAINT "users_pkey" PRIMARY KEY (id);
 
 
 --
 -- TOC entry 4777 (class 2606 OID 16433)
--- Name: Users valid_email; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: users valid_email; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE public."Users"
+ALTER TABLE public."users"
     ADD CONSTRAINT valid_email CHECK (((e_mail)::text ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'::text)) NOT VALID;
 
 
 --
 -- TOC entry 4790 (class 2606 OID 16458)
--- Name: Expenses category_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: expenses category_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Expenses"
-    ADD CONSTRAINT category_id FOREIGN KEY (category_id) REFERENCES public."Categories"(id) ON DELETE CASCADE NOT VALID;
+ALTER TABLE ONLY public."expenses"
+    ADD CONSTRAINT category_id FOREIGN KEY (category_id) REFERENCES public."categories"(id) ON DELETE CASCADE NOT VALID;
 
 
 --
 -- TOC entry 4793 (class 2606 OID 16468)
--- Name: Monthly_expenses category_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: monthly_expenses category_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Monthly_expenses"
-    ADD CONSTRAINT category_id FOREIGN KEY (category_id) REFERENCES public."Categories"(id) ON DELETE CASCADE NOT VALID;
+ALTER TABLE ONLY public."monthly_expenses"
+    ADD CONSTRAINT category_id FOREIGN KEY (category_id) REFERENCES public."categories"(id) ON DELETE CASCADE NOT VALID;
 
 
 --
 -- TOC entry 4792 (class 2606 OID 16434)
--- Name: Monthly_incomes  user_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: monthly_incomes  user_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Monthly_incomes "
-    ADD CONSTRAINT user_id FOREIGN KEY (user_id) REFERENCES public."Users"(id) ON DELETE CASCADE;
+ALTER TABLE ONLY public."monthly_incomes "
+    ADD CONSTRAINT user_id FOREIGN KEY (user_id) REFERENCES public."users"(id) ON DELETE CASCADE;
 
 
 --
 -- TOC entry 4791 (class 2606 OID 16463)
--- Name: Expenses user_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: expenses user_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Expenses"
-    ADD CONSTRAINT user_id FOREIGN KEY (user_id) REFERENCES public."Users"(id) ON DELETE CASCADE NOT VALID;
+ALTER TABLE ONLY public."expenses"
+    ADD CONSTRAINT user_id FOREIGN KEY (user_id) REFERENCES public."users"(id) ON DELETE CASCADE NOT VALID;
 
 
 --
 -- TOC entry 4794 (class 2606 OID 16473)
--- Name: Monthly_expenses user_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: monthly_expenses user_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Monthly_expenses"
-    ADD CONSTRAINT user_id FOREIGN KEY (user_id) REFERENCES public."Users"(id) ON DELETE CASCADE NOT VALID;
+ALTER TABLE ONLY public."monthly_expenses"
+    ADD CONSTRAINT user_id FOREIGN KEY (user_id) REFERENCES public."users"(id) ON DELETE CASCADE NOT VALID;
 
 
 --
 -- TOC entry 4795 (class 2606 OID 16478)
--- Name: Incomes user_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: incomes user_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Incomes"
-    ADD CONSTRAINT user_id FOREIGN KEY (user_id) REFERENCES public."Users"(id) ON DELETE CASCADE NOT VALID;
+ALTER TABLE ONLY public."incomes"
+    ADD CONSTRAINT user_id FOREIGN KEY (user_id) REFERENCES public."users"(id) ON DELETE CASCADE NOT VALID;
 
 
 -- Completed on 2025-05-05 15:48:03

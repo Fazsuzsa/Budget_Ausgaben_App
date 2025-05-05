@@ -40,10 +40,15 @@ app.use(express.json()); // Ermöglicht Express Json aus einem Body auszulesen
 app.use(express.static("public"));
 
 app.get("/expenses", async (req, res) => {
-  const result = await pool.query("SELECT * FROM expenses");
+  const result = await pool.query("SELECT * FROM Expenses");
+  res.json(result.rows);
+});
+
+app.get("/income", async (req, res) => {
+  const result = await pool.query("SELECT * FROM Incomes");
   res.json(result.rows);
 });
 
 app.listen(PORT, () => {
-  console.log(`Server lauft: http://localhost:${PORT}`);
+  console.log(`Server läuft: http://localhost:${PORT}`);
 });

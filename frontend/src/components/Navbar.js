@@ -1,5 +1,6 @@
 import React from "react";
 import logo from "../assets/images/logo.svg";
+import { Link } from "react-router-dom";
 
 function Navbar() {
   return (
@@ -12,39 +13,27 @@ function Navbar() {
       }}
     >
       <img src={logo} style={{ height: "40px" }} />
-
-      <div>
-        <a href="/" style={styles.link}>
-          Budget Manager
-        </a>
-      </div>
-
-      <div>
-        <a href="/expenses" style={styles.link}>
-          Expenses
-        </a>
-      </div>
-
-      <div>
-        <a href="/login" style={styles.link}>
-          LOGIN
-        </a>
-      </div>
-
-      <a href="/about" style={styles.link}>
+      <Link to="/" style={styles.link}>
+        Budget Manager
+      </Link>
+      <Link to="/expenses" style={styles.link}>
+        Expenses
+      </Link>
+      <Link to="/income" style={styles.link}>
+        Income
+      </Link>
+      <Link to="/login" style={styles.link}>
+        LOGIN
+      </Link>
+      <Link to="/about" style={styles.link}>
         About ZENS
-      </a>
-      <div>
-        <a href="/eng_ger" style={styles.link}>
-          English/German
-        </a>
-      </div>
-
-      <div>
-        <a href="/dark_light" style={styles.link}>
-          Dark/Light
-        </a>
-      </div>
+      </Link>
+      <Link to="/eng_ger" style={styles.link}>
+        English/German
+      </Link>
+      <Link to="/dark_light" style={styles.link}>
+        Dark/Light
+      </Link>
     </div>
   );
 }
