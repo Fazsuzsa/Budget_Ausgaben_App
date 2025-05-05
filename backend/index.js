@@ -1,43 +1,70 @@
-const express = require('express');
-const cors = require('cors');
-const { Pool } = require('pg');
-require('dotenv').config();
+const express = require("express");
+const cors = require("cors");
+require("dotenv").config();
+const { Pool } = require("pg");
+
 
 const app = express();
 const PORT = 5005;
-
-app.use(cors());
-app.use(express.json());
-
-// PostgreSQL-Verbindung über Pool ???
 const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
+  user: process.env.DB_USER, // Dein PostgreSQL-Benutzername
+  host: process.env.DB_HOST, // z. B. 'localhost'
+  database: process.env.DB_NAME, // Name deiner Datenbank
+  password: process.env.DB_PASSWORD, // Dein Passwort
+  port: process.env.DB_PORT, // Standardport für PostgreSQL
 });
 
-// POST-Route - Ausgabe Hinzufügen
-app.post('/api/expenses', async (req, res) => {
-  const { title, amount, category } = req.body;
+const createTable = async () => {
+  const client = await pool.connect();
+  try {
+    const queryText = `
+            CREATE TABLE IF NOT EXISTS Users (id  SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    budget real NOT NULL,
+    e_mail VARCHAR(100) NOT NULL
+            );
+        `;
+    await client.query(queryText);
+    console.log("✅ Table 'users' exists / created!");
+  } catch (err) {
+    console.error("❌ Error creating table:", err);
+  } finally {
+    client.release();
+  }
+};
 
-  if (!title || !amount) {
-    return res.status(400).json({ error: 'title und amount sind erforderlich' });
+createTable();
+
+app.use(cors());
+app.use(express.json()); // Ermöglicht Express Json aus einem Body auszulesen
+app.use(express.static("public"));
+
+app.get("/expenses", async (req, res) => {
+  const result = await pool.query("SELECT * FROM expenses");
+  res.json(result.rows);
+});
+
+app.post("/expenses", async (req, res) => {
+  const { user_id, category_id, amount, description, date } = req.body;
+
+  if (!user_id || !category_id || !amount || !date) {
+    return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
     const result = await pool.query(
-      'INSERT INTO expenses (title, amount, category) VALUES ($1, $2, $3) RETURNING *',
-      [title, amount, category]
+      `INSERT INTO expenses (user_id, category_id, amount, description, date)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [user_id, category_id, amount, description || '', date]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error('Fehler beim Einfügen in DB:', err);
-    res.status(500).json({ error: 'Datenbankfehler' });
+    console.error("Fehler beim Einfügen der Ausgabe:", err);
+    res.status(500).json({ error: "Interner Serverfehler" });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`Server läuft: http://localhost:${PORT}`);
+  console.log(`Server lauft: http://localhost:${PORT}`);
 });
