@@ -4,7 +4,9 @@ require("dotenv").config();
 const { Pool } = require("pg");
 
 const app = express();
+
 const PORT = 5005;
+
 const pool = new Pool({
   user: process.env.DB_USER, // Dein PostgreSQL-Benutzername
   host: process.env.DB_HOST, // z. B. 'localhost'
@@ -12,6 +14,7 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD, // Dein Passwort
   port: process.env.DB_PORT, // Standardport für PostgreSQL
 });
+
 
 const createTable = async () => {
   const client = await pool.connect();
@@ -35,14 +38,45 @@ const createTable = async () => {
 
 createTable();
 
+
+
 app.use(cors());
 app.use(express.json()); // Ermöglicht Express Json aus einem Body auszulesen
 app.use(express.static("public"));
+
+app.post("/login", async (req, res) => {
+    const { e_mail, password } = req.body;
+    console.log("Request login:", e_mail, password);
+
+    try {
+        const result = await pool.query('SELECT * FROM users WHERE e_mail = $1', [e_mail]);
+        const user = result.rows[0];
+
+        if (!user) {
+            return res.json({ error: "e_mail incorrect!" });
+        }
+
+
+        if (user.password !== password) {
+            return res.json({ error: "Passwort incorrect" });
+        }
+
+        res.json({ message: "Connexion OK", user });
+        console.log(res.json({ user }))
+    } catch (error) {
+        console.error("Error login:", error);
+        res.status(500).json({ error: "Error server" });
+    }
+});
+
+
+
 
 app.get("/expenses", async (req, res) => {
   const result = await pool.query("SELECT * FROM expenses");
   res.json(result.rows);
 });
+
 
 app.listen(PORT, () => {
   console.log(`Server lauft: http://localhost:${PORT}`);
