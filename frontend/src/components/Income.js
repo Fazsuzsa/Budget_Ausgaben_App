@@ -40,8 +40,7 @@ function Income() {
               <th>User ID</th>
               <th>Name</th>
               <th>Amount (€)</th>
-              <th>Category ID</th>
-              <th>Frequency</th>
+
               <th>Date</th>
             </tr>
           </thead>
@@ -51,9 +50,7 @@ function Income() {
                 <td>{income.id}</td>
                 <td>{income.user_id}</td>
                 <td>{income.name}</td>
-                <td>{income["amount(€)"]}</td>
-                <td>{income.category_id}</td>
-                <td>{income.frequency || "-"}</td>
+                <td>{income.amount}</td>
                 <td>{income.date}</td>
               </tr>
             ))}
