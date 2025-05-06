@@ -1,9 +1,12 @@
 import React from "react";
+
+import AddExpenseForm from "./AddExpense";
 import Navbar from "./components/Navbar";
 import sampleTable from "./assets/images/sampleTable.png";
 import barChart from "./assets/images/barChart.png";
 import pieChart from "./assets/images/pieChart.png";
 import "./App.css";
+
 
 const App = () => {
   return (
@@ -30,13 +33,14 @@ const App = () => {
           <img src={barChart} alt="Expenses statistics" />
         </div>
       </div>
+      {/* Button zum Einblenden des Formulars */}
+      <AddExpenseForm />
     </>
   );
 };
 
 const styles = {
   chartContainer: {
-    display: "flex",
     gap: "30px", // space between charts
   },
   chartBox: {
