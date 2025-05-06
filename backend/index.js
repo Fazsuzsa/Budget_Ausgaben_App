@@ -3,8 +3,9 @@ const cors = require("cors");
 require("dotenv").config();
 const { Pool } = require("pg");
 
-const app = express();
 
+
+const app = express();
 const PORT = 5005;
 
 const pool = new Pool({
@@ -38,11 +39,72 @@ const createTable = async () => {
 
 createTable();
 
-
-
 app.use(cors());
 app.use(express.json()); // Ermöglicht Express Json aus einem Body auszulesen
 app.use(express.static("public"));
+
+app.get("/expenses", async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM "expenses"');
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Fehler beim Abrufen der Ausgaben:", err);
+    res.status(500).json({ error: "Interner Serverfehler" });
+  }
+});
+
+app.post("/expenses", async (req, res) => {
+  const { user_id, category_id, amount, name, date } = req.body;
+
+  if (!user_id || !category_id || !amount || !date) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO "expenses" (user_id, category_id, "amount", name, date)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [user_id, category_id, amount, name || '', date]
+    );
+    
+  
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error("Fehler beim Einfügen der Ausgabe:", err);
+    res.status(500).json({ error: "Interner Serverfehler" });
+  }
+});
+
+app.get("/monthly_expenses", async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM "monthly_expenses"');
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Fehler beim Abrufen der monatlichen Ausgaben:", err);
+    res.status(500).json({ error: "Interner Serverfehler" });
+  }
+});
+
+app.post("/monthly_expenses", async (req, res) => {
+  const { user_id, category_id, amount, name, date, frequency } = req.body;
+
+  if (!user_id || !category_id || !amount || !date || !frequency) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO "Monthly_expenses" (user_id, category_id, "amount", name, date, frequency)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [user_id, category_id, amount, name || '', date, frequency]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error("Fehler beim Einfügen in Monthly_expenses:", err);
+    res.status(500).json({ error: "Interner Serverfehler" });
+  }
+});
+
 
 app.post("/login", async (req, res) => {
     const { e_mail, password } = req.body;
@@ -69,20 +131,7 @@ app.post("/login", async (req, res) => {
     }
 });
 
-
-
-
-app.get("/expenses", async (req, res) => {
-  const result = await pool.query("SELECT * FROM Expenses");
-  res.json(result.rows);
-});
-
-app.get("/income", async (req, res) => {
-  const result = await pool.query("SELECT * FROM Incomes");
-  res.json(result.rows);
-});
-
-
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);
 });
+
