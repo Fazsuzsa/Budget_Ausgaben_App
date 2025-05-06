@@ -1,15 +1,17 @@
 import React from "react";
-// import Navbar from "./components/Navbar";
-// import sampleTable from "./assets/images/sampleTable.png";
-// import barChart from "./assets/images/barChart.png";
-// import pieChart from "./assets/images/pieChart.png";
-import "./App.css";
+
 import AddExpenseForm from "./AddExpense";
+import Navbar from "./components/Navbar";
+import sampleTable from "./assets/images/sampleTable.png";
+import barChart from "./assets/images/barChart.png";
+import pieChart from "./assets/images/pieChart.png";
+import "./App.css";
+
 
 const App = () => {
   return (
     <>
-      {/* <Navbar />
+      <Navbar />
       <h1>Our Application for your budget administration</h1>
 
       <div>
@@ -30,8 +32,7 @@ const App = () => {
           <h3>Expenses statistics</h3>
           <img src={barChart} alt="Expenses statistics" />
         </div>
-      </div> */}
-
+      </div>
       {/* Button zum Einblenden des Formulars */}
       <AddExpenseForm />
     </>
@@ -40,8 +41,7 @@ const App = () => {
 
 const styles = {
   chartContainer: {
-    display: "flex",
-    gap: "30px",
+    gap: "30px", // space between charts
   },
   chartBox: {
     textAlign: "center",
