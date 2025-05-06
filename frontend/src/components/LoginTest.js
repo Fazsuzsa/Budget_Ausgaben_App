@@ -1,6 +1,6 @@
 import React from "react";
 import Navbar from "./Navbar";
-import { Button } from "./Button";
+import { Button } from "./ui/Button";
 import {
   Accordion,
   AccordionContent,
