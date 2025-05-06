@@ -137,15 +137,33 @@ app.get("/income", async (req, res) => {
   res.json(result.rows);
 });
 
-app.delete("/income/:user_id/:id", async (req, res) => {
+app.put("/income/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const user_id = req.params.user_id;
+    const query = 'UPDATE FROM "incomes" WHERE id = $1  RETURNING *';
+
+    const { rows } = await pool.query(query, [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).send("cannot find the incomes");
+    }
+
+    res.status(200).json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("some error has occured");
+  }
+});
+
+app.delete("/income/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const user_id = req.params.user_id;
 
-    const query =
-      "DELETE FROM incomes WHERE id = $1 AND user_id = $2 RETURNING *;";
+    const query = 'DELETE FROM "incomes" WHERE id = $1  RETURNING *;';
 
-    const { rows } = await pool.query(query, [id, user_id]);
+    const { rows } = await pool.query(query, [id]);
 
     if (rows.length === 0) {
       return res.status(404).send("cannot find the incomes");
