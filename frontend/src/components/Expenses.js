@@ -8,10 +8,10 @@ function Expenses() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5005/expenses")
+    fetch("http://localhost:5005/Expenses")
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Failed to fetch expenses");
+          throw new Error("Failed to fetch Expenses");
         }
         return response.json();
       })
