@@ -1,6 +1,5 @@
 import React from "react";
 
-import AddExpenseForm from "./AddExpense";
 import Navbar from "./components/Navbar";
 import sampleTable from "./assets/images/sampleTable.png";
 import barChart from "./assets/images/barChart.png";
@@ -33,8 +32,6 @@ const App = () => {
           <img src={barChart} alt="Expenses statistics" />
         </div>
       </div>
-      {/* Button zum Einblenden des Formulars */}
-      <AddExpenseForm />
     </>
   );
 };

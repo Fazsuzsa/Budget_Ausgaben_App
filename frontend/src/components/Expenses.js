@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "./Navbar";
+import AddExpenseForm from "./AddExpense";
 
 function Expenses() {
   const [expenses, setExpenses] = useState([]);
@@ -60,6 +61,8 @@ function Expenses() {
           </tbody>
         </table>
       )}
+            {/* Button zum Einblenden des Formulars */}
+            <AddExpenseForm />
     </>
   );
 }
