@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "./Navbar";
+import AddExpenseForm from "./AddExpense";
 
 function Expenses() {
   const [expenses, setExpenses] = useState([]);
@@ -7,10 +8,10 @@ function Expenses() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5005/expenses")
+    fetch("http://localhost:5005/Expenses")
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Failed to fetch expenses");
+          throw new Error("Failed to fetch Expenses");
         }
         return response.json();
       })
@@ -60,6 +61,8 @@ function Expenses() {
           </tbody>
         </table>
       )}
+            {/* Button zum Einblenden des Formulars */}
+            <AddExpenseForm />
     </>
   );
 }

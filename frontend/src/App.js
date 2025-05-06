@@ -1,9 +1,11 @@
 import React from "react";
+
 import Navbar from "./components/Navbar";
 import sampleTable from "./assets/images/sampleTable.png";
 import barChart from "./assets/images/barChart.png";
 import pieChart from "./assets/images/pieChart.png";
 import "./App.css";
+
 
 const App = () => {
   return (
@@ -36,7 +38,6 @@ const App = () => {
 
 const styles = {
   chartContainer: {
-    display: "flex",
     gap: "30px", // space between charts
   },
   chartBox: {
