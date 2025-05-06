@@ -25,6 +25,19 @@ function Income() {
   }, []);
   const updateIncome = (id) => {
     console.log("Update income with ID:", id);
+    fetch(`http://localhost:5005/income/${id}`, {
+      method: "UPDATE",
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to update income");
+        }
+
+        setIncome((prev) => prev.filter((item) => item.id !== id));
+      })
+      .catch((err) => {
+        setError(err.message);
+      });
   };
   const deleteIncome = (id) => {
     fetch(`http://localhost:5005/income/${id}`, {
