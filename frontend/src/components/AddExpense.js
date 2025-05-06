@@ -11,14 +11,10 @@ const AddExpenseForm = () => {
     const payload = {
       user_id: 1,
       category_id: parseInt(form.category_id.value),
-      name: form.name.value,
       amount: parseFloat(form.amount.value),
-      date: form.date.value,
-    };
-
-    if (type === "monthly") {
-      payload.frequency = form.frequency.value;
-    }
+      name: form.name.value,
+      ...(type === "once" ? { date: form.date.value } : {})
+    };    
 
     const url =
       type === "monthly"
@@ -82,15 +78,6 @@ const AddExpenseForm = () => {
           </select>
 
           <input name="date" type="date" required />
-
-          {type === "monthly" && (
-            <select name="frequency" required>
-              <option value="">-- Frequenz wählen --</option>
-              <option value="monthly">Monatlich</option>
-              <option value="quarterly">Vierteljährlich</option>
-              <option value="yearly">Jährlich</option>
-            </select>
-          )}
 
           <button type="submit">Speichern</button>
         </form>

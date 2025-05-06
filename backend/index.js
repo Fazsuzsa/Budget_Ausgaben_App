@@ -45,7 +45,7 @@ app.use(express.static("public"));
 
 app.get("/expenses", async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM "expenses"');
+    const result = await pool.query('SELECT * FROM expenses');
     res.json(result.rows);
   } catch (err) {
     console.error("Fehler beim Abrufen der Ausgaben:", err);
@@ -86,24 +86,25 @@ app.get("/monthly_expenses", async (req, res) => {
 });
 
 app.post("/monthly_expenses", async (req, res) => {
-  const { user_id, category_id, amount, name, date, frequency } = req.body;
+  const { user_id, category_id, amount, name } = req.body;
 
-  if (!user_id || !category_id || !amount || !date || !frequency) {
+  if (!user_id || !category_id || !amount) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
     const result = await pool.query(
-      `INSERT INTO "Monthly_expenses" (user_id, category_id, "amount", name, date, frequency)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [user_id, category_id, amount, name || '', date, frequency]
+      `INSERT INTO monthly_expenses (user_id, category_id, amount, name)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [user_id, category_id, amount, name || '']
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error("Fehler beim Einfügen in Monthly_expenses:", err);
+    console.error("Fehler beim Einfügen in monthly_expenses:", err);
     res.status(500).json({ error: "Interner Serverfehler" });
   }
 });
+
 
 
 app.post("/login", async (req, res) => {
