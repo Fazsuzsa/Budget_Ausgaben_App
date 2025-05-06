@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 
-function Income() {
+function Monthly_incomes() {
   const [income, setIncome] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5005/incomes")
+    fetch("http://localhost:5005/monthly_incomes")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch income");
@@ -25,7 +25,7 @@ function Income() {
 
   return (
     <>
-      <h1>Incomes</h1>
+      <h1>Monthly incomes</h1>
 
       {loading && <p>Loading income...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
@@ -38,8 +38,6 @@ function Income() {
               <th>User ID</th>
               <th>Name</th>
               <th>Amount (€)</th>
-
-              <th>Date</th>
             </tr>
           </thead>
           <tbody>
@@ -49,7 +47,6 @@ function Income() {
                 <td>{income.user_id}</td>
                 <td>{income.name}</td>
                 <td>{income.amount}</td>
-                <td>{income.date}</td>
               </tr>
             ))}
           </tbody>
@@ -59,4 +56,4 @@ function Income() {
   );
 }
 
-export default Income;
+export default Monthly_incomes;

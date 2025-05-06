@@ -3,8 +3,6 @@ const cors = require("cors");
 require("dotenv").config();
 const { Pool } = require("pg");
 
-
-
 const app = express();
 const PORT = 5005;
 
@@ -15,7 +13,6 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD, // Dein Passwort
   port: process.env.DB_PORT, // Standardport für PostgreSQL
 });
-
 
 const createTable = async () => {
   const client = await pool.connect();
@@ -64,10 +61,9 @@ app.post("/expenses", async (req, res) => {
     const result = await pool.query(
       `INSERT INTO "expenses" (user_id, category_id, "amount", name, date)
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [user_id, category_id, amount, name || '', date]
+      [user_id, category_id, amount, name || "", date]
     );
-    
-  
+
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error("Fehler beim Einfügen der Ausgabe:", err);
@@ -96,7 +92,7 @@ app.post("/monthly_expenses", async (req, res) => {
     const result = await pool.query(
       `INSERT INTO "Monthly_expenses" (user_id, category_id, "amount", name, date, frequency)
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [user_id, category_id, amount, name || '', date, frequency]
+      [user_id, category_id, amount, name || "", date, frequency]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -105,33 +101,56 @@ app.post("/monthly_expenses", async (req, res) => {
   }
 });
 
+app.get("/incomes", async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM "incomes"');
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Fehler beim Abrufen der Ausgaben:", err);
+    res.status(500).json({ error: "Interner Serverfehler" });
+  }
+});
+
+// app.post("/incomes", ... MUSS GEMACHT WERDEN!
+
+app.get("/monthly_incomes", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM monthly_incomes");
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Fehler beim Abrufen der Ausgaben:", err);
+    res.status(500).json({ error: "Interner Serverfehler" });
+  }
+});
+
+// app.post("/monthly_incomes", ... MUSS GEMACHT WERDEN!
 
 app.post("/login", async (req, res) => {
-    const { e_mail, password } = req.body;
-    console.log("Request login:", e_mail, password);
+  const { e_mail, password } = req.body;
+  console.log("Request login:", e_mail, password);
 
-    try {
-        const result = await pool.query('SELECT * FROM users WHERE e_mail = $1', [e_mail]);
-        const user = result.rows[0];
+  try {
+    const result = await pool.query("SELECT * FROM users WHERE e_mail = $1", [
+      e_mail,
+    ]);
+    const user = result.rows[0];
 
-        if (!user) {
-            return res.json({ error: "e_mail incorrect!" });
-        }
-
-
-        if (user.password !== password) {
-            return res.json({ error: "Passwort incorrect" });
-        }
-
-        res.json({ message: "Connexion OK", user });
-        console.log(res.json({ user }))
-    } catch (error) {
-        console.error("Error login:", error);
-        res.status(500).json({ error: "Error server" });
+    if (!user) {
+      return res.json({ error: "e_mail incorrect!" });
     }
+
+    if (user.password !== password) {
+      return res.json({ error: "Passwort incorrect" });
+    }
+
+    res.json({ message: "Connexion OK", user });
+    console.log(res.json({ user }));
+  } catch (error) {
+    console.error("Error login:", error);
+    res.status(500).json({ error: "Error server" });
+  }
 });
 
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);
 });
-
