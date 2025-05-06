@@ -15,7 +15,6 @@ const pool = new Pool({
   port: process.env.DB_PORT, // Standardport für PostgreSQL
 });
 
-
 const createTable = async () => {
   const client = await pool.connect();
   try {
@@ -38,39 +37,35 @@ const createTable = async () => {
 
 createTable();
 
-
-
 app.use(cors());
 app.use(express.json()); // Ermöglicht Express Json aus einem Body auszulesen
 app.use(express.static("public"));
 
 app.post("/login", async (req, res) => {
-    const { e_mail, password } = req.body;
-    console.log("Request login:", e_mail, password);
+  const { e_mail, password } = req.body;
+  console.log("Request login:", e_mail, password);
 
-    try {
-        const result = await pool.query('SELECT * FROM users WHERE e_mail = $1', [e_mail]);
-        const user = result.rows[0];
+  try {
+    const result = await pool.query("SELECT * FROM users WHERE e_mail = $1", [
+      e_mail,
+    ]);
+    const user = result.rows[0];
 
-        if (!user) {
-            return res.json({ error: "e_mail incorrect!" });
-        }
-
-
-        if (user.password !== password) {
-            return res.json({ error: "Passwort incorrect" });
-        }
-
-        res.json({ message: "Connexion OK", user });
-        console.log(res.json({ user }))
-    } catch (error) {
-        console.error("Error login:", error);
-        res.status(500).json({ error: "Error server" });
+    if (!user) {
+      return res.json({ error: "e_mail incorrect!" });
     }
+
+    if (user.password !== password) {
+      return res.json({ error: "Passwort incorrect" });
+    }
+
+    res.json({ message: "Connexion OK", user });
+    console.log(res.json({ user }));
+  } catch (error) {
+    console.error("Error login:", error);
+    res.status(500).json({ error: "Error server" });
+  }
 });
-
-
-
 
 app.get("/expenses", async (req, res) => {
   const result = await pool.query("SELECT * FROM Expenses");
@@ -82,6 +77,26 @@ app.get("/income", async (req, res) => {
   res.json(result.rows);
 });
 
+app.delete("/income/:user_id/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const user_id = req.params.user_id;
+
+    const query =
+      "DELETE FROM incomes WHERE id = $1 AND user_id = $2 RETURNING *;";
+
+    const { rows } = await pool.query(query, [id, user_id]);
+
+    if (rows.length === 0) {
+      return res.status(404).send("cannot find the incomes");
+    }
+
+    res.status(200).json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("some error has occured");
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);
