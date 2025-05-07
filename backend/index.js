@@ -100,7 +100,6 @@ app.post("/monthly_expenses", async (req, res) => {
     res.status(500).json({ error: "Interner Serverfehler" });
   }
 });
-
 app.get("/incomes", async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM "incomes"');
@@ -148,6 +147,60 @@ app.post("/login", async (req, res) => {
   } catch (error) {
     console.error("Error login:", error);
     res.status(500).json({ error: "Error server" });
+  }
+});
+
+app.get("/expenses", async (req, res) => {
+  const result = await pool.query("SELECT * FROM Expenses");
+  res.json(result.rows);
+});
+
+app.get("/income", async (req, res) => {
+  const result = await pool.query("SELECT * FROM Incomes");
+  res.json(result.rows);
+});
+
+app.put("/income/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { user_id, amount, name, date } = req.body;
+
+    const query = `
+      UPDATE "incomes"
+      SET user_id = $1, amount = $2, name = $3, date = $4    WHERE id = $5
+      RETURNING *;
+    `;
+    const values = [user_id, amount, name, date, id];
+
+    const { rows } = await pool.query(query, values);
+
+    if (rows.length === 0) {
+      return res.status(404).send("Cannot find the income");
+    }
+
+    res.status(200).json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("An error occurred");
+  }
+});
+app.delete("/income/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const user_id = req.params.user_id;
+
+    const query = 'DELETE FROM "incomes" WHERE id = $1  RETURNING *;';
+
+    const { rows } = await pool.query(query, [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).send("cannot find the incomes");
+    }
+
+    res.status(200).json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("some error has occured");
   }
 });
 
