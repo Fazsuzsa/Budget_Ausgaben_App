@@ -60,7 +60,9 @@ function Expenses() {
                 <TableCell className="font-medium">{expense.name}</TableCell>
                 <TableCell>{expense.amount}</TableCell>
                 <TableCell>{expense.category_id}</TableCell>
-                <TableCell>{expense.date}</TableCell>
+                <TableCell>
+                  {new Date(expense.date).toISOString().split("T")[0]}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
