@@ -61,8 +61,8 @@ function Expenses() {
           </tbody>
         </table>
       )}
-            {/* Button zum Einblenden des Formulars */}
-            <AddExpenseForm />
+      {/* Button zum Einblenden des Formulars */}
+      <AddExpenseForm />
     </>
   );
 }
