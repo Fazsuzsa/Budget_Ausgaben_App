@@ -8,8 +8,8 @@ import About from "./pages/About";
 import Login from "./pages/Login";
 import Eng_ger from "./components/Eng_ger";
 import Dark_light from "./components/Dark_light";
-import Expenses from "./components/Expenses";
-import Incomes from "./components/Incomes";
+import ExpensesNav from "./components/ExpensesNav";
+import IncomesNav from "./components/IncomesNav";
 import FormExpenses from "./pages/FormExpenses";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -18,8 +18,8 @@ root.render(
     <Router>
       <Routes>
         <Route path="/" element={<App></App>}></Route>
-        <Route path="/expenses" element={<Expenses></Expenses>}></Route>
-        <Route path="/incomes" element={<Incomes></Incomes>}></Route>
+        <Route path="/expenses" element={<ExpensesNav></ExpensesNav>}></Route>
+        <Route path="/incomes" element={<IncomesNav></IncomesNav>}></Route>
         <Route path="/about" element={<About></About>}></Route>
         <Route path="/login" element={<Login></Login>}></Route>
         <Route path="/test" element={<FormExpenses></FormExpenses>}></Route>
