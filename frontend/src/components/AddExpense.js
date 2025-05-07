@@ -11,14 +11,10 @@ const AddExpenseForm = () => {
     const payload = {
       user_id: 1,
       category_id: parseInt(form.category_id.value),
-      name: form.name.value,
       amount: parseFloat(form.amount.value),
-      date: form.date.value,
-    };
-
-    if (type === "monthly") {
-      payload.frequency = form.frequency.value;
-    }
+      name: form.name.value,
+      ...(type === "once" ? { date: form.date.value } : {})
+    };    
 
     const url =
       type === "monthly"
