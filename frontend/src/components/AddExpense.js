@@ -83,15 +83,6 @@ const AddExpenseForm = () => {
 
           <input name="date" type="date" required />
 
-          {type === "monthly" && (
-            <select name="frequency" required>
-              <option value="">-- Frequenz wählen --</option>
-              <option value="monthly">Monatlich</option>
-              <option value="quarterly">Vierteljährlich</option>
-              <option value="yearly">Jährlich</option>
-            </select>
-          )}
-
           <button type="submit">Speichern</button>
         </form>
       )}
