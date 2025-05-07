@@ -23,6 +23,37 @@ function Income() {
         setLoading(false);
       });
   }, []);
+  const updateIncome = (id) => {
+    console.log("Update income with ID:", id);
+    fetch(`http://localhost:5005/income/${id}`, {
+      method: "UPDATE",
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to update income");
+        }
+
+        setIncome((prev) => prev.filter((item) => item.id !== id));
+      })
+      .catch((err) => {
+        setError(err.message);
+      });
+  };
+  const deleteIncome = (id) => {
+    fetch(`http://localhost:5005/income/${id}`, {
+      method: "DELETE",
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to delete income");
+        }
+        // Remove deleted item from state
+        setIncome((prev) => prev.filter((item) => item.id !== id));
+      })
+      .catch((err) => {
+        setError(err.message);
+      });
+  };
 
   return (
     <>
@@ -40,18 +71,22 @@ function Income() {
               <th>User ID</th>
               <th>Name</th>
               <th>Amount (€)</th>
-
               <th>Date</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {income.map((income) => (
-              <tr key={income.id}>
-                <td>{income.id}</td>
-                <td>{income.user_id}</td>
-                <td>{income.name}</td>
-                <td>{income.amount}</td>
-                <td>{income.date}</td>
+            {income.map((item) => (
+              <tr key={item.id}>
+                <td>{item.id}</td>
+                <td>{item.user_id}</td>
+                <td>{item.name}</td>
+                <td>{item["amount (€)"]}</td>
+                <td>{item.date || "-"}</td>
+                <td>
+                  <button onClick={() => deleteIncome(item.id)}>Delete</button>
+                  <button onClick={() => updateIncome(item.id)}>Update</button>
+                </td>
               </tr>
             ))}
           </tbody>

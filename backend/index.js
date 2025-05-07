@@ -3,8 +3,6 @@ const cors = require("cors");
 require("dotenv").config();
 const { Pool } = require("pg");
 
-
-
 const app = express();
 const PORT = 5005;
 
@@ -15,7 +13,6 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD, // Dein Passwort
   port: process.env.DB_PORT, // Standardport für PostgreSQL
 });
-
 
 const createTable = async () => {
   const client = await pool.connect();
@@ -64,10 +61,9 @@ app.post("/expenses", async (req, res) => {
     const result = await pool.query(
       `INSERT INTO "expenses" (user_id, category_id, "amount", name, date)
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [user_id, category_id, amount, name || '', date]
+      [user_id, category_id, amount, name || "", date]
     );
-    
-  
+
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error("Fehler beim Einfügen der Ausgabe:", err);
@@ -96,7 +92,7 @@ app.post("/monthly_expenses", async (req, res) => {
     const result = await pool.query(
       `INSERT INTO monthly_expenses (user_id, category_id, amount, name)
        VALUES ($1, $2, $3, $4) RETURNING *`,
-      [user_id, category_id, amount, name || '']
+      [user_id, category_id, amount, name || ""]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -106,33 +102,86 @@ app.post("/monthly_expenses", async (req, res) => {
 });
 
 
-
 app.post("/login", async (req, res) => {
-    const { e_mail, password } = req.body;
-    console.log("Request login:", e_mail, password);
+  const { e_mail, password } = req.body;
+  console.log("Request login:", e_mail, password);
 
-    try {
-        const result = await pool.query('SELECT * FROM users WHERE e_mail = $1', [e_mail]);
-        const user = result.rows[0];
+  try {
+    const result = await pool.query("SELECT * FROM users WHERE e_mail = $1", [
+      e_mail,
+    ]);
+    const user = result.rows[0];
 
-        if (!user) {
-            return res.json({ error: "e_mail incorrect!" });
-        }
-
-
-        if (user.password !== password) {
-            return res.json({ error: "Passwort incorrect" });
-        }
-
-        res.json({ message: "Connexion OK", user });
-        console.log(res.json({ user }))
-    } catch (error) {
-        console.error("Error login:", error);
-        res.status(500).json({ error: "Error server" });
+    if (!user) {
+      return res.json({ error: "e_mail incorrect!" });
     }
+
+    if (user.password !== password) {
+      return res.json({ error: "Passwort incorrect" });
+    }
+
+    res.json({ message: "Connexion OK", user });
+    console.log(res.json({ user }));
+  } catch (error) {
+    console.error("Error login:", error);
+    res.status(500).json({ error: "Error server" });
+  }
+});
+
+app.get("/expenses", async (req, res) => {
+  const result = await pool.query("SELECT * FROM Expenses");
+  res.json(result.rows);
+});
+
+app.get("/income", async (req, res) => {
+  const result = await pool.query("SELECT * FROM Incomes");
+  res.json(result.rows);
+});
+
+app.put("/income/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { user_id, amount, name, date } = req.body;
+
+    const query = `
+      UPDATE "incomes"
+      SET user_id = $1, amount = $2, name = $3, date = $4    WHERE id = $5
+      RETURNING *;
+    `;
+    const values = [user_id, amount, name, date, id];
+
+    const { rows } = await pool.query(query, values);
+
+    if (rows.length === 0) {
+      return res.status(404).send("Cannot find the income");
+    }
+
+    res.status(200).json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("An error occurred");
+  }
+});
+app.delete("/income/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const user_id = req.params.user_id;
+
+    const query = 'DELETE FROM "incomes" WHERE id = $1  RETURNING *;';
+
+    const { rows } = await pool.query(query, [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).send("cannot find the incomes");
+    }
+
+    res.status(200).json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("some error has occured");
+  }
 });
 
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);
 });
-
