@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+
 import {
   Table,
   TableBody,
@@ -9,21 +10,21 @@ import {
   TableRow,
 } from "./ui/table";
 
-function Monthly_incomes() {
-  const [income, setIncome] = useState([]);
+function Monthly_expenses() {
+  const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5005/monthly_incomes")
+    fetch("http://localhost:5005/monthly_expenses")
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Failed to fetch income");
+          throw new Error("Failed to fetch Expenses");
         }
         return response.json();
       })
       .then((data) => {
-        setIncome(data);
+        setExpenses(data);
         setLoading(false);
       })
       .catch((err) => {
@@ -34,9 +35,9 @@ function Monthly_incomes() {
 
   return (
     <>
-      <h1>Monthly incomes</h1>
+      <h1>Monthly expenses</h1>
 
-      {loading && <p>Loading income...</p>}
+      {loading && <p>Loading expenses...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       {!loading && !error && (
@@ -45,21 +46,18 @@ function Monthly_incomes() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[100px]">Name</TableHead>
-              <TableHead>Amount</TableHead>
+              <TableHead>Price (€)</TableHead>
+              <TableHead>Category</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {income.map((income) => (
-              <TableRow key={income.id}>
-                <TableCell className="font-medium">{income.name}</TableCell>
-                <TableCell>{income.amount}</TableCell>
+            {expenses.map((expense) => (
+              <TableRow key={expense.id}>
+                <TableCell className="font-medium">{expense.name}</TableCell>
+                <TableCell>{parseFloat(expense.amount).toFixed(2)}</TableCell>
+                <TableCell>{expense.category}</TableCell>
               </TableRow>
             ))}
-            <TableRow>
-              <TableCell>Sum </TableCell>
-              <TableCell> </TableCell>
-              <TableCell> Total of all Incomes </TableCell>
-            </TableRow>
           </TableBody>
         </Table>
       )}
@@ -67,4 +65,4 @@ function Monthly_incomes() {
   );
 }
 
-export default Monthly_incomes;
+export default Monthly_expenses;

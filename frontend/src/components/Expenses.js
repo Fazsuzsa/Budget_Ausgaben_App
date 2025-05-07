@@ -37,8 +37,6 @@ function Expenses() {
 
   return (
     <>
-      <Navbar />
-
       <h1>Expenses</h1>
 
       {loading && <p>Loading expenses...</p>}
@@ -46,11 +44,11 @@ function Expenses() {
 
       {!loading && !error && (
         <Table>
-          <TableCaption>A list of your recent invoices.</TableCaption>
+          <TableCaption></TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[100px]">Name</TableHead>
-              <TableHead>Amount</TableHead>
+              <TableHead>Price (€)</TableHead>
               <TableHead>Category</TableHead>
               <TableHead className="text-right">Date</TableHead>
             </TableRow>
@@ -59,8 +57,11 @@ function Expenses() {
             {expenses.map((expense) => (
               <TableRow key={expense.id}>
                 <TableCell className="font-medium">{expense.name}</TableCell>
-                <TableCell>{expense.amount}</TableCell>
-                <TableCell>{expense.category_id}</TableCell>
+                <TableCell>
+                  {parseFloat(parseFloat(expense.amount).toFixed(2)).toFixed(2)}
+                </TableCell>
+
+                <TableCell>{expense.category}</TableCell>
                 <TableCell>
                   {new Date(expense.date).toISOString().split("T")[0]}
                 </TableCell>
@@ -75,6 +76,11 @@ function Expenses() {
                 </TableCell>
               </TableRow>
             ))}
+            <TableRow>
+              <TableCell>Sum </TableCell>
+              <TableCell> </TableCell>
+              <TableCell> Total of all Expenses </TableCell>
+            </TableRow>
           </TableBody>
         </Table>
       )}

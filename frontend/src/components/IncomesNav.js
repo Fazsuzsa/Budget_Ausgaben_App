@@ -3,7 +3,7 @@ import Navbar from "./Navbar";
 import Income from "./Income";
 import Monthly_incomes from "./Monthly_incomes";
 
-function Incomes() {
+function IncomesNav() {
   return (
     <>
       <Navbar />
@@ -13,4 +13,4 @@ function Incomes() {
   );
 }
 
-export default Incomes;
+export default IncomesNav;
