@@ -67,7 +67,7 @@ function Expenses() {
                 </TableCell>
                 <TableCell>
                   <Link
-                    to={`/edit-expense/${expense.id}/${expense.user_id}`}
+                    to={`/edit-expense/${expense.user_id}/${expense.id}`}
                     state={{ expense }}
                     className="text-blue-500 underline"
                   >
