@@ -25,7 +25,7 @@ function Income() {
 
   return (
     <>
-      <h1>Incomes</h1>
+      <h1>Income</h1>
 
       {loading && <p>Loading income...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
