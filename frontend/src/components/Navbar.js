@@ -19,7 +19,7 @@ function Navbar() {
       <Link to="/expenses" style={styles.link}>
         Expenses
       </Link>
-      <Link to="/income" style={styles.link}>
+      <Link to="/incomes" style={styles.link}>
         Income
       </Link>
       <Link to="/login" style={styles.link}>

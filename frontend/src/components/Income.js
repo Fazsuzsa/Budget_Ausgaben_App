@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "./Navbar";
 
 function Income() {
   const [income, setIncome] = useState([]);
@@ -7,7 +6,7 @@ function Income() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5005/income")
+    fetch("http://localhost:5005/incomes")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch income");
@@ -57,7 +56,6 @@ function Income() {
 
   return (
     <>
-      <Navbar />
       <h1>Income</h1>
 
       {loading && <p>Loading income...</p>}
