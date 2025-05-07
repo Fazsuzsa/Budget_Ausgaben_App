@@ -24,7 +24,7 @@ root.render(
         <Route path="/about" element={<About></About>}></Route>
         <Route path="/login" element={<Login></Login>}></Route>
         <Route path="/test" element={<FormExpenses></FormExpenses>}></Route>
-        <Route path="/form" element={<MyForm></MyForm>}></Route>
+        <Route path="/edit-expense/:userId/:expenseId" element={<MyForm></MyForm>}></Route>
         <Route path="/eng_ger" element={<Eng_ger></Eng_ger>}></Route>
         <Route path="/dark_light" element={<Dark_light></Dark_light>}></Route>
 

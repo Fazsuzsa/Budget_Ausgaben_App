@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "./Navbar";
 import AddExpenseForm from "./AddExpense";
 import {
@@ -62,6 +63,15 @@ function Expenses() {
                 <TableCell>{expense.category_id}</TableCell>
                 <TableCell>
                   {new Date(expense.date).toISOString().split("T")[0]}
+                </TableCell>
+                <TableCell>
+                  <Link
+                    to={`/edit-expense/${expense.id}/${expense.user_id}`}
+                    state={{ expense }}
+                    className="text-blue-500 underline"
+                  >
+                    Edit
+                  </Link>
                 </TableCell>
               </TableRow>
             ))}
