@@ -100,6 +100,29 @@ app.post("/monthly_expenses", async (req, res) => {
     res.status(500).json({ error: "Interner Serverfehler" });
   }
 });
+app.get("/incomes", async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM "incomes"');
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Fehler beim Abrufen der Ausgaben:", err);
+    res.status(500).json({ error: "Interner Serverfehler" });
+  }
+});
+
+// app.post("/incomes", ... MUSS GEMACHT WERDEN!
+
+app.get("/monthly_incomes", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM monthly_incomes");
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Fehler beim Abrufen der Ausgaben:", err);
+    res.status(500).json({ error: "Interner Serverfehler" });
+  }
+});
+
+// app.post("/monthly_incomes", ... MUSS GEMACHT WERDEN!
 
 app.post("/login", async (req, res) => {
   const { e_mail, password } = req.body;
