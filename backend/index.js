@@ -146,8 +146,9 @@ app.post("/login", async (req, res) => {
       return res.json({ error: "Passwort incorrect" });
     }
 
-    res.json({ message: "Connexion OK", user });
+    res.json({ message: "Connexion OK", user, token: "my_simple_token", });
     console.log(res.json({ user }));
+
   } catch (error) {
     console.error("Error login:", error);
     res.status(500).json({ error: "Error server" });
