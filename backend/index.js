@@ -42,7 +42,7 @@ app.use(express.static("public"));
 
 app.get("/expenses", async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM expenses');
+    const result = await pool.query("SELECT * FROM expenses");
     res.json(result.rows);
   } catch (err) {
     console.error("Fehler beim Abrufen der Ausgaben:", err);
@@ -114,7 +114,7 @@ app.get("/incomes", async (req, res) => {
 
 app.get("/monthly_incomes", async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM monthly_incomes");
+    const result = await pool.query('SELECT * FROM "monthly_incomes"');
     res.json(result.rows);
   } catch (err) {
     console.error("Fehler beim Abrufen der Ausgaben:", err);
@@ -123,7 +123,6 @@ app.get("/monthly_incomes", async (req, res) => {
 });
 
 // app.post("/monthly_incomes", ... MUSS GEMACHT WERDEN!
-
 
 app.post("/login", async (req, res) => {
   const { e_mail, password } = req.body;
