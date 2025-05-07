@@ -1,4 +1,13 @@
 import React, { useEffect, useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./ui/table";
 
 function Income() {
   const [income, setIncome] = useState([]);
@@ -56,39 +65,38 @@ function Income() {
 
   return (
     <>
-      <h1>Income</h1>
+      <h1>Incomes</h1>
 
       {loading && <p>Loading income...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       {!loading && !error && (
-        <table border="1">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>User ID</th>
-              <th>Name</th>
-              <th>Amount (€)</th>
-              <th>Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {income.map((item) => (
-              <tr key={item.id}>
-                <td>{item.id}</td>
-                <td>{item.user_id}</td>
-                <td>{item.name}</td>
-                <td>{item["amount (€)"]}</td>
-                <td>{item.date || "-"}</td>
-                <td>
-                  <button onClick={() => deleteIncome(item.id)}>Delete</button>
-                  <button onClick={() => updateIncome(item.id)}>Update</button>
-                </td>
-              </tr>
+        <Table>
+          <TableCaption></TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[100px]">Name</TableHead>
+              <TableHead>Amount</TableHead>
+              <TableHead className="text-right">Date</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {income.map((income) => (
+              <TableRow key={income.id}>
+                <TableCell className="font-medium">{income.name}</TableCell>
+                <TableCell>{income.amount}</TableCell>
+                <TableCell>
+                  {new Date(income.date).toISOString().split("T")[0]}
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+            <TableRow>
+              <TableCell>Sum </TableCell>
+              <TableCell> </TableCell>
+              <TableCell> Total of all Incomes </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
       )}
     </>
   );

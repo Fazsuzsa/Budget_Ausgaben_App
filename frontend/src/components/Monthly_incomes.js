@@ -1,4 +1,13 @@
 import React, { useEffect, useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./ui/table";
 
 function Monthly_incomes() {
   const [income, setIncome] = useState([]);
@@ -31,26 +40,28 @@ function Monthly_incomes() {
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       {!loading && !error && (
-        <table border="1">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>User ID</th>
-              <th>Name</th>
-              <th>Amount (€)</th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table>
+          <TableCaption></TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[100px]">Name</TableHead>
+              <TableHead>Amount</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {income.map((income) => (
-              <tr key={income.id}>
-                <td>{income.id}</td>
-                <td>{income.user_id}</td>
-                <td>{income.name}</td>
-                <td>{income.amount}</td>
-              </tr>
+              <TableRow key={income.id}>
+                <TableCell className="font-medium">{income.name}</TableCell>
+                <TableCell>{income.amount}</TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+            <TableRow>
+              <TableCell>Sum </TableCell>
+              <TableCell> </TableCell>
+              <TableCell> Total of all Incomes </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
       )}
     </>
   );
