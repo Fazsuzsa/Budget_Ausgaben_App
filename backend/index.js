@@ -204,6 +204,33 @@ app.delete("/income/:id", async (req, res) => {
     res.status(500).send("some error has occured");
   }
 });
+app.put("/expenses/:id_user/:id", async (req, res) => {
+  try {
+    const { id } = req.params
+    const { id_user } = req.params
+
+    const { category_id, amount, name, date } = req.body;
+
+    const query = `
+    UPDATE "expenses"
+    SET category_id=$1, amount=$2, name=$3, date=$4
+    WHERE id=$5 AND user_id=$6
+    RETURNING *;`
+    const values = [category_id, amount, name, date, id, id_user];
+
+    const { rows } = await pool.query(query, values)
+    if (rows.lenght == 0) {
+      return res.status(404).send("cannot find the expenses");
+    }
+    res.status(200).json(rows[0]);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("some error has occured");
+  }
+
+
+
+});
 
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);
