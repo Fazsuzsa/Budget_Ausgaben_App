@@ -8,7 +8,6 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-
 function UserTable() {
   return (
     <>
@@ -33,5 +32,4 @@ function UserTable() {
     </>
   );
 }
-
 export default UserTable;
