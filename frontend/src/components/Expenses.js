@@ -62,7 +62,6 @@ function Expenses() {
                       2
                     )}
                   </TableCell>
-
                   <TableCell>{expense.category}</TableCell>
                   <TableCell>
                     {new Date(expense.date).toISOString().split("T")[0]}
