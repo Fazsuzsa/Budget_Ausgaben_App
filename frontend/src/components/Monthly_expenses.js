@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "./Navbar";
-import AddExpenseForm from "./AddExpense";
+
 import {
   Table,
   TableBody,
@@ -11,13 +10,13 @@ import {
   TableRow,
 } from "./ui/table";
 
-function Expenses() {
+function Monthly_expenses() {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5005/Expenses")
+    fetch("http://localhost:5005/monthly_expenses")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch Expenses");
@@ -36,7 +35,7 @@ function Expenses() {
 
   return (
     <>
-      <h1>Expenses</h1>
+      <h1>Monthly expenses</h1>
 
       {loading && <p>Loading expenses...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
@@ -49,35 +48,21 @@ function Expenses() {
               <TableHead className="w-[100px]">Name</TableHead>
               <TableHead>Price (€)</TableHead>
               <TableHead>Category</TableHead>
-              <TableHead className="text-right">Date</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {expenses.map((expense) => (
               <TableRow key={expense.id}>
                 <TableCell className="font-medium">{expense.name}</TableCell>
-                <TableCell>
-                  {parseFloat(parseFloat(expense.amount).toFixed(2)).toFixed(2)}
-                </TableCell>
-
+                <TableCell>{parseFloat(expense.amount).toFixed(2)}</TableCell>
                 <TableCell>{expense.category}</TableCell>
-                <TableCell>
-                  {new Date(expense.date).toISOString().split("T")[0]}
-                </TableCell>
               </TableRow>
             ))}
-            <TableRow>
-              <TableCell>Sum </TableCell>
-              <TableCell> </TableCell>
-              <TableCell> Total of all Expenses </TableCell>
-            </TableRow>
           </TableBody>
         </Table>
       )}
-      {/* Button zum Einblenden des Formulars */}
-      <AddExpenseForm />
     </>
   );
 }
 
-export default Expenses;
+export default Monthly_expenses;
