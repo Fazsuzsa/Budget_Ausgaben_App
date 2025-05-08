@@ -87,6 +87,23 @@ app.post("/expenses", async (req, res) => {
   }
 });
 
+app.delete("/expenses/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await pool.query("DELETE FROM expenses WHERE id = $1 RETURNING *", [id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Eintrag nicht gefunden" });
+    }
+
+    res.status(200).json({ message: "Erfolgreich gelöscht" });
+  } catch (err) {
+    console.error("Fehler beim Löschen:", err);
+    res.status(500).json({ error: "Interner Serverfehler" });
+  }
+});
+
 app.get("/monthly_expenses", async (req, res) => {
   try {
     const result = await pool.query(
@@ -119,6 +136,23 @@ app.post("/monthly_expenses", async (req, res) => {
   if (!user_id || !category_id || !amount) {
     return res.status(400).json({ error: "Missing required fields" });
   }
+
+  app.delete("/monthly_expenses/:id", async (req, res) => {
+    const { id } = req.params;
+  
+    try {
+      const result = await pool.query("DELETE FROM monthly_expenses WHERE id = $1 RETURNING *", [id]);
+  
+      if (result.rowCount === 0) {
+        return res.status(404).json({ error: "Eintrag nicht gefunden" });
+      }
+  
+      res.status(200).json({ message: "Erfolgreich gelöscht" });
+    } catch (err) {
+      console.error("Fehler beim Löschen:", err);
+      res.status(500).json({ error: "Interner Serverfehler" });
+    }
+  });  
 
   try {
     const result = await pool.query(
@@ -209,11 +243,6 @@ app.post("/login", async (req, res) => {
     console.error("Error login:", error);
     res.status(500).json({ error: "Error server" });
   }
-});
-
-app.get("/expenses", async (req, res) => {
-  const result = await pool.query("SELECT * FROM Expenses");
-  res.json(result.rows);
 });
 
 app.get("/income", async (req, res) => {

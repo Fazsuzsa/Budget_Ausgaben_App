@@ -1,25 +1,47 @@
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "./ui/form";
+import { Select, SelectItem } from "./ui/select";
 
 const AddExpenseForm = () => {
   const [showForm, setShowForm] = useState(false);
-  const [type, setType] = useState("once"); // einmalig oder monatlich
+  const [type, setType] = useState("once");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const form = e.target;
+  const { register, handleSubmit, reset } = useForm({
+    defaultValues: {
+      name: "",
+      amount: "",
+      category_id: "",
+      date: "",
+    },
+  });
 
+  const onSubmit = async (values) => {
     const payload = {
       user_id: 1,
-      category_id: parseInt(form.category_id.value),
-      amount: parseFloat(form.amount.value),
-      name: form.name.value,
-      ...(type === "once" ? { date: form.date.value } : {})
-    };    
+      ...values,
+      category_id: parseInt(values.category_id),
+      amount: parseFloat(values.amount),
+    };
+
+    // Datum rausnehmen bei "monthly"
+    if (type === "monthly") {
+      delete payload.date;
+    }
 
     const url =
       type === "monthly"
-        ? "http://localhost:5005/Monthly_expenses"
-        : "http://localhost:5005/Expenses";
+        ? "http://localhost:5005/monthly_expenses"
+        : "http://localhost:5005/expenses";
 
     try {
       const res = await fetch(url, {
@@ -30,7 +52,7 @@ const AddExpenseForm = () => {
 
       if (res.ok) {
         alert("Gespeichert!");
-        form.reset();
+        reset();
         setShowForm(false);
       } else {
         const data = await res.json();
@@ -43,44 +65,72 @@ const AddExpenseForm = () => {
   };
 
   return (
-    <div style={{ margin: "40px auto", textAlign: "center" }}>
-      <button onClick={() => setShowForm(!showForm)}>
+    <div className="text-center mt-10">
+      <Button onClick={() => setShowForm(!showForm)} className="mb-4">
         {showForm ? "Formular schließen" : "Neue Ausgabe hinzufügen"}
-      </button>
+      </Button>
 
       {showForm && (
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            marginTop: "20px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "10px",
-            maxWidth: "300px",
-            marginInline: "auto",
-          }}
-        >
-          <select value={type} onChange={(e) => setType(e.target.value)}>
-            <option value="once">Einmalige Ausgabe</option>
-            <option value="monthly">Monatliche Ausgabe</option>
-          </select>
+        <Form>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="max-w-sm mx-auto space-y-4"
+          >
+            <FormItem>
+              <FormLabel>Typ</FormLabel>
+              <FormControl>
+                <Select
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                >
+                  <SelectItem value="once">Einmalig</SelectItem>
+                  <SelectItem value="monthly">Monatlich</SelectItem>
+                </Select>
+              </FormControl>
+            </FormItem>
 
-          <input name="name" placeholder="Name" required />
-          <input name="amount" type="number" step="0.01" placeholder="Betrag" required />
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Name der Ausgabe" {...register("name")} required />
+              </FormControl>
+            </FormItem>
 
-          <select name="category_id" required>
-            <option value="">-- Kategorie wählen --</option>
-            <option value="1">Shopping</option>
-            <option value="2">Entertainment</option>
-            <option value="3">Transport</option>
-            <option value="4">Rent & Energy</option>
-            <option value="5">Other</option>
-          </select>
+            <FormItem>
+              <FormLabel>Betrag (€)</FormLabel>
+              <FormControl>
+                <Input type="number" step="0.01" {...register("amount")} required />
+              </FormControl>
+            </FormItem>
 
-          <input name="date" type="date" required />
+            <FormItem>
+              <FormLabel>Kategorie</FormLabel>
+              <FormControl>
+                <Select {...register("category_id")} required>
+                  <SelectItem value="">-- Kategorie wählen --</SelectItem>
+                  <SelectItem value="1">Shopping</SelectItem>
+                  <SelectItem value="2">Entertainment</SelectItem>
+                  <SelectItem value="3">Transport</SelectItem>
+                  <SelectItem value="4">Rent & Energy</SelectItem>
+                  <SelectItem value="5">Other</SelectItem>
+                </Select>
+              </FormControl>
+            </FormItem>
 
-          <button type="submit">Speichern</button>
-        </form>
+            {type === "once" && (
+              <FormItem>
+                <FormLabel>Datum</FormLabel>
+                <FormControl>
+                  <Input type="date" {...register("date")} required />
+                </FormControl>
+              </FormItem>
+            )}
+
+            <Button type="submit" className="w-full">
+              Speichern
+            </Button>
+          </form>
+        </Form>
       )}
     </div>
   );
