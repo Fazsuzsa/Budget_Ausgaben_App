@@ -76,14 +76,19 @@ function Expenses() {
                 </TableCell>
               </TableRow>
             ))}
-            <TableRow>
-              <TableCell>Sum </TableCell>
-              <TableCell> </TableCell>
-              <TableCell> Total of all Expenses </TableCell>
+            <TableRow style={{ backgroundColor: '#61DAFB', fontWeight: 'bold', color: '#333', }}>
+              <TableCell className="font-medium">Sum Expenses</TableCell>
+              <TableCell>
+                {expenses.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0).toFixed(2)}{" "}€
+              </TableCell>
+              <TableCell></TableCell>
+              <TableCell></TableCell>
+              <TableCell></TableCell>
             </TableRow>
           </TableBody>
-        </Table>
-      )}
+        </Table >
+      )
+      }
       {/* Button zum Einblenden des Formulars */}
       <AddExpenseForm />
     </>
