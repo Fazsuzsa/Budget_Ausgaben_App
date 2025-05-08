@@ -1,5 +1,4 @@
 import React from "react";
-
 import Navbar from "./components/Navbar";
 import sampleTable from "./assets/images/sampleTable.png";
 import barChart from "./assets/images/barChart.png";

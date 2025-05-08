@@ -65,6 +65,8 @@ function Expenses() {
       {error && <p className="text-center text-red-500">{error}</p>}
 
       {!loading && !error && (
+
+
         <div className="max-w-4xl mx-auto">
           <Table>
             <TableCaption></TableCaption>
@@ -105,10 +107,14 @@ function Expenses() {
                   </TableCell>
                 </TableRow>
               ))}
-              <TableRow>
-                <TableCell>Sum</TableCell>
-                <TableCell />
-                <TableCell colSpan={3}>Total of all Expenses</TableCell>
+              <TableRow style={{ backgroundColor: '#61DAFB', fontWeight: 'bold', color: '#333', }}>
+                <TableCell className="font-medium">Sum Expenses</TableCell>
+                <TableCell>
+                  {expenses.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0).toFixed(2)}{" "}€
+                </TableCell>
+                <TableCell></TableCell>
+                <TableCell></TableCell>
+                <TableCell></TableCell>
               </TableRow>
             </TableBody>
           </Table>
