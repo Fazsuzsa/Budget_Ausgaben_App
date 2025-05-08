@@ -41,25 +41,27 @@ function Monthly_expenses() {
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       {!loading && !error && (
-        <Table>
-          <TableCaption></TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">Name</TableHead>
-              <TableHead>Price (€)</TableHead>
-              <TableHead>Category</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {expenses.map((expense) => (
-              <TableRow key={expense.id}>
-                <TableCell className="font-medium">{expense.name}</TableCell>
-                <TableCell>{parseFloat(expense.amount).toFixed(2)}</TableCell>
-                <TableCell>{expense.category}</TableCell>
+        <div className="max-w-4xl mx-auto">
+          <Table>
+            <TableCaption></TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">Name</TableHead>
+                <TableHead>Price (€)</TableHead>
+                <TableHead>Category</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {expenses.map((expense) => (
+                <TableRow key={expense.id}>
+                  <TableCell className="font-medium">{expense.name}</TableCell>
+                  <TableCell>{parseFloat(expense.amount).toFixed(2)}</TableCell>
+                  <TableCell>{expense.category}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
     </>
   );
