@@ -237,8 +237,9 @@ app.post("/login", async (req, res) => {
       return res.json({ error: "Passwort incorrect" });
     }
 
-    res.json({ message: "Connexion OK", user });
+    res.json({ message: "Connexion OK", user, token: "my_simple_token", });
     console.log(res.json({ user }));
+
   } catch (error) {
     console.error("Error login:", error);
     res.status(500).json({ error: "Error server" });
@@ -319,6 +320,59 @@ app.put("/expenses/:id_user/:id", async (req, res) => {
     res.status(500).send("some error has occured");
   }
 });
+app.get("/expenses/search", async (req, res) => {
+  const { year } = req.query; // Get the year from the query string
+
+  if (!year) {
+    return res.status(400).json({ error: "Year is required" });
+  }
+
+  try {
+    // Log the incoming year to verify it's being received correctly
+    console.log(`Received request for expenses in year: ${year}`);
+
+    // Query both regular expenses and monthly expenses for the given year
+    const result = await pool.query(
+      `
+      SELECT amount FROM public.expenses WHERE EXTRACT(YEAR FROM date) = $1
+      UNION ALL
+      SELECT amount FROM public.monthly_expenses WHERE EXTRACT(YEAR FROM date) = $1
+      `,
+      [year]
+    );
+
+    // Log the result of the query to check if it returns expected data
+    console.log("Query Result:", result.rows);
+
+    // Check if any expenses were found
+    if (result.rows.length === 0) {
+      console.log("No expenses found for the given year");
+      return res.status(404).json({ error: "No expenses found for the given year" });
+    }
+
+    // Calculate the total amount
+    const totalAmount = result.rows.reduce((sum, row) => sum + parseFloat(row.amount), 0);
+
+    // Calculate the average expense
+    const averageAmount = totalAmount / result.rows.length;
+
+    // Log the total and average for verification
+    console.log(`Total Expenses: €${totalAmount.toFixed(2)}, Average Expense: €${averageAmount.toFixed(2)}`);
+
+    res.json({
+      year: year,
+      totalExpenses: totalAmount.toFixed(2),
+      averageExpense: averageAmount.toFixed(2),
+    });
+  } catch (err) {
+    // Log the error for debugging purposes
+    console.error("Error calculating average expenses:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+
 
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);
