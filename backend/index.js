@@ -164,17 +164,18 @@ app.get("/income", async (req, res) => {
   res.json(result.rows);
 });
 
-app.put("/income/:id", async (req, res) => {
+app.put("/income/:id_user/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { user_id, amount, name, date } = req.body;
+    const { id_user } = req.params;
+    const { amount, name, date } = req.body;
 
     const query = `
       UPDATE "incomes"
-      SET user_id = $1, amount = $2, name = $3, date = $4    WHERE id = $5
+      SET amount = $1, name = $2, date = $3    WHERE id = $4 AND user_id = $5
       RETURNING *;
     `;
-    const values = [user_id, amount, name, date, id];
+    const values = [amount, name, date, id, id_user];
 
     const { rows } = await pool.query(query, values);
 
@@ -188,14 +189,15 @@ app.put("/income/:id", async (req, res) => {
     res.status(500).send("An error occurred");
   }
 });
-app.delete("/income/:id", async (req, res) => {
+app.delete("/income/:id_user/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const user_id = req.params.user_id;
+    const user_id = req.params.id_user;
 
-    const query = 'DELETE FROM "incomes" WHERE id = $1  RETURNING *;';
+    const query =
+      'DELETE FROM "incomes" WHERE id = $1 AND user_id= $2 RETURNING *;';
 
-    const { rows } = await pool.query(query, [id]);
+    const { rows } = await pool.query(query, [id, user_id]);
 
     if (rows.length === 0) {
       return res.status(404).send("cannot find the incomes");
@@ -209,8 +211,8 @@ app.delete("/income/:id", async (req, res) => {
 });
 app.put("/expenses/:id_user/:id", async (req, res) => {
   try {
-    const { id } = req.params
-    const { id_user } = req.params
+    const { id } = req.params;
+    const { id_user } = req.params;
 
     const { category_id, amount, name, date } = req.body;
 
@@ -218,10 +220,10 @@ app.put("/expenses/:id_user/:id", async (req, res) => {
     UPDATE "expenses"
     SET category_id=$1, amount=$2, name=$3, date=$4
     WHERE id=$5 AND user_id=$6
-    RETURNING *;`
+    RETURNING *;`;
     const values = [category_id, amount, name, date, id, id_user];
 
-    const { rows } = await pool.query(query, values)
+    const { rows } = await pool.query(query, values);
     if (rows.lenght == 0) {
       return res.status(404).send("cannot find the expenses");
     }
@@ -230,9 +232,6 @@ app.put("/expenses/:id_user/:id", async (req, res) => {
     console.log(err);
     res.status(500).send("some error has occured");
   }
-
-
-
 });
 
 app.listen(PORT, () => {
