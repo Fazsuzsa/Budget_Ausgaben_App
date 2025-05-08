@@ -71,32 +71,34 @@ function Income() {
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       {!loading && !error && (
-        <Table>
-          <TableCaption></TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">Name</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead className="text-right">Date</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {income.map((income) => (
-              <TableRow key={income.id}>
-                <TableCell className="font-medium">{income.name}</TableCell>
-                <TableCell>{income.amount}</TableCell>
-                <TableCell>
-                  {new Date(income.date).toISOString().split("T")[0]}
-                </TableCell>
+        <div className="max-w-4xl mx-auto">
+          <Table>
+            <TableCaption></TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">Name</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead className="text-right">Date</TableHead>
               </TableRow>
-            ))}
-            <TableRow>
-              <TableCell>Sum </TableCell>
-              <TableCell> </TableCell>
-              <TableCell> Total of all Incomes </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {income.map((income) => (
+                <TableRow key={income.id}>
+                  <TableCell className="font-medium">{income.name}</TableCell>
+                  <TableCell>{income.amount}</TableCell>
+                  <TableCell>
+                    {new Date(income.date).toISOString().split("T")[0]}
+                  </TableCell>
+                </TableRow>
+              ))}
+              <TableRow>
+                <TableCell>Sum </TableCell>
+                <TableCell> </TableCell>
+                <TableCell> Total of all Incomes </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
       )}
     </>
   );
