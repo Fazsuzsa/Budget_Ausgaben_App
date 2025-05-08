@@ -16,9 +16,9 @@ import Navbar from "../components/Navbar";
 
 export default function EditIncome() {
   const { state } = useLocation();
-  const expense = state?.expense;
+  const income = state?.income;
   const navigate = useNavigate();
-  const { userId: paramUserId, incomeId: paramExpenseId } = useParams();
+  const { userId: paramUserId, incomeId: paramIncomeId } = useParams();
 
   const [expenseId, setIncomeId] = useState("");
   const [userId, setUserId] = useState("");
