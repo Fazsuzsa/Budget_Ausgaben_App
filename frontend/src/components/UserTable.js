@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -8,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-
 function UserTable() {
   return (
     <>
@@ -33,5 +33,4 @@ function UserTable() {
     </>
   );
 }
-
 export default UserTable;
