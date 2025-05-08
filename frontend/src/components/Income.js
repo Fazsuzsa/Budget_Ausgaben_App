@@ -8,14 +8,14 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-
+import { useParams } from "react-router-dom";
 function Income() {
   const [income, setIncome] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const { id } = useParams();
   useEffect(() => {
-    fetch("http://localhost:5005/incomes")
+    fetch(`http://localhost:5005/incomes/${id}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch income");
@@ -33,7 +33,7 @@ function Income() {
   }, []);
   const updateIncome = (id) => {
     console.log("Update income with ID:", id);
-    fetch(`http://localhost:5005/income/${user_id}/${id}`, {
+    fetch(`http://localhost:5005/income/${id}/${id}`, {
       method: "UPDATE",
     })
       .then((response) => {
@@ -48,7 +48,7 @@ function Income() {
       });
   };
   const deleteIncome = (id) => {
-    fetch(`http://localhost:5005/income/${user_id}/${id}`, {
+    fetch(`http://localhost:5005/income/${id}/${id}`, {
       method: "DELETE",
     })
       .then((response) => {

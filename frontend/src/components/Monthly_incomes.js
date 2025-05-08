@@ -8,14 +8,15 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
+import { useParams } from "react-router-dom";
 
 function Monthly_incomes() {
   const [income, setIncome] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const { id } = useParams();
   useEffect(() => {
-    fetch("http://localhost:5005/monthly_incomes")
+    fetch(`http://localhost:5005/monthly_incomes/${id}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch income");

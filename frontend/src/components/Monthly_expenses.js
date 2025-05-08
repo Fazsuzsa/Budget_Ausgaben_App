@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-
 import {
   Table,
   TableBody,
@@ -9,14 +8,15 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
+import { useParams } from "react-router-dom";
 
 function Monthly_expenses() {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const { id } = useParams();
   useEffect(() => {
-    fetch("http://localhost:5005/monthly_expenses")
+    fetch(`http://localhost:5005/monthly_expenses/${id}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch Expenses");
@@ -59,13 +59,26 @@ function Monthly_expenses() {
                   <TableCell>{expense.category}</TableCell>
                 </TableRow>
               ))}
-              <TableRow style={{ backgroundColor: '#61DAFB', fontWeight: 'bold', color: '#333', }}>
-                <TableCell className="font-medium">Sum Monthly Expenses</TableCell>
+              <TableRow
+                style={{
+                  backgroundColor: "#61DAFB",
+                  fontWeight: "bold",
+                  color: "#333",
+                }}
+              >
+                <TableCell className="font-medium">
+                  Sum Monthly Expenses
+                </TableCell>
                 <TableCell>
-                  {expenses.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0).toFixed(2)}{" "}€
+                  {expenses
+                    .reduce(
+                      (sum, item) => sum + parseFloat(item.amount || 0),
+                      0
+                    )
+                    .toFixed(2)}{" "}
+                  €
                 </TableCell>
                 <TableCell></TableCell>
-
               </TableRow>
             </TableBody>
           </Table>
