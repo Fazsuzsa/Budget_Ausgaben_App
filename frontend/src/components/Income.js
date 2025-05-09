@@ -13,12 +13,9 @@ function Income() {
   const [income, setIncome] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-<<<<<<< Updated upstream
   const user = JSON.parse(localStorage.getItem("user"));
   const user_id = user?.id;
-=======
   const token = localStorage.getItem("token");
->>>>>>> Stashed changes
 
   useEffect(() => {
     fetchIncomes();
@@ -105,7 +102,10 @@ function Income() {
                 <TableCell>Sum Incomes</TableCell>
                 <TableCell>
                   {income
-                    .reduce((sum, item) => sum + parseFloat(item.amount || 0), 0)
+                    .reduce(
+                      (sum, item) => sum + parseFloat(item.amount || 0),
+                      0
+                    )
                     .toFixed(2)}{" "}
                   €
                 </TableCell>
