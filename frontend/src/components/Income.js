@@ -25,7 +25,7 @@ function Income() {
       const response = await fetch(`http://localhost:5005/incomes/${user_id}`);
 
       if (!response.ok) {
-        throw new Error("Failed to fetch Expenses");
+        throw new Error("Failed to fetch incomes");
       }
       const data = await response.json();
       setIncome(data);
@@ -35,15 +35,20 @@ function Income() {
       setLoading(false);
     }
   };
-  const updateIncome = (user_id, id) => {
-    console.log("Update income with ID:", id);
-    fetch(`http://localhost:5005/income/${user_id}/${id}`, {
-      method: "UPDATE",
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to update income");
-        }
+
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm("Diesen Income-Eintrag löschen?");
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`http://localhost:5005/income/${user_id}/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Fehler beim Löschen");
+      }
 
       setIncome((prev) => prev.filter((item) => item.id !== id));
     } catch (err) {
@@ -75,7 +80,9 @@ function Income() {
                 <TableRow key={item.id}>
                   <TableCell className="font-medium">{item.name}</TableCell>
                   <TableCell>{parseFloat(item.amount).toFixed(2)}</TableCell>
-                  <TableCell>{new Date(item.date).toISOString().split("T")[0]}</TableCell>
+                  <TableCell>
+                    {new Date(item.date).toISOString().split("T")[0]}
+                  </TableCell>
                   <TableCell className="text-right">
                     <button
                       onClick={() => handleDelete(item.id)}
@@ -86,24 +93,17 @@ function Income() {
                   </TableCell>
                 </TableRow>
               ))}
-              <TableRow
-                style={{
-                  backgroundColor: "#61DAFB",
-                  fontWeight: "bold",
-                  color: "#333",
-                }}
-              >
+
+              <TableRow>
                 <TableCell>Sum Incomes</TableCell>
                 <TableCell>
                   {income
-                    .reduce(
-                      (sum, item) => sum + parseFloat(item.amount || 0),
-                      0
-                    )
+                    .reduce((sum, item) => sum + parseFloat(item.amount || 0), 0)
                     .toFixed(2)}{" "}
                   €
                 </TableCell>
-                <TableCell></TableCell>
+                <TableCell />
+                <TableCell />
               </TableRow>
             </TableBody>
           </Table>
