@@ -14,52 +14,96 @@ function Monthly_incomes() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const user = JSON.parse(localStorage.getItem("user"));
+  const user_id = user?.id;
+
   useEffect(() => {
-    fetch("http://localhost:5005/monthly_incomes")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to fetch income");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setIncome(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
+    fetchIncomes();
   }, []);
+
+  const fetchIncomes = async () => {
+    try {
+      const response = await fetch("http://localhost:5005/monthly_incomes");
+      if (!response.ok) {
+        throw new Error("Failed to fetch income");
+      }
+      const data = await response.json();
+      setIncome(data);
+      setLoading(false);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm("Diesen monatlichen Income-Eintrag löschen?");
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`http://localhost:5005/monthly_incomes/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Fehler beim Löschen");
+      }
+
+      setIncome((prev) => prev.filter((e) => e.id !== id));
+    } catch (err) {
+      alert("Löschen fehlgeschlagen: " + err.message);
+    }
+  };
 
   return (
     <>
-      <h1>Monthly incomes</h1>
+      <h1 className="text-2xl font-bold text-center my-6">Monthly Incomes</h1>
 
-      {loading && <p>Loading income...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {loading && <p className="text-center">Loading incomes...</p>}
+      {error && <p className="text-center text-red-500">{error}</p>}
 
       {!loading && !error && (
         <div className="max-w-4xl mx-auto">
           <Table>
-            <TableCaption></TableCaption>
+            <TableCaption>Regelmäßige Einnahmen</TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[100px]">Name</TableHead>
-                <TableHead>Amount</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Amount (€)</TableHead>
+                <TableHead className="text-right">Aktionen</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {income.map((income) => (
-                <TableRow key={income.id}>
-                  <TableCell className="font-medium">{income.name}</TableCell>
-                  <TableCell>{income.amount}</TableCell>
+              {income.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell className="font-medium">{item.name}</TableCell>
+                  <TableCell>{parseFloat(item.amount).toFixed(2)}</TableCell>
+                  <TableCell className="text-right">
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      className="text-red-500 underline"
+                    >
+                      Delete
+                    </button>
+                  </TableCell>
                 </TableRow>
               ))}
-              <TableRow>
-                <TableCell>Sum </TableCell>
-                <TableCell> </TableCell>
-                <TableCell> Total of all Incomes </TableCell>
+
+              <TableRow
+                style={{
+                  backgroundColor: "#c1f0d5",
+                  fontWeight: "bold",
+                  color: "#155724",
+                }}
+              >
+                <TableCell>Sum Monthly Incomes</TableCell>
+                <TableCell>
+                  {income
+                    .reduce((sum, i) => sum + parseFloat(i.amount || 0), 0)
+                    .toFixed(2)} €  
+                </TableCell>
+                <TableCell />
               </TableRow>
             </TableBody>
           </Table>

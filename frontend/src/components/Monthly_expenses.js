@@ -103,19 +103,14 @@ const handleDelete = async (id) => {
                   color: "#333",
                 }}
               >
-                <TableCell className="font-medium">
-                  Sum Monthly Expenses
-                </TableCell>
+                <TableCell className="font-medium">Sum Monthly Expenses</TableCell>
                 <TableCell>
                   {expenses
-                    .reduce(
-                      (sum, item) => sum + parseFloat(item.amount || 0),
-                      0
-                    )
-                    .toFixed(2)}{" "}
-                  €
+                    .reduce((sum, item) => sum + parseFloat(item.amount || 0), 0)
+                    .toFixed(2)} €  
                 </TableCell>
-                <TableCell></TableCell>
+                <TableCell />
+                <TableCell />
               </TableRow>
             </TableBody>
           </Table>

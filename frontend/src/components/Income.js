@@ -14,6 +14,9 @@ function Income() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const user = JSON.parse(localStorage.getItem("user"));
+  const user_id = user?.id;
+
   useEffect(() => {
     fetch("http://localhost:5005/incomes")
       .then((response) => {
@@ -31,70 +34,78 @@ function Income() {
         setLoading(false);
       });
   }, []);
-  const updateIncome = (user_id, id) => {
-    console.log("Update income with ID:", id);
-    fetch(`http://localhost:5005/income/${user_id}/${id}`, {
-      method: "UPDATE",
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to update income");
-        }
 
-        setIncome((prev) => prev.filter((item) => item.id !== id));
-      })
-      .catch((err) => {
-        setError(err.message);
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm("Diesen Income-Eintrag löschen?");
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`http://localhost:5005/income/${user_id}/${id}`, {
+        method: "DELETE",
       });
-  };
-  const deleteIncome = (user_id, id) => {
-    fetch(`http://localhost:5005/income/${user_id}/${id}`, {
-      method: "DELETE",
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to delete income");
-        }
-        // Remove deleted item from state
-        setIncome((prev) => prev.filter((item) => item.id !== id));
-      })
-      .catch((err) => {
-        setError(err.message);
-      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Fehler beim Löschen");
+      }
+
+      setIncome((prev) => prev.filter((item) => item.id !== id));
+    } catch (err) {
+      alert("Löschen fehlgeschlagen: " + err.message);
+    }
   };
 
   return (
     <>
-      <h1>Incomes</h1>
+      <h1 className="text-2xl font-bold text-center my-6">Incomes</h1>
 
-      {loading && <p>Loading income...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {loading && <p className="text-center">Loading income...</p>}
+      {error && <p className="text-center text-red-500">{error}</p>}
 
       {!loading && !error && (
         <div className="max-w-4xl mx-auto">
           <Table>
-            <TableCaption></TableCaption>
+            <TableCaption>Einnahmen des Nutzers</TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[100px]">Name</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead className="text-right">Date</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Amount (€)</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead className="text-right">Aktionen</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {income.map((income) => (
-                <TableRow key={income.id}>
-                  <TableCell className="font-medium">{income.name}</TableCell>
-                  <TableCell>{income.amount}</TableCell>
-                  <TableCell>
-                    {new Date(income.date).toISOString().split("T")[0]}
+              {income.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell className="font-medium">{item.name}</TableCell>
+                  <TableCell>{parseFloat(item.amount).toFixed(2)}</TableCell>
+                  <TableCell>{new Date(item.date).toISOString().split("T")[0]}</TableCell>
+                  <TableCell className="text-right">
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      className="text-red-500 underline"
+                    >
+                      Delete
+                    </button>
                   </TableCell>
                 </TableRow>
               ))}
-              <TableRow>
-                <TableCell>Sum </TableCell>
-                <TableCell> </TableCell>
-                <TableCell> Total of all Incomes </TableCell>
+
+              <TableRow
+                style={{
+                  backgroundColor: "#c1f0d5",
+                  fontWeight: "bold",
+                  color: "#155724",
+                }}
+              >
+                <TableCell>Sum Incomes</TableCell>
+                <TableCell>
+                  {income
+                    .reduce((sum, i) => sum + parseFloat(i.amount || 0), 0)
+                    .toFixed(2)} €  
+                </TableCell>
+                <TableCell />
+                <TableCell />
               </TableRow>
             </TableBody>
           </Table>
