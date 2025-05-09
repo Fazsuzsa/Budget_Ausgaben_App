@@ -20,7 +20,7 @@ export default function EditIncome() {
   const navigate = useNavigate();
   const { userId: paramUserId, incomeId: paramIncomeId } = useParams();
 
-  const [expenseId, setIncomeId] = useState("");
+  const [incomeId, setIncomeId] = useState("");
   const [userId, setUserId] = useState("");
 
   const [name, setName] = useState("");
@@ -30,14 +30,14 @@ export default function EditIncome() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (expense) {
+    if (income) {
       setIncomeId(income.id || paramIncomeId);
       setUserId(income.user_id || paramUserId);
       setName(income.name || "");
       setAmount(income.amount || "");
-      setDate(incomee.date || "");
+      setDate(income.date || "");
     }
-  }, [income]);
+  }, [income, paramIncomeId, paramUserId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,7 +51,6 @@ export default function EditIncome() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            category_id: categoryId,
             amount: amount,
             name: name,
             date: date,
