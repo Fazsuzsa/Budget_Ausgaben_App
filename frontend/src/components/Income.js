@@ -81,7 +81,7 @@ function Income() {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[100px]">Name</TableHead>
-                <TableHead>Amount</TableHead>
+                <TableHead>Price (€)</TableHead>
                 <TableHead className="text-right">Date</TableHead>
               </TableRow>
             </TableHeader>
@@ -89,7 +89,11 @@ function Income() {
               {income.map((income) => (
                 <TableRow key={income.id}>
                   <TableCell className="font-medium">{income.name}</TableCell>
-                  <TableCell>{income.amount}</TableCell>
+                  <TableCell>
+                    {parseFloat(parseFloat(income.amount).toFixed(2)).toFixed(
+                      2
+                    )}
+                  </TableCell>
                   <TableCell>
                     {new Date(income.date).toISOString().split("T")[0]}
                   </TableCell>

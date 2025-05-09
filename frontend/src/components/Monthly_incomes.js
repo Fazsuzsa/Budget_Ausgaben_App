@@ -58,7 +58,7 @@ function Monthly_incomes() {
               {income.map((income) => (
                 <TableRow key={income.id}>
                   <TableCell className="font-medium">{income.name}</TableCell>
-                  <TableCell>{income.amount}</TableCell>
+                  <TableCell>{parseFloat(income.amount).toFixed(2)}</TableCell>
                 </TableRow>
               ))}
               <TableRow
