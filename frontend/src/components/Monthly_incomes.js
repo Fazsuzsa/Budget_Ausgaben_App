@@ -89,14 +89,7 @@ function Monthly_incomes() {
                   </TableCell>
                 </TableRow>
               ))}
-
-              <TableRow
-                style={{
-                  backgroundColor: "#c1f0d5",
-                  fontWeight: "bold",
-                  color: "#155724",
-                }}
-              >
+              <TableRow className="font-bold text-gray-700">
                 <TableCell>Sum Monthly Incomes</TableCell>
                 <TableCell>
                   {income
