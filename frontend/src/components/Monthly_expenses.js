@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom"; // ✅ ajouter ceci
 import {
   Table,
   TableBody,
@@ -9,13 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-
 function Monthly_expenses() {
-
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const user = JSON.parse(localStorage.getItem("user"));
   const user_id = user?.id;
 
@@ -25,7 +21,9 @@ function Monthly_expenses() {
 
   const fetchMonthlyExpenses = async () => {
     try {
-      const response = await fetch(`http://localhost:5005/monthly_expenses/${user_id}`)
+      const response = await fetch(
+        `http://localhost:5005/monthly_expenses/${user_id}`
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch Expenses");
@@ -61,7 +59,7 @@ const handleDelete = async (id) => {
 
   return (
     <>
-      <h1 className="text-2xl font-bold text-center my-6">Monthly Expenses</h1>
+      <h1 className="text-2xl font-bold text-center my-6">Monthly expenses</h1>
 
       {loading && <p className="text-center">Loading expenses...</p>}
       {error && <p className="text-center text-red-500">{error}</p>}
@@ -82,9 +80,7 @@ const handleDelete = async (id) => {
               {expenses.map((expense) => (
                 <TableRow key={expense.id}>
                   <TableCell className="font-medium">{expense.name}</TableCell>
-                  <TableCell>
-                    {parseFloat(expense.amount).toFixed(2)}
-                  </TableCell>
+                  <TableCell>{parseFloat(expense.amount).toFixed(2)}</TableCell>
                   <TableCell>{expense.category}</TableCell>
                   <TableCell className="text-right">
                     <button

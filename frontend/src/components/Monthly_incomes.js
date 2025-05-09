@@ -8,24 +8,25 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-
 function Monthly_incomes() {
   const [income, setIncome] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const user = JSON.parse(localStorage.getItem("user"));
   const user_id = user?.id;
 
   useEffect(() => {
-    fetchIncomes();
+    fetchMonthlyIncomes();
   }, []);
 
-  const fetchIncomes = async () => {
+  const fetchMonthlyIncomes = async () => {
     try {
-      const response = await fetch("http://localhost:5005/monthly_incomes");
+      const response = await fetch(
+        `http://localhost:5005/monthly_incomes/${user_id}`
+      );
+
       if (!response.ok) {
-        throw new Error("Failed to fetch income");
+        throw new Error("Failed to fetch Expenses");
       }
       const data = await response.json();
       setIncome(data);
@@ -36,29 +37,9 @@ function Monthly_incomes() {
     }
   };
 
-  const handleDelete = async (id) => {
-    const confirmed = window.confirm("Diesen monatlichen Income-Eintrag löschen?");
-    if (!confirmed) return;
-
-    try {
-      const res = await fetch(`http://localhost:5005/monthly_incomes/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Fehler beim Löschen");
-      }
-
-      setIncome((prev) => prev.filter((e) => e.id !== id));
-    } catch (err) {
-      alert("Löschen fehlgeschlagen: " + err.message);
-    }
-  };
-
   return (
     <>
-      <h1 className="text-2xl font-bold text-center my-6">Monthly Incomes</h1>
+      <h1 className="text-2xl font-bold text-center my-6">Monthly incomes</h1>
 
       {loading && <p className="text-center">Loading incomes...</p>}
       {error && <p className="text-center text-red-500">{error}</p>}
@@ -69,9 +50,8 @@ function Monthly_incomes() {
             <TableCaption>Regelmäßige Einnahmen</TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Amount (€)</TableHead>
-                <TableHead className="text-right">Aktionen</TableHead>
+                <TableHead className="w-[100px]">Name</TableHead>
+                <TableHead>Price (€)</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -89,14 +69,25 @@ function Monthly_incomes() {
                   </TableCell>
                 </TableRow>
               ))}
-              <TableRow className="font-bold text-gray-700">
-                <TableCell>Sum Monthly Incomes</TableCell>
+              <TableRow
+                style={{
+                  backgroundColor: "#61DAFB",
+                  fontWeight: "bold",
+                  color: "#333",
+                }}
+              >
+                <TableCell className="font-medium">
+                  Sum Monthly Incomes
+                </TableCell>
                 <TableCell>
                   {income
-                    .reduce((sum, i) => sum + parseFloat(i.amount || 0), 0)
-                    .toFixed(2)} €  
+                    .reduce(
+                      (sum, item) => sum + parseFloat(item.amount || 0),
+                      0
+                    )
+                    .toFixed(2)}{" "}
+                  €
                 </TableCell>
-                <TableCell />
               </TableRow>
             </TableBody>
           </Table>

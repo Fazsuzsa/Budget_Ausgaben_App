@@ -1,10 +1,8 @@
 import React from "react";
 import logo from "../assets/images/logo.svg";
 import { Link } from "react-router-dom";
-import { useParams } from "react-router-dom";
 
 function Navbar() {
-  const { user_id } = useParams();
   return (
     <div
       style={{
@@ -18,7 +16,7 @@ function Navbar() {
       <Link to="/" style={styles.link}>
         Budget Manager
       </Link>
-      <Link to={`/expenses/${user_id}`} style={styles.link}>
+      <Link to="/expenses" style={styles.link}>
         Expenses
       </Link>
       <Link to="/incomes" style={styles.link}>

@@ -40,7 +40,6 @@ app.use(cors());
 app.use(express.json()); // Ermöglicht Express Json aus einem Body auszulesen
 app.use(express.static("public"));
 
-
 app.get("/expenses/:user_id", async (req, res) => {
   const { user_id } = req.params;
   try {
@@ -96,7 +95,6 @@ app.delete("/expenses/:id", async (req, res) => {
   }
 });
 
-
 app.get("/monthly_expenses/:user_id", async (req, res) => {
   const { user_id } = req.params;
   try {
@@ -151,22 +149,12 @@ app.post("/monthly_expenses", async (req, res) => {
   }
 });
 
-app.get("/incomes", async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM "incomes"');
-    res.json(result.rows);
-  } catch (err) {
-    console.error("Fehler beim Abrufen der Ausgaben:", err);
-    res.status(500).json({ error: "Interner Serverfehler" });
-  }
-});
-
-app.get("/incomes/:id", async (req, res) => {
-  const userId = req.params.id;
+app.get("/incomes/:user_id", async (req, res) => {
+  const { user_id } = req.params;
   try {
     const result = await pool.query(
       'SELECT * FROM "incomes" WHERE user_id = $1',
-      [userId]
+      [user_id]
     );
     res.json(result.rows);
   } catch (err) {
@@ -177,22 +165,12 @@ app.get("/incomes/:id", async (req, res) => {
 
 // app.post("/incomes", ... MUSS GEMACHT WERDEN!
 
-app.get("/monthly_incomes", async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM "monthly_incomes"');
-    res.json(result.rows);
-  } catch (err) {
-    console.error("Fehler beim Abrufen der Ausgaben:", err);
-    res.status(500).json({ error: "Interner Serverfehler" });
-  }
-});
-
-app.get("/monthly_incomes/:id", async (req, res) => {
-  const userId = req.params.id;
+app.get("/monthly_incomes/:user_id", async (req, res) => {
+  const { user_id } = req.params;
   try {
     const result = await pool.query(
       'SELECT * FROM "monthly_incomes" WHERE user_id = $1',
-      [userId]
+      [user_id]
     );
     res.json(result.rows);
   } catch (err) {
@@ -227,11 +205,6 @@ app.post("/login", async (req, res) => {
     console.error("Error login:", error);
     res.status(500).json({ error: "Error server" });
   }
-});
-
-app.get("/income", async (req, res) => {
-  const result = await pool.query("SELECT * FROM Incomes");
-  res.json(result.rows);
 });
 
 app.put("/income/:id_user/:id", async (req, res) => {
