@@ -1,8 +1,8 @@
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import Navbar from "./Navbar";
 import Expenses from "./Expenses";
 import Monthly_expenses from "./Monthly_expenses";
-
+import { useParams } from "react-router-dom";
 function ExpensesNav() {
   const { user_id } = useParams();
 

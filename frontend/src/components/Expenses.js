@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Navbar from "./Navbar";
 import AddExpenseForm from "./AddExpense";
 import {
   Table,
@@ -16,24 +15,12 @@ function Expenses() {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // let userId = null;
-  // try {
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?.id;
-
-  // const userId = parseInt(user?.id, 10);
-  // if (isNaN(userId)) {
-  // throw new Error("Invalid user ID");
-  // }
-  // } catch (error) {
-  //   console.error("Failed to get user ID:", error);
-  //  }
 
   useEffect(() => {
     fetchExpenses();
   }, []);
-
   const fetchExpenses = async () => {
     try {
       const res = await fetch(`http://localhost:5005/expenses/${userId}`);
@@ -48,7 +35,6 @@ function Expenses() {
       setLoading(false);
     }
   };
-
   const handleDelete = async (id) => {
     const confirmed = window.confirm(
       "Willst du diesen Eintrag wirklich löschen?"

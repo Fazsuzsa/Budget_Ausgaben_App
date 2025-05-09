@@ -13,24 +13,28 @@ function Income() {
   const [income, setIncome] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const user = JSON.parse(localStorage.getItem("user"));
+  const user_id = user?.id;
 
   useEffect(() => {
-    fetch("http://localhost:5005/incomes")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to fetch income");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setIncome(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
+    fetchIncomes();
   }, []);
+
+  const fetchIncomes = async () => {
+    try {
+      const response = await fetch(`http://localhost:5005/incomes/${user_id}`);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch Expenses");
+      }
+      const data = await response.json();
+      setIncome(data);
+      setLoading(false);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
   const updateIncome = (user_id, id) => {
     console.log("Update income with ID:", id);
     fetch(`http://localhost:5005/income/${user_id}/${id}`, {
@@ -65,7 +69,7 @@ function Income() {
 
   return (
     <>
-      <h1>Incomes</h1>
+      <h1 className="text-2xl font-bold text-center my-6">Incomes</h1>
 
       {loading && <p>Loading income...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
@@ -91,10 +95,24 @@ function Income() {
                   </TableCell>
                 </TableRow>
               ))}
-              <TableRow>
-                <TableCell>Sum </TableCell>
-                <TableCell> </TableCell>
-                <TableCell> Total of all Incomes </TableCell>
+              <TableRow
+                style={{
+                  backgroundColor: "#61DAFB",
+                  fontWeight: "bold",
+                  color: "#333",
+                }}
+              >
+                <TableCell>Sum Incomes</TableCell>
+                <TableCell>
+                  {income
+                    .reduce(
+                      (sum, item) => sum + parseFloat(item.amount || 0),
+                      0
+                    )
+                    .toFixed(2)}{" "}
+                  €
+                </TableCell>
+                <TableCell></TableCell>
               </TableRow>
             </TableBody>
           </Table>
