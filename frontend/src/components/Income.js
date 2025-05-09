@@ -16,6 +16,9 @@ function Income() {
 <<<<<<< Updated upstream
   const user = JSON.parse(localStorage.getItem("user"));
   const user_id = user?.id;
+=======
+  const token = localStorage.getItem("token");
+>>>>>>> Stashed changes
 
   useEffect(() => {
     fetchIncomes();
