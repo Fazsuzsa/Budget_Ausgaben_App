@@ -13,6 +13,7 @@ import IncomesNav from "./components/IncomesNav";
 import FormExpenses from "./pages/FormExpenses";
 import PrivateRoute from "./components/PrivateRoute";
 import MyForm from "./pages/MyForm";
+import EditIncome from "./pages/EditIncome";
 import Expenses from "./components/Expenses";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -21,13 +22,39 @@ root.render(
     <Router>
       <Routes>
         <Route path="/" element={<App></App>}></Route>
-        <Route path="/expenses" element={<PrivateRoute> <ExpensesNav></ExpensesNav></PrivateRoute>}></Route>
-        <Route path="/incomes" element={<PrivateRoute><IncomesNav></IncomesNav></PrivateRoute>}></Route>
+        <Route
+          path="/expenses"
+          element={
+            <PrivateRoute>
+              {" "}
+              <ExpensesNav></ExpensesNav>
+            </PrivateRoute>
+          }
+        ></Route>
+        <Route
+          path="/incomes"
+          element={
+            <PrivateRoute>
+              <IncomesNav></IncomesNav>
+            </PrivateRoute>
+          }
+        ></Route>
         <Route path="/about" element={<About></About>}></Route>
         <Route path="/login" element={<Login></Login>}></Route>
         <Route path="/test" element={<FormExpenses></FormExpenses>}></Route>
-        <Route path="/edit-expense/:userId/:expenseId" element={<MyForm></MyForm>}></Route>
-        <Route path="/expenses" element={<PrivateRoute> <Expenses /></PrivateRoute>} ></Route>
+        <Route
+          path="/edit-expense/:userId/:expenseId"
+          element={<MyForm></MyForm>}
+        ></Route>
+        <Route
+          path="/expenses"
+          element={
+            <PrivateRoute>
+              {" "}
+              <Expenses />
+            </PrivateRoute>
+          }
+        ></Route>
         <Route path="/eng_ger" element={<Eng_ger></Eng_ger>}></Route>
         <Route path="/dark_light" element={<Dark_light></Dark_light>}></Route>
 
