@@ -31,7 +31,7 @@ function Income() {
         setLoading(false);
       });
   }, []);
-  const updateIncome = (id) => {
+  const updateIncome = (user_id, id) => {
     console.log("Update income with ID:", id);
     fetch(`http://localhost:5005/income/${user_id}/${id}`, {
       method: "UPDATE",
@@ -47,7 +47,7 @@ function Income() {
         setError(err.message);
       });
   };
-  const deleteIncome = (id) => {
+  const deleteIncome = (user_id, id) => {
     fetch(`http://localhost:5005/income/${user_id}/${id}`, {
       method: "DELETE",
     })

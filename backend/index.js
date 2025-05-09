@@ -52,13 +52,21 @@ app.get("/expenses", async (req, res) => {
   }
 });
 
-app.get("/expenses/:id", async (req, res) => {
-  const userId = req.params.id;
+app.get("/expenses/:user_id", async (req, res) => {
+  //const { id } = req.params;
+  const { user_id } = req.params;
+
   try {
+    //   const result = await pool.query(
+    //     "SELECT expenses.id, expenses.user_id, expenses.amount, expenses.name, expenses.category_id, expenses.date, categories.category FROM public.expenses JOIN public.categories on expenses.category_id = categories.id WHERE expenses.user_id = $1",
+    //     [user_id]
+    //   );
+
     const result = await pool.query(
-      "SELECT expenses.id, expenses.user_id, expenses.amount, expenses.name, expenses.category_id, expenses.date, categories.category FROM public.expenses JOIN public.categories on expenses.category_id = categories.id WHERE expenses.user_id = $1",
-      [userId]
+      "SELECT * FROM expenses WHERE user_id = $1",
+      [user_id]
     );
+
     res.json(result.rows);
   } catch (err) {
     console.error("Fehler beim Abrufen der Ausgaben:", err);
@@ -91,7 +99,10 @@ app.delete("/expenses/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const result = await pool.query("DELETE FROM expenses WHERE id = $1 RETURNING *", [id]);
+    const result = await pool.query(
+      "DELETE FROM expenses WHERE id = $1 RETURNING *",
+      [id]
+    );
 
     if (result.rowCount === 0) {
       return res.status(404).json({ error: "Eintrag nicht gefunden" });
@@ -139,20 +150,23 @@ app.post("/monthly_expenses", async (req, res) => {
 
   app.delete("/monthly_expenses/:id", async (req, res) => {
     const { id } = req.params;
-  
+
     try {
-      const result = await pool.query("DELETE FROM monthly_expenses WHERE id = $1 RETURNING *", [id]);
-  
+      const result = await pool.query(
+        "DELETE FROM monthly_expenses WHERE id = $1 RETURNING *",
+        [id]
+      );
+
       if (result.rowCount === 0) {
         return res.status(404).json({ error: "Eintrag nicht gefunden" });
       }
-  
+
       res.status(200).json({ message: "Erfolgreich gelöscht" });
     } catch (err) {
       console.error("Fehler beim Löschen:", err);
       res.status(500).json({ error: "Interner Serverfehler" });
     }
-  });  
+  });
 
   try {
     const result = await pool.query(
@@ -237,9 +251,8 @@ app.post("/login", async (req, res) => {
       return res.json({ error: "Passwort incorrect" });
     }
 
-    res.json({ message: "Connexion OK", user, token: "my_simple_token", });
+    res.json({ message: "Connexion OK", user, token: "my_simple_token" });
     console.log(res.json({ user }));
-
   } catch (error) {
     console.error("Error login:", error);
     res.status(500).json({ error: "Error server" });
@@ -347,17 +360,26 @@ app.get("/expenses/search", async (req, res) => {
     // Check if any expenses were found
     if (result.rows.length === 0) {
       console.log("No expenses found for the given year");
-      return res.status(404).json({ error: "No expenses found for the given year" });
+      return res
+        .status(404)
+        .json({ error: "No expenses found for the given year" });
     }
 
     // Calculate the total amount
-    const totalAmount = result.rows.reduce((sum, row) => sum + parseFloat(row.amount), 0);
+    const totalAmount = result.rows.reduce(
+      (sum, row) => sum + parseFloat(row.amount),
+      0
+    );
 
     // Calculate the average expense
     const averageAmount = totalAmount / result.rows.length;
 
     // Log the total and average for verification
-    console.log(`Total Expenses: €${totalAmount.toFixed(2)}, Average Expense: €${averageAmount.toFixed(2)}`);
+    console.log(
+      `Total Expenses: €${totalAmount.toFixed(
+        2
+      )}, Average Expense: €${averageAmount.toFixed(2)}`
+    );
 
     res.json({
       year: year,
@@ -370,9 +392,6 @@ app.get("/expenses/search", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
-
-
 
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);
