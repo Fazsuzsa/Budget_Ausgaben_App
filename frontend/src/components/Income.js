@@ -84,11 +84,11 @@ function Income() {
                     )}
                   </TableCell>
                   <TableCell>
-                    {new Date(item.date).toISOString().split("T")[0]}
+                    {new Date(income.date).toISOString().split("T")[0]}
                   </TableCell>
                   <TableCell className="text-right">
                     <button
-                      onClick={() => handleDelete(item.id)}
+                      onClick={() => handleDelete(income.id)}
                       className="text-red-500 underline"
                     >
                       Delete

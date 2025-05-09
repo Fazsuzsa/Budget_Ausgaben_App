@@ -78,12 +78,19 @@ function Monthly_incomes() {
             </TableHeader>
             <TableBody>
               {income.map((income) => (
-                <TableRow key={income.id}>
-                  <TableCell className="font-medium">{income.name}</TableCell>
-                  <TableCell>{parseFloat(income.amount).toFixed(2)}</TableCell>
-                </TableRow>
-              ))}
-
+              <TableRow key={income.id}>
+                <TableCell className="font-medium">{income.name}</TableCell>
+                <TableCell>{parseFloat(income.amount).toFixed(2)}</TableCell>
+                <TableCell className="text-right">
+                  <button
+                    onClick={() => handleDelete(income.id)}
+                    className="text-red-500 underline"
+                  >
+                    Delete
+                  </button>
+                </TableCell>
+              </TableRow>
+            ))}
               <TableRow>
                 <TableCell className="font-medium">Sum Monthly Incomes</TableCell>
                 <TableCell>
