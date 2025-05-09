@@ -28,7 +28,7 @@ export function LoginForm({ className, ...props }) {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ e_mail: email, password }),
+                body: JSON.stringify({ email, password }),
             });
 
             const data = await res.json();
@@ -36,12 +36,11 @@ export function LoginForm({ className, ...props }) {
             if (data.error) {
                 setError(data.error);
             } else {
-                setSuccess("Login successful!");
+                // Enregistre le token si nécessaire
                 localStorage.setItem("token", data.token);
-                localStorage.setItem("user", JSON.stringify(data.user));
 
-                console.log("Logged in user:", data.user);
-                navigate('/expenses');
+                // Redirige vers la page expenses/<userId>
+                navigate(`/expenses/${data.user.id}`);
             }
         } catch (err) {
             console.error("Login error:", err);

@@ -17,7 +17,11 @@ function Monthly_expenses() {
   const [error, setError] = useState(null);
 
   const user = JSON.parse(localStorage.getItem("user"));
-  const user_id = user?.id;
+  const user_id = user ? user.id : null;
+
+  if (!user_id) {
+    console.error("User ID is undefined or null");
+  }
 
   useEffect(() => {
     fetchMonthlyExpenses();

@@ -24,9 +24,8 @@ root.render(
         <Route path="/" element={<App></App>}></Route>
 
 
-        <Route path="/expenses/:user_id" element={
-          <ExpensesNav></ExpensesNav>
-        } />
+        <Route path="/expenses/:user_id" element={<PrivateRoute><ExpensesNav /></PrivateRoute>} />
+
 
 
         <Route

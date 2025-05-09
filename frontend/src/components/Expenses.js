@@ -20,7 +20,12 @@ function Expenses() {
   // let userId = null;
   // try {
   const user = JSON.parse(localStorage.getItem("user"));
-  const userId = user?.id;
+  const user_id = user ? user.id : null;
+
+  if (!user_id) {
+    console.error("User ID is undefined or null");
+  }
+
 
   // const userId = parseInt(user?.id, 10);
   // if (isNaN(userId)) {
@@ -32,11 +37,11 @@ function Expenses() {
 
   useEffect(() => {
     fetchExpenses();
-  }, []);
+  }, [user_id]);
 
   const fetchExpenses = async () => {
     try {
-      const res = await fetch(`http://localhost:5005/expenses/${userId}`);
+      const res = await fetch(`http://localhost:5005/expenses/${user_id}`);
       if (!res.ok) {
         throw new Error("Failed to fetch expenses");
       }
@@ -57,7 +62,7 @@ function Expenses() {
 
     try {
       const res = await fetch(
-        `http://localhost:5005/expenses/${userId}/${id}`,
+        `http://localhost:5005/expenses/${user_id}/${id}`,
         {
           method: "DELETE",
         }

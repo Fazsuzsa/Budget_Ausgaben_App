@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const { Pool } = require("pg");
 
 const app = express();
@@ -204,25 +206,29 @@ app.get("/monthly_incomes/:id", async (req, res) => {
 // app.post("/monthly_incomes", ... MUSS GEMACHT WERDEN!
 
 app.post("/login", async (req, res) => {
-  const { e_mail, password } = req.body;
-  console.log("Request login:", e_mail, password);
+  const { email, password } = req.body;
+  console.log("Request login:", email, password);
 
   try {
-    const result = await pool.query("SELECT * FROM users WHERE e_mail = $1", [
-      e_mail,
-    ]);
+    const result = await pool.query("SELECT * FROM users WHERE e_mail = $1", [email]);
     const user = result.rows[0];
 
     if (!user) {
-      return res.json({ error: "e_mail incorrect!" });
+      return res.json({ error: "Email incorrect!" });
     }
 
-    if (user.password !== password) {
-      return res.json({ error: "Passwort incorrect" });
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(401).json({ error: "Passwort incorrect!" });
     }
 
-    res.json({ message: "Connexion OK", user, token: "my_simple_token" });
-    console.log(res.json({ user }));
+    const token = jwt.sign(
+      { userId: user.id, e_mail: user.e_mail },
+      process.env.JWT_SECRET || "default_secret",
+      { expiresIn: "30m" }
+    );
+
+    res.json({ message: "Connexion OK", user: { id: user.id, e_mail: user.e_mail }, token });
   } catch (error) {
     console.error("Error login:", error);
     res.status(500).json({ error: "Error server" });
