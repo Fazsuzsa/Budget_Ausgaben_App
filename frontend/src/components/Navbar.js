@@ -17,6 +17,7 @@ function Navbar() {
         Budget Manager
       </Link>
       <Link to="/expenses" style={styles.link}>
+      <Link to={"/expenses/${user_id}"} style={styles.link}>
         Expenses
       </Link>
       <Link to="/incomes" style={styles.link}>
