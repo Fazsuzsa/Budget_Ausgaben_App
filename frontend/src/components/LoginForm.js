@@ -32,12 +32,12 @@ export function LoginForm({ className, ...props }) {
             });
 
             const data = await res.json();
+            localStorage.setItem("token", data.token);
 
             if (data.error) {
                 setError(data.error);
             } else {
                 setSuccess("Login successful!");
-                localStorage.setItem("token", data.token);
                 localStorage.setItem("user", JSON.stringify(data.user));
 
                 console.log("Logged in user:", data.user);

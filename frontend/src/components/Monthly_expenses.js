@@ -16,7 +16,13 @@ function Monthly_expenses() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5005/monthly_expenses")
+    const token = localStorage.getItem("token");
+
+    fetch("http://localhost:5005/monthly_expenses", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch Expenses");

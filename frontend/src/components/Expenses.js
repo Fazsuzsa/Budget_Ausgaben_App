@@ -23,7 +23,14 @@ function Expenses() {
 
   const fetchExpenses = async () => {
     try {
-      const res = await fetch("http://localhost:5005/expenses");
+      const token = localStorage.getItem("token");
+
+      const res = await fetch("http://localhost:5005/expenses", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       if (!res.ok) {
         throw new Error("Failed to fetch expenses");
       }
