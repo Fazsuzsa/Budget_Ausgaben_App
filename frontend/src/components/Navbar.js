@@ -16,10 +16,10 @@ function Navbar() {
       <Link to="/" style={styles.link}>
         Budget Manager
       </Link>
-      <Link to="/expenses/" style={styles.link}>
+      <Link to="/expenses" style={styles.link}>
         Expenses
       </Link>
-      <Link to="/incomes/" style={styles.link}>
+      <Link to="/incomes" style={styles.link}>
         Incomes
       </Link>
       <Link to="/login" style={styles.link}>

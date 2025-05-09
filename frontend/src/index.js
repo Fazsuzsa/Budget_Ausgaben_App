@@ -22,16 +22,15 @@ root.render(
       <Routes>
         <Route path="/" element={<App></App>}></Route>
         <Route
-          path="/expenses/:id"
+          path="/expenses"
           element={
             <PrivateRoute>
-              {" "}
               <ExpensesNav></ExpensesNav>
             </PrivateRoute>
           }
         ></Route>
         <Route
-          path="/incomes/:id"
+          path="/incomes"
           element={
             <PrivateRoute>
               <IncomesNav></IncomesNav>
