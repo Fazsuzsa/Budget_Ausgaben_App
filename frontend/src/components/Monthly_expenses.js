@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-
+import { useParams } from "react-router-dom"; // ✅ ajouter ceci
 import {
   Table,
   TableBody,
@@ -11,9 +11,13 @@ import {
 } from "./ui/table";
 
 function Monthly_expenses() {
+
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const user = JSON.parse(localStorage.getItem("user"));
+  const user_id = user?.id;
 
   useEffect(() => {
     fetchMonthlyExpenses();
@@ -21,7 +25,8 @@ function Monthly_expenses() {
 
   const fetchMonthlyExpenses = async () => {
     try {
-      const response = await fetch("http://localhost:5005/monthly_expenses");
+      const response = await fetch(`http://localhost:5005/monthly_expenses/${user_id}`)
+
       if (!response.ok) {
         throw new Error("Failed to fetch Expenses");
       }
@@ -34,7 +39,7 @@ function Monthly_expenses() {
     }
   };
 
-  const handleDelete = async (id) => {
+const handleDelete = async (id) => {
     const confirmed = window.confirm("Diesen monatlichen Eintrag löschen?");
     if (!confirmed) return;
 
@@ -77,7 +82,9 @@ function Monthly_expenses() {
               {expenses.map((expense) => (
                 <TableRow key={expense.id}>
                   <TableCell className="font-medium">{expense.name}</TableCell>
-                  <TableCell>{parseFloat(expense.amount).toFixed(2)}</TableCell>
+                  <TableCell>
+                    {parseFloat(expense.amount).toFixed(2)}
+                  </TableCell>
                   <TableCell>{expense.category}</TableCell>
                   <TableCell className="text-right">
                     <button
@@ -89,12 +96,25 @@ function Monthly_expenses() {
                   </TableCell>
                 </TableRow>
               ))}
-              <TableRow style={{ backgroundColor: '#61DAFB', fontWeight: 'bold', color: '#333' }}>
-                <TableCell className="font-medium">Sum Monthly Expenses</TableCell>
-                <TableCell>
-                  {expenses.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0).toFixed(2)} €
+              <TableRow
+                style={{
+                  backgroundColor: "#61DAFB",
+                  fontWeight: "bold",
+                  color: "#333",
+                }}
+              >
+                <TableCell className="font-medium">
+                  Sum Monthly Expenses
                 </TableCell>
-                <TableCell></TableCell>
+                <TableCell>
+                  {expenses
+                    .reduce(
+                      (sum, item) => sum + parseFloat(item.amount || 0),
+                      0
+                    )
+                    .toFixed(2)}{" "}
+                  €
+                </TableCell>
                 <TableCell></TableCell>
               </TableRow>
             </TableBody>

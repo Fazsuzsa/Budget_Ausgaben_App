@@ -40,33 +40,14 @@ app.use(cors());
 app.use(express.json()); // Ermöglicht Express Json aus einem Body auszulesen
 app.use(express.static("public"));
 
-app.get("/expenses", async (req, res) => {
-  try {
-    const result = await pool.query(
-      "SELECT expenses.id, expenses.user_id, expenses.amount, expenses.name, expenses.category_id, expenses.date, categories.category FROM public.expenses JOIN public.categories on expenses.category_id = categories.id"
-    );
-    res.json(result.rows);
-  } catch (err) {
-    console.error("Fehler beim Abrufen der Ausgaben:", err);
-    res.status(500).json({ error: "Interner Serverfehler" });
-  }
-});
 
 app.get("/expenses/:user_id", async (req, res) => {
-  //const { id } = req.params;
   const { user_id } = req.params;
-
   try {
-    //   const result = await pool.query(
-    //     "SELECT expenses.id, expenses.user_id, expenses.amount, expenses.name, expenses.category_id, expenses.date, categories.category FROM public.expenses JOIN public.categories on expenses.category_id = categories.id WHERE expenses.user_id = $1",
-    //     [user_id]
-    //   );
-
     const result = await pool.query(
-      "SELECT * FROM expenses WHERE user_id = $1",
+      "SELECT expenses.id, expenses.user_id, expenses.amount, expenses.name, expenses.category_id, expenses.date, categories.category FROM public.expenses JOIN public.categories on expenses.category_id = categories.id WHERE expenses.user_id = $1",
       [user_id]
     );
-
     res.json(result.rows);
   } catch (err) {
     console.error("Fehler beim Abrufen der Ausgaben:", err);
@@ -115,24 +96,13 @@ app.delete("/expenses/:id", async (req, res) => {
   }
 });
 
-app.get("/monthly_expenses", async (req, res) => {
-  try {
-    const result = await pool.query(
-      "SELECT monthly_expenses.id, monthly_expenses.user_id, monthly_expenses.amount, monthly_expenses.name, monthly_expenses.category_id, categories.category FROM public.monthly_expenses JOIN public.categories on monthly_expenses.category_id = categories.id"
-    );
-    res.json(result.rows);
-  } catch (err) {
-    console.error("Fehler beim Abrufen der monatlichen Ausgaben:", err);
-    res.status(500).json({ error: "Interner Serverfehler" });
-  }
-});
 
-app.get("/monthly_expenses/:id", async (req, res) => {
-  const userId = req.params.id;
+app.get("/monthly_expenses/:user_id", async (req, res) => {
+  const { user_id } = req.params;
   try {
     const result = await pool.query(
       "SELECT monthly_expenses.id, monthly_expenses.user_id, monthly_expenses.amount, monthly_expenses.name, monthly_expenses.category_id, categories.category FROM public.monthly_expenses JOIN public.categories on monthly_expenses.category_id = categories.id WHERE monthly_expenses.user_id = $1",
-      [userId]
+      [user_id]
     );
     res.json(result.rows);
   } catch (err) {
