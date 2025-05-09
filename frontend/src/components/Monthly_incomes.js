@@ -77,18 +77,10 @@ function Monthly_incomes() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {income.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">{item.name}</TableCell>
-                  <TableCell>{parseFloat(item.amount).toFixed(2)}</TableCell>
-                  <TableCell className="text-right">
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      className="text-red-500 underline"
-                    >
-                      Delete
-                    </button>
-                  </TableCell>
+              {income.map((income) => (
+                <TableRow key={income.id}>
+                  <TableCell className="font-medium">{income.name}</TableCell>
+                  <TableCell>{parseFloat(income.amount).toFixed(2)}</TableCell>
                 </TableRow>
               ))}
 

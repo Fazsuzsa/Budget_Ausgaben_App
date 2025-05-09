@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const { Pool } = require("pg");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 const PORT = 5005;
@@ -195,12 +197,18 @@ app.post("/login", async (req, res) => {
       return res.json({ error: "e_mail incorrect!" });
     }
 
-    if (user.password !== password) {
-      return res.json({ error: "Passwort incorrect" });
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(401).json({ error: "Passwort incorrect!" });
     }
 
-    res.json({ message: "Connexion OK", user, token: "my_simple_token" });
-    console.log(res.json({ user }));
+    const token = jwt.sign(
+      { userId: user.id, e_mail: user.e_mail },
+      process.env.JWT_SECRET || "default_secret",
+      { expiresIn: "30m" }
+    );
+
+    res.json({ message: "Connexion OK", user: { id: user.id, e_mail: user.e_mail }, token });
   } catch (error) {
     console.error("Error login:", error);
     res.status(500).json({ error: "Error server" });

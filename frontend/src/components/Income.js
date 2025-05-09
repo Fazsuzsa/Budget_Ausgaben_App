@@ -69,17 +69,20 @@ function Income() {
             <TableCaption>Einnahmen des Nutzers</TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Amount (€)</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Aktionen</TableHead>
+                <TableHead className="w-[100px]">Name</TableHead>
+                <TableHead>Price (€)</TableHead>
+                <TableHead className="text-right">Date</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {income.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">{item.name}</TableCell>
-                  <TableCell>{parseFloat(item.amount).toFixed(2)}</TableCell>
+              {income.map((income) => (
+                <TableRow key={income.id}>
+                  <TableCell className="font-medium">{income.name}</TableCell>
+                  <TableCell>
+                    {parseFloat(parseFloat(income.amount).toFixed(2)).toFixed(
+                      2
+                    )}
+                  </TableCell>
                   <TableCell>
                     {new Date(item.date).toISOString().split("T")[0]}
                   </TableCell>
