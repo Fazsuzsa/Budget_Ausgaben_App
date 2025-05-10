@@ -1,5 +1,6 @@
 import React from "react";
-import logo from "../assets/images/logo.svg";
+//import logo from "../assets/images/logo.svg";
+import logo from "../assets/images/AppIcon.png";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
@@ -23,7 +24,7 @@ function Navbar() {
         padding: "1.5rem 1.5rem", // 1 rem = 16 px it is a relative unit based on the fontsize
       }}
     >
-      <img src={logo} style={{ height: "40px" }} />
+      <img src={logo} style={{ height: "70px" }} />
       <Link to="/" style={styles.linkb}>
         Monthly Reporting
       </Link>

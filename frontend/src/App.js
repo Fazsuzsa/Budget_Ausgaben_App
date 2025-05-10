@@ -8,9 +8,10 @@ import { Navigate } from "react-router-dom";
 import "./App.css";
 
 import { Pie } from "react-chartjs-2";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from "chart.js";
+import ChartDataLabels from "chartjs-plugin-datalabels"; // Import the plugin
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, Tooltip, Legend, Title, ChartDataLabels);
 
 const options = {
   responsive: true,
@@ -19,9 +20,22 @@ const options = {
     legend: {
       position: "bottom",
       labels: {
-        boxWidth: 40,
+        boxWidth: 60,
         padding: 15,
       },
+    },
+    datalabels: {
+      color: "black", // Color of the data labels
+      font: {
+        // weight: "bold",
+        size: 18,
+      },
+      formatter: (value, context) => {
+        if (value === 0) return ""; // Hide zero amounts
+        return `€${value.toFixed(2)}`; // Format as currency
+      },
+      align: "start", // Align the labels in the center
+      anchor: "end", // Anchor them in the center of each segment
     },
   },
 };
