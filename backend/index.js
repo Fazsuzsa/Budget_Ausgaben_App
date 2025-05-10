@@ -208,7 +208,11 @@ app.post("/login", async (req, res) => {
       { expiresIn: "30m" }
     );
 
-    res.json({ message: "Connexion OK", user: { id: user.id, e_mail: user.e_mail }, token });
+    res.json({
+      message: "Connexion OK",
+      user: { id: user.id, e_mail: user.e_mail },
+      token,
+    });
   } catch (error) {
     console.error("Error login:", error);
     res.status(500).json({ error: "Error server" });
@@ -342,6 +346,86 @@ app.get("/expenses/search", async (req, res) => {
     console.error("Error calculating average expenses:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
+});
+
+app.post("/piedata/:id_user", async (req, res) => {
+  const { year, month } = req.body;
+  const { id_user } = req.params;
+
+  console.log(`Request for year: ${year}, month: ${month}`);
+
+  let result;
+
+  try {
+    result = await pool.query(
+      `SELECT EXISTS (
+         SELECT 1 FROM expenses
+         WHERE user_id = $1 
+          AND EXTRACT(YEAR FROM date) = $2
+          AND EXTRACT(MONTH FROM date) = $3
+       )`,
+      [id_user, year, month]
+    );
+  } catch (err) {
+    console.error("Error checking monthly expenses:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+
+  // If no data is returned, send an empty response
+  if (!result.rows[0].exists) {
+    return res.json({
+      labels: [],
+      datasets: [
+        {
+          label: "Expenses",
+          data: [],
+          backgroundColor: [],
+          borderWidth: 1,
+        },
+      ],
+    });
+  }
+
+  // SQL query to join expenses and categories tables and sum the amounts per category
+  result = await pool.query(
+    `SELECT c.category, COALESCE(SUM(e.amount), 0) AS total_amount
+       FROM categories c
+       LEFT JOIN expenses e ON c.id = e.category_id AND e.user_id = $1
+       AND EXTRACT(YEAR FROM e.date) = $2
+       AND EXTRACT(MONTH FROM e.date) = $3
+       GROUP BY c.category
+       ORDER BY total_amount DESC;`,
+    [id_user, year, month]
+  );
+
+  // Prepare the data for the pie chart
+  const categories = result.rows.map((row) => row.category);
+  const totalAmounts = result.rows.map((row) => row.total_amount);
+
+  const backgroundColors = categories.map((_, index) => {
+    const colors = [
+      "rgba(255, 99, 132, 0.6)",
+      "rgba(54, 162, 235, 0.6)",
+      "rgba(255, 206, 86, 0.6)",
+      "rgba(75, 192, 192, 0.6)",
+      "rgba(110, 75, 192, 0.6)",
+    ];
+    return colors[index % colors.length]; // Repeat the colors if there are more than 5 categories
+  });
+
+  const data = {
+    labels: categories,
+    datasets: [
+      {
+        label: "Expenses",
+        data: totalAmounts,
+        backgroundColor: backgroundColors,
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  res.json(data);
 });
 
 app.listen(PORT, () => {

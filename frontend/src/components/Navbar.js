@@ -1,8 +1,19 @@
 import React from "react";
 import logo from "../assets/images/logo.svg";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function Navbar() {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const user_name = user?.e_mail;
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
   return (
     <div
       style={{
@@ -13,27 +24,31 @@ function Navbar() {
       }}
     >
       <img src={logo} style={{ height: "40px" }} />
-      <Link to="/" style={styles.link}>
-        Budget Manager
+      <Link to="/" style={styles.linkb}>
+        Monthly Reporting
       </Link>
-      <Link to="/expenses" style={styles.link}>
+      <Link to="/expenses" style={styles.linkb}>
         Expenses
       </Link>
-      <Link to="/incomes" style={styles.link}>
+      <Link to="/incomes" style={styles.linkb}>
         Income
       </Link>
-      <Link to="/login" style={styles.link}>
-        LOGIN
-      </Link>
-      <Link to="/about" style={styles.link}>
-        About ZENS
-      </Link>
-      <Link to="/eng_ger" style={styles.link}>
-        English/German
-      </Link>
-      <Link to="/dark_light" style={styles.link}>
-        Dark/Light
-      </Link>
+      <div>
+        <Link to="/dark_light" style={styles.link}>
+          Dark/Light
+        </Link>
+        <br />
+        <Link to="/about" style={styles.link}>
+          About ZENS
+        </Link>
+      </div>
+      <div>
+        <span style={{ color: "black", fontWeight: "bold" }}>{user_name}</span>
+        <br />
+        <button onClick={handleLogout} style={styles.logoutButton}>
+          Logout
+        </button>
+      </div>
     </div>
   );
 }
@@ -44,6 +59,21 @@ const styles = {
     color: "blue",
     fontWeight: "bold",
     fontSize: "16px",
+  },
+  linkb: {
+    textDecoration: "none",
+    color: "blue",
+    fontWeight: "bold",
+    fontSize: "24px",
+  },
+  logoutButton: {
+    background: "none",
+    border: "none",
+    color: "red",
+    //fontWeight: "bold",
+    cursor: "pointer",
+    fontSize: "16px",
+    padding: 0,
   },
 };
 

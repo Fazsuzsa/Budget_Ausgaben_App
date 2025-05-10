@@ -1,34 +1,146 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
-import sampleTable from "./assets/images/sampleTable.png";
-import barChart from "./assets/images/barChart.png";
-import pieChart from "./assets/images/pieChart.png";
+import { Input } from "./components/ui/input";
+import { Form, FormControl, FormItem, FormLabel } from "./components/ui/form";
+import { Select, SelectItem } from "./components/ui/select";
+import { useForm } from "react-hook-form";
+import { Navigate } from "react-router-dom";
 import "./App.css";
 
+import { Pie } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+
+ChartJS.register(ArcElement, Tooltip, Legend);
+
+const options = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: "bottom",
+      labels: {
+        boxWidth: 40,
+        padding: 15,
+      },
+    },
+  },
+};
 
 const App = () => {
+  const now = new Date();
+  const currentYear = now.getFullYear().toString();
+  const currentMonth = (now.getMonth() + 1).toString();
+
+  const [chartData, setChartData] = useState({
+    labels: [],
+    datasets: [
+      {
+        data: [],
+        backgroundColor: [],
+      },
+    ],
+  });
+
+  const { register, handleSubmit, reset, watch } = useForm({
+    defaultValues: {
+      year: currentYear,
+      month: currentMonth,
+    },
+  });
+
+  const year = watch("year");
+  const month = watch("month");
+
+  const user = JSON.parse(localStorage.getItem("user"));
+  const user_id = user?.id;
+
+  useEffect(() => {
+    const fetchChartData = async () => {
+      if (!year || !month) return;
+
+      const payload = {
+        year: parseFloat(year),
+        month: parseFloat(month),
+      };
+
+      try {
+        const res = await fetch(`http://localhost:5005/piedata/${user_id}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setChartData(data); // Update pie chart data
+        } else {
+          const err = await res.json();
+          console.error("Backend error:", err.error);
+        }
+      } catch (err) {
+        console.error("Fetch error:", err);
+      }
+    };
+
+    fetchChartData();
+  }, [year, month]); // Runs whenever year or month changes
+
+  const token = localStorage.getItem("token");
+  if (!token) {
+    return <Navigate to="/login" />;
+  }
+
+  const isChartEmpty = chartData && chartData.labels.length === 0;
+
   return (
     <>
-      <Navbar />
-      <h1>Our Application for your budget administration</h1>
+      <Navbar></Navbar>
+      <div style={styles.chartBox}>
+        <Form>
+          <form className="max-w-sm mx-auto space-y-4">
+            <FormItem>
+              <FormLabel>Month</FormLabel>
+              <FormControl>
+                <Select {...register("month")} defaultValue={currentMonth}>
+                  <SelectItem value="1">January</SelectItem>
+                  <SelectItem value="2">February</SelectItem>
+                  <SelectItem value="3">March</SelectItem>
+                  <SelectItem value="4">April</SelectItem>
+                  <SelectItem value="5">May</SelectItem>
+                  <SelectItem value="6">June</SelectItem>
+                  <SelectItem value="7">July</SelectItem>
+                  <SelectItem value="8">August</SelectItem>
+                  <SelectItem value="9">September</SelectItem>
+                  <SelectItem value="10">October</SelectItem>
+                  <SelectItem value="11">November</SelectItem>
+                  <SelectItem value="12">December</SelectItem>
+                </Select>
+              </FormControl>
+            </FormItem>
 
-      <div>
-        <h3>Expenses table for April</h3>
-        <img
-          src={sampleTable}
-          alt="Expenses table for April"
-          style={{ marginBottom: "30px" }}
-        />
-      </div>
+            <FormItem>
+              <FormLabel>Year</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  step="1"
+                  {...register("year")}
+                  defaultValue={currentYear}
+                  required
+                />
+              </FormControl>
+            </FormItem>
+          </form>
+        </Form>
 
-      <div style={styles.chartContainer}>
-        <div style={styles.chartBox}>
-          <h3>Comparison expenses categories</h3>
-          <img src={pieChart} alt="comparison expenses categories" />
-        </div>
-        <div style={styles.chartBox}>
-          <h3>Expenses statistics</h3>
-          <img src={barChart} alt="Expenses statistics" />
+        <div className="w-full h-[500px] p-4 bg-white rounded shadow">
+          {isChartEmpty ? (
+            <p style={{ color: "red" }}>
+              No expenses available for the selected month and year.
+            </p>
+          ) : (
+            <Pie data={chartData} options={options} />
+          )}
         </div>
       </div>
     </>
@@ -36,11 +148,9 @@ const App = () => {
 };
 
 const styles = {
-  chartContainer: {
-    gap: "30px", // space between charts
-  },
   chartBox: {
     textAlign: "center",
+    maxWidth: "400px", // optional: control width
   },
 };
 
