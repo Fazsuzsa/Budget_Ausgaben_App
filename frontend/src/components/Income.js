@@ -15,6 +15,7 @@ function Income() {
   const [error, setError] = useState(null);
   const user = JSON.parse(localStorage.getItem("user"));
   const user_id = user?.id;
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     fetchIncomes();
@@ -58,7 +59,7 @@ function Income() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold text-center my-6">Incomes</h1>
+      <h1 className="text-2xl font-bold text-center my-6">One-Time Incomes</h1>
 
       {loading && <p className="text-center">Loading income...</p>}
       {error && <p className="text-center text-red-500">{error}</p>}
@@ -97,11 +98,20 @@ function Income() {
                 </TableRow>
               ))}
 
-              <TableRow>
-                <TableCell>Sum Incomes</TableCell>
+              <TableRow
+                style={{
+                  backgroundColor: "#61DAFB",
+                  fontWeight: "bold",
+                  color: "#333",
+                }}
+              >
+                <TableCell>Sum One-Time Incomes</TableCell>
                 <TableCell>
                   {income
-                    .reduce((sum, item) => sum + parseFloat(item.amount || 0), 0)
+                    .reduce(
+                      (sum, item) => sum + parseFloat(item.amount || 0),
+                      0
+                    )
                     .toFixed(2)}{" "}
                   €
                 </TableCell>

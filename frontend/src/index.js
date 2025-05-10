@@ -6,7 +6,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import App from "./App";
 import About from "./pages/About";
 import Login from "./pages/Login";
-import Eng_ger from "./components/Eng_ger";
 import Dark_light from "./components/Dark_light";
 import ExpensesNav from "./components/ExpensesNav";
 import IncomesNav from "./components/IncomesNav";
@@ -31,7 +30,7 @@ root.render(
           path="/edit-expense/:userId/:expenseId"
           element={<MyForm></MyForm>}
         ></Route>
-        <Route path="/eng_ger" element={<Eng_ger></Eng_ger>}></Route>
+
         <Route path="/dark_light" element={<Dark_light></Dark_light>}></Route>
 
         {/*<Route path="/Expenses" element={<Expenses></Expenses>}></Route>
