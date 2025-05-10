@@ -3,46 +3,58 @@ import Navbar from "../components/Navbar";
 import sampleTable from "../assets/images/sampleTable.png";
 import barChart from "../assets/images/barChart.png";
 import pieChart from "../assets/images/pieChart.png";
-import { Navigate } from "react-router-dom";
+// import { Navigate } from "react-router-dom";
 
 function About() {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    return <Navigate to="/login" />;
-  }
+  // const token = localStorage.getItem("token");
+  // if (!token) {
+  //   return <Navigate to="/login" />;
+  // }
   return (
     <>
       <Navbar></Navbar>
-      <h1 style={{ color: "red" }}>ZENS: About us (Work in progress ...)</h1>
-      <br />
-      <h1>Our Application for your budget administration</h1>
-      <br />
-
-      <div>
-        <h3>Expenses table for April:</h3>
+      <div style={styles.pageContainer}>
+        <div style={{ color: "red" }}>ZENS: About us (Work in progress ...)</div>
         <br />
-        <img
-          src={sampleTable}
-          alt="Expenses table for April"
-          style={{ marginBottom: "30px" }}
-        />
-      </div>
+        <div className="text-2xl font-bold text-center my-6">The Application for Your Budget Administration</div>
+        <br />
 
-      <div style={styles.chartContainer}>
-        <div style={styles.chartBox}>
-          <h3>Comparison expenses categories</h3>
-          <img src={pieChart} alt="comparison expenses categories" />
+        <div>
+          <div className="text-1xl font-bold text-left my-6">Overview of Monthly Expenses:</div>
+          <br />
+          <img
+            src={sampleTable}
+            alt="Expenses table"
+            style={{ marginBottom: "30px" }}
+          />
+          <br />
+          <div className="text-1xl font-bold text-left my-6">Charts for Reporting:</div>
         </div>
-        <div style={styles.chartBox}>
-          <h3>Expenses statistics</h3>
-          <img src={barChart} alt="Expenses statistics" />
+
+        <div style={styles.chartContainer}>
+          <div style={styles.chartBox}>
+            <h3>Comparison expenses categories</h3>
+            <img src={pieChart} alt="comparison expenses categories" />
+          </div>
+          <div style={styles.chartBox}>
+            <h3>Expenses statistics</h3>
+            <img src={barChart} alt="Expenses statistics" />
+          </div>
         </div>
-      </div>
+      </div >
     </>
   );
 }
 
 const styles = {
+  pageContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "left",
+    padding: "20px",
+  },
   chartContainer: {
     display: "flex", // enable flex layout
     flexDirection: "row", // row = side-by-side
