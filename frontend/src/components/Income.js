@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -15,10 +16,12 @@ function Income() {
   const [error, setError] = useState(null);
   const user = JSON.parse(localStorage.getItem("user"));
   const user_id = user?.id;
-  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    fetchIncomes();
+    if (user) {
+      fetchIncomes();
+    }
+    //return <Navigate to="/login" />;
   }, []);
 
   const fetchIncomes = async () => {
