@@ -14,12 +14,12 @@ function authenticateToken(req, res, next) {
   const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ error: "Token manquant" });
+    return res.status(401).json({ error: "Missing token" });
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
-      return res.status(403).json({ error: "Token invalide" });
+      return res.status(403).json({ error: "Invalid token" });
     }
 
     req.user = user;
@@ -234,6 +234,7 @@ app.post("/login", async (req, res) => {
       user: { id: user.id, e_mail: user.e_mail },
       token,
     });
+    res.json({ token });
   } catch (error) {
     console.error("Error login:", error);
     res.status(500).json({ error: "Error server" });
@@ -509,6 +510,65 @@ app.post("/piedata/:id_user", async (req, res) => {
 
   res.json(data);
 });
+
+
+app.put("/monthly_expenses/:id_user/:id", async (req, res) => {
+  try {
+    const { id, id_user } = req.params;
+    const { category_id, amount, name } = req.body;
+    const today = new Date();
+
+
+    const selectQuery = `
+      SELECT * FROM monthly_expenses
+      WHERE id = $1 AND user_id = $2;
+    `;
+    const { rows: originalRows } = await pool.query(selectQuery, [id, id_user]);
+
+    if (originalRows.length === 0) {
+      return res.status(404).send("Expense not found");
+    }
+
+    const original = originalRows[0];
+
+
+    const isSame =
+      original.amount === amount &&
+      original.name === name &&
+      original.category_id === category_id;
+
+    if (isSame) {
+      return res.status(200).json({ message: "No changes detected" });
+    }
+
+
+    const updateQuery = `
+      UPDATE monthly_expenses
+      SET date_end = $1
+      WHERE id = $2 AND user_id = $3
+      RETURNING *;
+    `;
+    await pool.query(updateQuery, [today, id, id_user]);
+
+
+    const insertQuery = `
+      INSERT INTO monthly_expenses (user_id, amount, name, category_id, date_start, date_end)
+      VALUES ($1, $2, $3, $4, $5, NULL)
+      RETURNING *;
+    `;
+    const insertValues = [id_user, amount, name, category_id, today];
+    const { rows: newRows } = await pool.query(insertQuery, insertValues);
+
+    res.status(200).json({
+      message: "Expense updated with versioning",
+      newEntry: newRows[0],
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("An error occurred");
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);
