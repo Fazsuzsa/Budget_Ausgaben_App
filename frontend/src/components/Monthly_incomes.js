@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
+
 function Monthly_incomes() {
   const [income, setIncome] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +34,7 @@ function Monthly_incomes() {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch Expenses");
+        throw new Error("Failed to fetch incomes");
       }
       const data = await response.json();
       setIncome(data);
@@ -44,28 +45,59 @@ function Monthly_incomes() {
     }
   };
 
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm(
+      "Diesen monatlichen Income-Eintrag löschen?"
+    );
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`http://localhost:5005/monthly_incomes/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Fehler beim Löschen");
+      }
+
+      setIncome((prev) => prev.filter((item) => item.id !== id));
+    } catch (err) {
+      alert("Löschen fehlgeschlagen: " + err.message);
+    }
+  };
+
   return (
     <>
-      <h1 className="text-2xl font-bold text-center my-6">Monthly incomes</h1>
+      <h1 className="text-2xl font-bold text-center my-6">Monthly Incomes</h1>
 
-      {loading && <p>Loading income...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {loading && <p className="text-center">Loading incomes...</p>}
+      {error && <p className="text-center text-red-500">{error}</p>}
 
       {!loading && !error && (
         <div className="max-w-4xl mx-auto">
           <Table>
-            <TableCaption></TableCaption>
+            <TableCaption>Regelmäßige Einnahmen</TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[100px]">Name</TableHead>
                 <TableHead>Price (€)</TableHead>
+                <TableHead className="text-right">Aktion</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {income.map((income) => (
                 <TableRow key={income.id}>
                   <TableCell className="font-medium">{income.name}</TableCell>
-                  <TableCell>{income.amount}</TableCell>
+                  <TableCell>{parseFloat(income.amount).toFixed(2)}</TableCell>
+                  <TableCell className="text-right">
+                    <button
+                      onClick={() => handleDelete(income.id)}
+                      className="text-red-500 underline"
+                    >
+                      Delete
+                    </button>
+                  </TableCell>
                 </TableRow>
               ))}
               <TableRow
@@ -87,6 +119,7 @@ function Monthly_incomes() {
                     .toFixed(2)}{" "}
                   €
                 </TableCell>
+                <TableCell />
               </TableRow>
             </TableBody>
           </Table>

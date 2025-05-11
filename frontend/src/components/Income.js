@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -17,7 +18,10 @@ function Income() {
   const user_id = user?.id;
 
   useEffect(() => {
-    fetchIncomes();
+    if (user) {
+      fetchIncomes();
+    }
+    //return <Navigate to="/login" />;
   }, []);
 
   const fetchIncomes = async () => {
@@ -32,7 +36,7 @@ function Income() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch Expenses");
+        throw new Error("Failed to fetch incomes");
       }
       const data = await response.json();
       setIncome(data);
@@ -42,53 +46,42 @@ function Income() {
       setLoading(false);
     }
   };
-  const updateIncome = (user_id, id) => {
-    console.log("Update income with ID:", id);
-    fetch(`http://localhost:5005/income/${user_id}/${id}`, {
-      method: "UPDATE",
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to update income");
-        }
 
-        setIncome((prev) => prev.filter((item) => item.id !== id));
-      })
-      .catch((err) => {
-        setError(err.message);
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm("Diesen Income-Eintrag löschen?");
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`http://localhost:5005/income/${user_id}/${id}`, {
+        method: "DELETE",
       });
-  };
-  const deleteIncome = (user_id, id) => {
-    fetch(`http://localhost:5005/income/${user_id}/${id}`, {
-      method: "DELETE",
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to delete income");
-        }
-        // Remove deleted item from state
-        setIncome((prev) => prev.filter((item) => item.id !== id));
-      })
-      .catch((err) => {
-        setError(err.message);
-      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Fehler beim Löschen");
+      }
+
+      setIncome((prev) => prev.filter((item) => item.id !== id));
+    } catch (err) {
+      alert("Löschen fehlgeschlagen: " + err.message);
+    }
   };
 
   return (
     <>
-      <h1 className="text-2xl font-bold text-center my-6">Incomes</h1>
+      <h1 className="text-2xl font-bold text-center my-6">One-Time Incomes</h1>
 
-      {loading && <p>Loading income...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {loading && <p className="text-center">Loading income...</p>}
+      {error && <p className="text-center text-red-500">{error}</p>}
 
       {!loading && !error && (
         <div className="max-w-4xl mx-auto">
           <Table>
-            <TableCaption></TableCaption>
+            <TableCaption>Einnahmen des Nutzers</TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[100px]">Name</TableHead>
-                <TableHead>Amount</TableHead>
+                <TableHead>Price (€)</TableHead>
                 <TableHead className="text-right">Date</TableHead>
               </TableRow>
             </TableHeader>
@@ -96,12 +89,25 @@ function Income() {
               {income.map((income) => (
                 <TableRow key={income.id}>
                   <TableCell className="font-medium">{income.name}</TableCell>
-                  <TableCell>{income.amount}</TableCell>
+                  <TableCell>
+                    {parseFloat(parseFloat(income.amount).toFixed(2)).toFixed(
+                      2
+                    )}
+                  </TableCell>
                   <TableCell>
                     {new Date(income.date).toISOString().split("T")[0]}
                   </TableCell>
+                  <TableCell className="text-right">
+                    <button
+                      onClick={() => handleDelete(income.id)}
+                      className="text-red-500 underline"
+                    >
+                      Delete
+                    </button>
+                  </TableCell>
                 </TableRow>
               ))}
+
               <TableRow
                 style={{
                   backgroundColor: "#61DAFB",
@@ -109,7 +115,7 @@ function Income() {
                   color: "#333",
                 }}
               >
-                <TableCell>Sum Incomes</TableCell>
+                <TableCell>Sum One-Time Incomes</TableCell>
                 <TableCell>
                   {income
                     .reduce(
@@ -119,7 +125,8 @@ function Income() {
                     .toFixed(2)}{" "}
                   €
                 </TableCell>
-                <TableCell></TableCell>
+                <TableCell />
+                <TableCell />
               </TableRow>
             </TableBody>
           </Table>
