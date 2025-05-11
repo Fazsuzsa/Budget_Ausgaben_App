@@ -8,6 +8,27 @@ const jwt = require("jsonwebtoken");
 const app = express();
 const PORT = 5005;
 
+
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ error: "Token manquant" });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: "Token invalide" });
+    }
+
+    req.user = user;
+    next();
+  });
+}
+
+
+
 const pool = new Pool({
   user: process.env.DB_USER, // Dein PostgreSQL-Benutzername
   host: process.env.DB_HOST, // z. B. 'localhost'
@@ -42,7 +63,7 @@ app.use(cors());
 app.use(express.json()); // Ermöglicht Express Json aus einem Body auszulesen
 app.use(express.static("public"));
 
-app.get("/expenses/:user_id", async (req, res) => {
+app.get("/expenses/:user_id", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
   try {
     const result = await pool.query(
@@ -97,7 +118,7 @@ app.delete("/expenses/:id", async (req, res) => {
   }
 });
 
-app.get("/monthly_expenses/:user_id", async (req, res) => {
+app.get("/monthly_expenses/:user_id", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
   try {
     const result = await pool.query(
@@ -151,7 +172,7 @@ app.post("/monthly_expenses", async (req, res) => {
   }
 });
 
-app.get("/incomes/:user_id", async (req, res) => {
+app.get("/incomes/:user_id", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
   try {
     const result = await pool.query(
@@ -167,7 +188,7 @@ app.get("/incomes/:user_id", async (req, res) => {
 
 // app.post("/incomes", ... MUSS GEMACHT WERDEN!
 
-app.get("/monthly_incomes/:user_id", async (req, res) => {
+app.get("/monthly_incomes/:user_id", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
   try {
     const result = await pool.query(
