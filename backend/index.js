@@ -4,6 +4,7 @@ require("dotenv").config();
 const { Pool } = require("pg");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { refreshToken } = require('./tokenController');
 
 const app = express();
 const PORT = 5005;
@@ -27,7 +28,7 @@ function authenticateToken(req, res, next) {
   });
 }
 
-
+app.post('/refresh-token', refreshToken);
 
 const pool = new Pool({
   user: process.env.DB_USER, // Dein PostgreSQL-Benutzername
