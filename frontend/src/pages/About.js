@@ -14,13 +14,19 @@ function About() {
     <>
       <Navbar></Navbar>
       <div style={styles.pageContainer}>
-        <div style={{ color: "red" }}>ZENS: About us (Work in progress ...)</div>
+        <div style={{ color: "red" }}>
+          ZENS: About us (Work in progress ...)
+        </div>
         <br />
-        <div className="text-2xl font-bold text-center my-6">The Application for Your Budget Administration</div>
+        <div className="text-2xl font-bold text-center my-6">
+          The Application for Your Budget Administration
+        </div>
         <br />
 
         <div>
-          <div className="text-1xl font-bold text-left my-6">Overview of Monthly Expenses:</div>
+          <div className="text-1xl font-bold text-left my-6">
+            Overview of Monthly Expenses:
+          </div>
           <br />
           <img
             src={sampleTable}
@@ -28,7 +34,9 @@ function About() {
             style={{ marginBottom: "30px" }}
           />
           <br />
-          <div className="text-1xl font-bold text-left my-6">Charts for Reporting:</div>
+          <div className="text-1xl font-bold text-left my-6">
+            Charts for Reporting:
+          </div>
         </div>
 
         <div style={styles.chartContainer}>
@@ -37,11 +45,11 @@ function About() {
             <img src={pieChart} alt="comparison expenses categories" />
           </div>
           <div style={styles.chartBox}>
-            <h3>Expenses statistics</h3>
+            <h3>Expenses and Income statistics</h3>
             <img src={barChart} alt="Expenses statistics" />
           </div>
         </div>
-      </div >
+      </div>
     </>
   );
 }
