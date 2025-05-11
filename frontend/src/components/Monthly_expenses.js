@@ -13,16 +13,24 @@ function Monthly_expenses() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const user = JSON.parse(localStorage.getItem("user"));
-  const user_id = user?.id;
+  const userId = user?.id;
 
   useEffect(() => {
     fetchMonthlyExpenses();
   }, []);
 
   const fetchMonthlyExpenses = async () => {
+    const token = localStorage.getItem("token");
+
     try {
       const response = await fetch(
-        `http://localhost:5005/monthly_expenses/${user_id}`
+        `http://localhost:5005/monthly_expenses/${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      }
       );
 
       if (!response.ok) {

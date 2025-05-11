@@ -20,9 +20,16 @@ function Monthly_incomes() {
   }, []);
 
   const fetchMonthlyIncomes = async () => {
+    const token = localStorage.getItem("token");
     try {
       const response = await fetch(
-        `http://localhost:5005/monthly_incomes/${user_id}`
+        `http://localhost:5005/monthly_incomes/${user_id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      }
       );
 
       if (!response.ok) {
