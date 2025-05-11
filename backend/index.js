@@ -358,11 +358,13 @@ app.post("/piedata/:id_user", async (req, res) => {
   let monthly_result;
 
   try {
+    // Hier wird kontroliert ob mindestens ein Datei --> Expense existiert für (Jahr, Monat, User)
+    // Hier werden vom Datum das Jahr und den Monat herausgeholt --> extract
     result = await pool.query(
       `SELECT EXISTS (
          SELECT 1 FROM expenses
          WHERE user_id = $1 
-          AND EXTRACT(YEAR FROM date) = $2
+          AND EXTRACT(YEAR FROM date) = $2 
           AND EXTRACT(MONTH FROM date) = $3
        )`,
       [id_user, year, month]
@@ -396,7 +398,7 @@ app.post("/piedata/:id_user", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 
-  // If no data is returned, send an empty response
+  // If no data is returned  (expense & monthly expense), send an empty response
   if (!result.rows[0].exists && !monthly_result.rows[0].exists) {
     return res.json({
       labels: [],
@@ -410,7 +412,6 @@ app.post("/piedata/:id_user", async (req, res) => {
       ],
     });
   }
-
 
   // SQL query to join expenses and categories tables and sum the amounts per category
   result = await pool.query(
@@ -444,7 +445,7 @@ app.post("/piedata/:id_user", async (req, res) => {
     [id_user, year, month]
   );
 
-  // Merge and sum up the results
+  // Merge and sum up the results monthly and non monthly
   const categoryMap = new Map();
 
   for (const row of result.rows) {
