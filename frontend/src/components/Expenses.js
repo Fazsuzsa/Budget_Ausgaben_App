@@ -29,7 +29,7 @@ function Expenses() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`  // token stocké dans le localStorage ou cookie
+          Authorization: `Bearer ${token}`
         }
       });
       if (!res.ok) {
