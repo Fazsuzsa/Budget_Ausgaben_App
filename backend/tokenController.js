@@ -15,7 +15,7 @@ function refreshToken(req, res) {
         }
 
         const newAccessToken = jwt.sign({ userId: user.userId }, JWT_SECRET, {
-            expiresIn: '30m',
+            expiresIn: '1d',
         });
 
         res.json({ accessToken: newAccessToken });
