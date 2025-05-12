@@ -4,11 +4,10 @@ require("dotenv").config();
 const { Pool } = require("pg");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { refreshToken } = require('./tokenController');
+const { refreshToken } = require("./tokenController");
 
 const app = express();
 const PORT = 5005;
-
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
@@ -28,7 +27,7 @@ function authenticateToken(req, res, next) {
   });
 }
 
-app.post('/refresh-token', refreshToken);
+app.post("/refresh-token", refreshToken);
 
 const pool = new Pool({
   user: process.env.DB_USER, // Dein PostgreSQL-Benutzername
@@ -187,7 +186,26 @@ app.get("/incomes/:user_id", authenticateToken, async (req, res) => {
   }
 });
 
-// app.post("/incomes", ... MUSS GEMACHT WERDEN!
+app.post("/incomes", async (req, res) => {
+  const { user_id, amount, name, date } = req.body;
+
+  if (!user_id || !amount || !date) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO "incomes" (user_id, "amount", name, date)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [user_id, amount, name || "", date]
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error("Fehler beim Einfügen der Ausgabe:", err);
+    res.status(500).json({ error: "Interner Serverfehler" });
+  }
+});
 
 app.get("/monthly_incomes/:user_id", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
@@ -198,12 +216,31 @@ app.get("/monthly_incomes/:user_id", authenticateToken, async (req, res) => {
     );
     res.json(result.rows);
   } catch (err) {
-    console.error("Fehler beim Abrufen der Ausgaben:", err);
+    console.error("Fehler beim Abrufen: ", err);
     res.status(500).json({ error: "Interner Serverfehler" });
   }
 });
 
-// app.post("/monthly_incomes", ... MUSS GEMACHT WERDEN!
+app.post("/monthly_incomes", async (req, res) => {
+  const { user_id, amount, name, date_start } = req.body;
+
+  if (!user_id || !amount || !date_start) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO "monthly_incomes" (user_id, amount, name, date_start)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [user_id, amount, name || "", date_start]
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error("Fehler beim Einfügen in monthly_incomes:", err);
+    res.status(500).json({ error: "Interner Serverfehler" });
+  }
+});
 
 app.post("/login", async (req, res) => {
   const { e_mail, password } = req.body;
@@ -235,7 +272,6 @@ app.post("/login", async (req, res) => {
       user: { id: user.id, e_mail: user.e_mail },
       token,
     });
-
   } catch (error) {
     console.error("Error login:", error);
     res.status(500).json({ error: "Error server" });
