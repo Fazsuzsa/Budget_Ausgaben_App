@@ -22,6 +22,8 @@ const AddExpenseForm = () => {
       amount: "",
       category_id: "",
       date: "",
+      start_date: "",
+      end_date: "",
     },
   });
 
@@ -33,9 +35,11 @@ const AddExpenseForm = () => {
       amount: parseFloat(values.amount),
     };
 
-    // Datum rausnehmen bei "monthly"
     if (type === "monthly") {
       delete payload.date;
+    } else {
+      delete payload.start_date;
+      delete payload.end_date;
     }
 
     const url =
@@ -124,6 +128,24 @@ const AddExpenseForm = () => {
                   <Input type="date" {...register("date")} required />
                 </FormControl>
               </FormItem>
+            )}
+
+            {type === "monthly" && (
+              <>
+                <FormItem>
+                  <FormLabel>Startdatum</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...register("start_date")} required />
+                  </FormControl>
+                </FormItem>
+
+                <FormItem>
+                  <FormLabel>Enddatum</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...register("end_date")} />
+                  </FormControl>
+                </FormItem>
+              </>
             )}
 
             <Button type="submit" className="w-full">
