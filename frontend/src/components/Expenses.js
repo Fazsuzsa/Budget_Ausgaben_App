@@ -32,6 +32,7 @@ function Expenses() {
           Authorization: `Bearer ${token}`
         }
       });
+
       if (!res.ok) {
         throw new Error("Failed to fetch expenses");
       }
