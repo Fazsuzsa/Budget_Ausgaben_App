@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -17,12 +18,22 @@ function Income() {
   const user_id = user?.id;
 
   useEffect(() => {
-    fetchIncomes();
+    if (user) {
+      fetchIncomes();
+    }
+    //return <Navigate to="/login" />;
   }, []);
 
   const fetchIncomes = async () => {
+    const token = localStorage.getItem("token");
     try {
-      const response = await fetch(`http://localhost:5005/incomes/${user_id}`);
+      const response = await fetch(`http://localhost:5005/incomes/${user_id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      });
 
       if (!response.ok) {
         throw new Error("Failed to fetch incomes");
@@ -58,7 +69,7 @@ function Income() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold text-center my-6">Incomes</h1>
+      <h1 className="text-2xl font-bold text-center my-6">One-Time Incomes</h1>
 
       {loading && <p className="text-center">Loading income...</p>}
       {error && <p className="text-center text-red-500">{error}</p>}
@@ -97,11 +108,20 @@ function Income() {
                 </TableRow>
               ))}
 
-              <TableRow>
-                <TableCell>Sum Incomes</TableCell>
+              <TableRow
+                style={{
+                  backgroundColor: "#61DAFB",
+                  fontWeight: "bold",
+                  color: "#333",
+                }}
+              >
+                <TableCell>Sum One-Time Incomes</TableCell>
                 <TableCell>
                   {income
-                    .reduce((sum, item) => sum + parseFloat(item.amount || 0), 0)
+                    .reduce(
+                      (sum, item) => sum + parseFloat(item.amount || 0),
+                      0
+                    )
                     .toFixed(2)}{" "}
                   €
                 </TableCell>

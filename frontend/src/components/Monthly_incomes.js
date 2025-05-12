@@ -21,9 +21,16 @@ function Monthly_incomes() {
   }, []);
 
   const fetchMonthlyIncomes = async () => {
+    const token = localStorage.getItem("token");
     try {
       const response = await fetch(
-        `http://localhost:5005/monthly_incomes/${user_id}`
+        `http://localhost:5005/monthly_incomes/${user_id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      }
       );
 
       if (!response.ok) {
@@ -39,7 +46,9 @@ function Monthly_incomes() {
   };
 
   const handleDelete = async (id) => {
-    const confirmed = window.confirm("Diesen monatlichen Income-Eintrag löschen?");
+    const confirmed = window.confirm(
+      "Diesen monatlichen Income-Eintrag löschen?"
+    );
     if (!confirmed) return;
 
     try {
@@ -78,24 +87,35 @@ function Monthly_incomes() {
             </TableHeader>
             <TableBody>
               {income.map((income) => (
-              <TableRow key={income.id}>
-                <TableCell className="font-medium">{income.name}</TableCell>
-                <TableCell>{parseFloat(income.amount).toFixed(2)}</TableCell>
-                <TableCell className="text-right">
-                  <button
-                    onClick={() => handleDelete(income.id)}
-                    className="text-red-500 underline"
-                  >
-                    Delete
-                  </button>
+                <TableRow key={income.id}>
+                  <TableCell className="font-medium">{income.name}</TableCell>
+                  <TableCell>{parseFloat(income.amount).toFixed(2)}</TableCell>
+                  <TableCell className="text-right">
+                    <button
+                      onClick={() => handleDelete(income.id)}
+                      className="text-red-500 underline"
+                    >
+                      Delete
+                    </button>
+                  </TableCell>
+                </TableRow>
+              ))}
+              <TableRow
+                style={{
+                  backgroundColor: "#61DAFB",
+                  fontWeight: "bold",
+                  color: "#333",
+                }}
+              >
+                <TableCell className="font-medium">
+                  Sum Monthly Incomes
                 </TableCell>
-              </TableRow>
-            ))}
-              <TableRow>
-                <TableCell className="font-medium">Sum Monthly Incomes</TableCell>
                 <TableCell>
                   {income
-                    .reduce((sum, item) => sum + parseFloat(item.amount || 0), 0)
+                    .reduce(
+                      (sum, item) => sum + parseFloat(item.amount || 0),
+                      0
+                    )
                     .toFixed(2)}{" "}
                   €
                 </TableCell>

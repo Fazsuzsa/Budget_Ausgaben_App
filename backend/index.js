@@ -8,6 +8,27 @@ const jwt = require("jsonwebtoken");
 const app = express();
 const PORT = 5005;
 
+
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ error: "Missing token" });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: "Invalid token" });
+    }
+
+    req.user = user;
+    next();
+  });
+}
+
+
+
 const pool = new Pool({
   user: process.env.DB_USER, // Dein PostgreSQL-Benutzername
   host: process.env.DB_HOST, // z. B. 'localhost'
@@ -42,7 +63,7 @@ app.use(cors());
 app.use(express.json()); // Ermöglicht Express Json aus einem Body auszulesen
 app.use(express.static("public"));
 
-app.get("/expenses/:user_id", async (req, res) => {
+app.get("/expenses/:user_id", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
   try {
     const result = await pool.query(
@@ -97,7 +118,7 @@ app.delete("/expenses/:id", async (req, res) => {
   }
 });
 
-app.get("/monthly_expenses/:user_id", async (req, res) => {
+app.get("/monthly_expenses/:user_id", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
   try {
     const result = await pool.query(
@@ -151,7 +172,7 @@ app.post("/monthly_expenses", async (req, res) => {
   }
 });
 
-app.get("/incomes/:user_id", async (req, res) => {
+app.get("/incomes/:user_id", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
   try {
     const result = await pool.query(
@@ -167,7 +188,7 @@ app.get("/incomes/:user_id", async (req, res) => {
 
 // app.post("/incomes", ... MUSS GEMACHT WERDEN!
 
-app.get("/monthly_incomes/:user_id", async (req, res) => {
+app.get("/monthly_incomes/:user_id", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
   try {
     const result = await pool.query(
@@ -208,7 +229,12 @@ app.post("/login", async (req, res) => {
       { expiresIn: "30m" }
     );
 
-    res.json({ message: "Connexion OK", user: { id: user.id, e_mail: user.e_mail }, token });
+    res.json({
+      message: "Connexion OK",
+      user: { id: user.id, e_mail: user.e_mail },
+      token,
+    });
+    res.json({ token });
   } catch (error) {
     console.error("Error login:", error);
     res.status(500).json({ error: "Error server" });
@@ -343,6 +369,206 @@ app.get("/expenses/search", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+app.post("/piedata/:id_user", async (req, res) => {
+  const { year, month } = req.body;
+  const { id_user } = req.params;
+
+  console.log(`Request for year: ${year}, month: ${month}`);
+
+  let result;
+  let monthly_result;
+
+  try {
+    // Hier wird kontroliert ob mindestens ein Datei --> Expense existiert für (Jahr, Monat, User)
+    // Hier werden vom Datum das Jahr und den Monat herausgeholt --> extract
+    result = await pool.query(
+      `SELECT EXISTS (
+         SELECT 1 FROM expenses
+         WHERE user_id = $1 
+          AND EXTRACT(YEAR FROM date) = $2 
+          AND EXTRACT(MONTH FROM date) = $3
+       )`,
+      [id_user, year, month]
+    );
+  } catch (err) {
+    console.error("Error checking expenses:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+
+  try {
+    monthly_result = await pool.query(
+      `SELECT EXISTS (
+         SELECT 1 FROM monthly_expenses
+         WHERE user_id = $1 AND
+          ( (EXTRACT(YEAR FROM date_start) < $2
+            OR (EXTRACT(YEAR FROM date_start) = $2
+                AND EXTRACT(MONTH FROM date_start) <= $3)
+            ) AND
+		    	(date_end IS NULL OR
+           (EXTRACT(YEAR FROM date_end) > $2
+             OR (EXTRACT(MONTH FROM date_end) = $2
+                 AND EXTRACT(MONTH FROM date_end) >= $3
+		      	))
+          )
+         )
+       )`,
+      [id_user, year, month]
+    );
+  } catch (err) {
+    console.error("Error checking monthly expenses:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+
+  // If no data is returned  (expense & monthly expense), send an empty response
+  if (!result.rows[0].exists && !monthly_result.rows[0].exists) {
+    return res.json({
+      labels: [],
+      datasets: [
+        {
+          label: "Expenses",
+          data: [],
+          backgroundColor: [],
+          borderWidth: 1,
+        },
+      ],
+    });
+  }
+
+  // SQL query to join expenses and categories tables and sum the amounts per category
+  result = await pool.query(
+    `SELECT c.category, COALESCE(SUM(e.amount), 0) AS total_amount
+       FROM categories c
+       LEFT JOIN expenses e ON c.id = e.category_id AND e.user_id = $1
+       AND EXTRACT(YEAR FROM e.date) = $2
+       AND EXTRACT(MONTH FROM e.date) = $3
+       GROUP BY c.category
+       ORDER BY total_amount DESC;`,
+    [id_user, year, month]
+  );
+
+  monthly_result = await pool.query(
+    `SELECT c.category, COALESCE(SUM(e.amount), 0) AS total_amount
+       FROM categories c
+       LEFT JOIN monthly_expenses e ON c.id = e.category_id AND e.user_id = $1 AND
+         ( (EXTRACT(YEAR FROM date_start) < $2
+            OR (EXTRACT(YEAR FROM date_start) = $2
+                AND EXTRACT(MONTH FROM date_start) <= $3)
+            ) AND
+		      (date_end IS NULL OR
+           (EXTRACT(YEAR FROM date_end) > $2
+             OR (EXTRACT(MONTH FROM date_end) = $2
+                 AND EXTRACT(MONTH FROM date_end) >= $3
+			      ))
+          )
+         )
+       GROUP BY c.category
+       ORDER BY total_amount DESC;`,
+    [id_user, year, month]
+  );
+
+  // Merge and sum up the results monthly and non monthly
+  const categoryMap = new Map();
+
+  for (const row of result.rows) {
+    categoryMap.set(row.category, row.total_amount);
+  }
+
+  for (const row of monthly_result.rows) {
+    categoryMap.set(
+      row.category,
+      (categoryMap.get(row.category) || 0) + row.total_amount
+    );
+  }
+
+  // Prepare the data for the pie chart
+  const categories = Array.from(categoryMap.keys());
+  const totalAmounts = Array.from(categoryMap.values());
+
+  const backgroundColors = categories.map((_, index) => {
+    const colors = [
+      "rgba(255, 99, 132, 0.6)",
+      "rgba(54, 162, 235, 0.6)",
+      "rgba(255, 206, 86, 0.6)",
+      "rgba(75, 192, 192, 0.6)",
+      "rgba(110, 75, 192, 0.6)",
+    ];
+    return colors[index % colors.length]; // Repeat the colors if there are more than 5 categories
+  });
+
+  const data = {
+    labels: categories,
+    datasets: [
+      {
+        label: "Expenses",
+        data: totalAmounts,
+        backgroundColor: backgroundColors,
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  res.json(data);
+});
+
+
+app.put("/monthly_expenses/:id_user/:id", async (req, res) => {
+  try {
+    const { id, id_user } = req.params;
+    const { category_id, amount, name } = req.body;
+    const today = new Date();
+
+
+    const selectQuery = `
+      SELECT * FROM monthly_expenses
+      WHERE id = $1 AND user_id = $2;
+    `;
+    const { rows: originalRows } = await pool.query(selectQuery, [id, id_user]);
+
+    if (originalRows.length === 0) {
+      return res.status(404).send("Expense not found");
+    }
+
+    const original = originalRows[0];
+
+
+    const isSame =
+      original.amount === amount &&
+      original.name === name &&
+      original.category_id === category_id;
+
+    if (isSame) {
+      return res.status(200).json({ message: "No changes detected" });
+    }
+
+
+    const updateQuery = `
+      UPDATE monthly_expenses
+      SET date_end = $1
+      WHERE id = $2 AND user_id = $3
+      RETURNING *;
+    `;
+    await pool.query(updateQuery, [today, id, id_user]);
+
+
+    const insertQuery = `
+      INSERT INTO monthly_expenses (user_id, amount, name, category_id, date_start, date_end)
+      VALUES ($1, $2, $3, $4, $5, NULL)
+      RETURNING *;
+    `;
+    const insertValues = [id_user, amount, name, category_id, today];
+    const { rows: newRows } = await pool.query(insertQuery, insertValues);
+
+    res.status(200).json({
+      message: "Expense updated with versioning",
+      newEntry: newRows[0],
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("An error occurred");
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);
