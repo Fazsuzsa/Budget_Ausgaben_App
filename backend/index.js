@@ -4,6 +4,7 @@ require("dotenv").config();
 const { Pool } = require("pg");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { refreshToken } = require('./tokenController');
 
 const app = express();
 const PORT = 5005;
@@ -25,6 +26,9 @@ function authenticateToken(req, res, next) {
     next();
   });
 }
+
+
+app.post('/refresh-token', refreshToken);
 
 const pool = new Pool({
   user: process.env.DB_USER, // Dein PostgreSQL-Benutzername
@@ -261,7 +265,7 @@ app.post("/login", async (req, res) => {
     const token = jwt.sign(
       { userId: user.id, e_mail: user.e_mail },
       process.env.JWT_SECRET || "default_secret",
-      { expiresIn: "30m" }
+      { expiresIn: "1d" }
     );
 
     res.json({
@@ -269,7 +273,7 @@ app.post("/login", async (req, res) => {
       user: { id: user.id, e_mail: user.e_mail },
       token,
     });
-    res.json({ token });
+
   } catch (error) {
     console.error("Error login:", error);
     res.status(500).json({ error: "Error server" });
