@@ -25,8 +25,15 @@ function Income() {
   }, []);
 
   const fetchIncomes = async () => {
+    const token = localStorage.getItem("token");
     try {
-      const response = await fetch(`http://localhost:5005/incomes/${user_id}`);
+      const response = await fetch(`http://localhost:5005/incomes/${user_id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      });
 
       if (!response.ok) {
         throw new Error("Failed to fetch incomes");
