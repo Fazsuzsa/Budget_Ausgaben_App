@@ -319,6 +319,28 @@ app.delete("/income/:id_user/:id", async (req, res) => {
     res.status(500).send("some error has occured");
   }
 });
+
+app.delete("/monthly_incomes/:id_user/:id", authenticateToken, async (req, res) => {
+  const { id_user, id } = req.params;
+
+  try {
+    const result = await pool.query(
+      'DELETE FROM "monthly_incomes" WHERE id = $1 AND user_id = $2 RETURNING *;',
+      [id, id_user]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Eintrag nicht gefunden oder gehört nicht zu diesem User" });
+    }
+
+    res.status(200).json({ message: "Erfolgreich gelöscht" });
+  } catch (err) {
+    console.error("Fehler beim Löschen:", err);
+    res.status(500).json({ error: "Interner Serverfehler" });
+  }
+});
+
+
 app.put("/expenses/:id_user/:id", async (req, res) => {
   try {
     const { id } = req.params;
