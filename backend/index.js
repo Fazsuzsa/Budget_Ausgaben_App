@@ -134,37 +134,37 @@ app.get("/monthly_expenses/:user_id", authenticateToken, async (req, res) => {
 });
 
 app.post("/monthly_expenses", async (req, res) => {
-  const { user_id, category_id, amount, name } = req.body;
+  const { user_id, category_id, amount, name, date_start } = req.body;
 
   if (!user_id || !category_id || !amount) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
-  app.delete("/monthly_expenses/:id", async (req, res) => {
-    const { id } = req.params;
+  // app.delete("/monthly_expenses/:id", async (req, res) => {
+  //   const { id } = req.params;
 
-    try {
-      const result = await pool.query(
-        "DELETE FROM monthly_expenses WHERE id = $1 RETURNING *",
-        [id]
-      );
+  //   try {
+  //     const result = await pool.query(
+  //       "DELETE FROM monthly_expenses WHERE id = $1 RETURNING *",
+  //       [id]
+  //     );
 
-      if (result.rowCount === 0) {
-        return res.status(404).json({ error: "Eintrag nicht gefunden" });
-      }
+  //     if (result.rowCount === 0) {
+  //       return res.status(404).json({ error: "Eintrag nicht gefunden" });
+  //     }
 
-      res.status(200).json({ message: "Erfolgreich gelöscht" });
-    } catch (err) {
-      console.error("Fehler beim Löschen:", err);
-      res.status(500).json({ error: "Interner Serverfehler" });
-    }
-  });
+  //     res.status(200).json({ message: "Erfolgreich gelöscht" });
+  //   } catch (err) {
+  //     console.error("Fehler beim Löschen:", err);
+  //     res.status(500).json({ error: "Interner Serverfehler" });
+  //   }
+  // });
 
   try {
     const result = await pool.query(
-      `INSERT INTO monthly_expenses (user_id, category_id, amount, name)
-       VALUES ($1, $2, $3, $4) RETURNING *`,
-      [user_id, category_id, amount, name || ""]
+      `INSERT INTO monthly_expenses (user_id, category_id, amount, name, date_start)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [user_id, category_id, amount, name, date_start || ""]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -513,12 +513,78 @@ app.post("/piedata/:id_user", async (req, res) => {
 });
 
 
+// app.put("/monthly_expenses/:id_user/:id", async (req, res) => {
+//   try {
+//     const { id, id_user } = req.params;
+//     const { category_id, amount, name } = req.body;
+//     const today = new Date();
+
+
+//     const selectQuery = `
+//       SELECT * FROM monthly_expenses
+//       WHERE id = $1 AND user_id = $2;
+//     `;
+//     const { rows: originalRows } = await pool.query(selectQuery, [id, id_user]);
+
+//     if (originalRows.length === 0) {
+//       return res.status(404).send("Expense not found");
+//     }
+
+//     const original = originalRows[0];
+
+
+//     const isSame =
+//       original.amount === amount &&
+//       original.name === name &&
+//       original.category_id === category_id;
+
+//     if (isSame) {
+//       return res.status(200).json({ message: "No changes detected" });
+//     }
+
+
+//     const updateQuery = `
+//       UPDATE monthly_expenses
+//       SET date_end = $1
+//       WHERE id = $2 AND user_id = $3
+//       RETURNING *;
+//     `;
+//     await pool.query(updateQuery, [today, id, id_user]);
+
+
+//     const insertQuery = `
+//       INSERT INTO monthly_expenses (user_id, amount, name, category_id, date_start, date_end)
+//       VALUES ($1, $2, $3, $4, $5, NULL)
+//       RETURNING *;
+//     `;
+//     const insertValues = [id_user, amount, name, category_id, today];
+//     const { rows: newRows } = await pool.query(insertQuery, insertValues);
+
+//     res.status(200).json({
+//       message: "Expense updated with versioning",
+//       newEntry: newRows[0],
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).send("An error occurred");
+//   }
+// });
+
 app.put("/monthly_expenses/:id_user/:id", async (req, res) => {
   try {
     const { id, id_user } = req.params;
     const { category_id, amount, name } = req.body;
-    const today = new Date();
 
+    // Calcul first day of next month
+    const nextMonthFirstDay = new Date();
+
+    nextMonthFirstDay.setMonth(nextMonthFirstDay.getMonth() + 1);
+    nextMonthFirstDay.setDate(1);
+    const lastDay = new Date(nextMonthFirstDay);
+    lastDay.setDate(lastDay.getDate() - 1);
+    nextMonthFirstDay.setUTCHours(0, 0, 0, 0);
+    lastDay.setUTCHours(0, 0, 0, 0);
+    console.log(nextMonthFirstDay, lastDay);
 
     const selectQuery = `
       SELECT * FROM monthly_expenses
@@ -532,16 +598,15 @@ app.put("/monthly_expenses/:id_user/:id", async (req, res) => {
 
     const original = originalRows[0];
 
-
     const isSame =
-      original.amount === amount &&
+      parseFloat(original.amount) === parseFloat(amount) &&
       original.name === name &&
-      original.category_id === category_id;
+      parseInt(original.category_id) === parseInt(category_id);
+
 
     if (isSame) {
       return res.status(200).json({ message: "No changes detected" });
     }
-
 
     const updateQuery = `
       UPDATE monthly_expenses
@@ -549,15 +614,14 @@ app.put("/monthly_expenses/:id_user/:id", async (req, res) => {
       WHERE id = $2 AND user_id = $3
       RETURNING *;
     `;
-    await pool.query(updateQuery, [today, id, id_user]);
-
+    await pool.query(updateQuery, [lastDay, id, id_user]);
 
     const insertQuery = `
-      INSERT INTO monthly_expenses (user_id, amount, name, category_id, date_start, date_end)
-      VALUES ($1, $2, $3, $4, $5, NULL)
+      INSERT INTO monthly_expenses (user_id, amount, name, category_id, date_start)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING *;
     `;
-    const insertValues = [id_user, amount, name, category_id, today];
+    const insertValues = [id_user, amount, name, category_id, nextMonthFirstDay];
     const { rows: newRows } = await pool.query(insertQuery, insertValues);
 
     res.status(200).json({
@@ -569,6 +633,7 @@ app.put("/monthly_expenses/:id_user/:id", async (req, res) => {
     res.status(500).send("An error occurred");
   }
 });
+
 
 
 app.listen(PORT, () => {
