@@ -16,7 +16,7 @@ function App() {
     <>
       <Navbar></Navbar>
       <PieChart></PieChart>
-      {/* <BarChart></BarChart> */}
+      <BarChart></BarChart>
     </>
   );
 }
