@@ -99,17 +99,17 @@ app.post("/expenses", async (req, res) => {
   }
 });
 
-app.delete("/expenses/:id", async (req, res) => {
-  const { id } = req.params;
+app.delete("/expenses/:id_user/:id", authenticateToken, async (req, res) => {
+  const { id_user, id } = req.params;
 
   try {
     const result = await pool.query(
-      "DELETE FROM expenses WHERE id = $1 RETURNING *",
-      [id]
+      'DELETE FROM "expenses" WHERE id = $1 AND user_id = $2 RETURNING *;',
+      [id, id_user]
     );
 
     if (result.rowCount === 0) {
-      return res.status(404).json({ error: "Eintrag nicht gefunden" });
+      return res.status(404).json({ error: "Eintrag nicht gefunden oder gehört nicht zu diesem User" });
     }
 
     res.status(200).json({ message: "Erfolgreich gelöscht" });
@@ -118,6 +118,7 @@ app.delete("/expenses/:id", async (req, res) => {
     res.status(500).json({ error: "Interner Serverfehler" });
   }
 });
+
 
 app.get("/monthly_expenses/:user_id", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
@@ -154,17 +155,17 @@ app.post("/monthly_expenses", async (req, res) => {
 });
 
 // DELETE: Monatlichen Eintrag löschen
-app.delete("/monthly_expenses/:id", async (req, res) => {
-  const { id } = req.params;
+app.delete("/monthly_expenses/:id_user/:id", authenticateToken, async (req, res) => {
+  const { id_user, id } = req.params;
 
   try {
     const result = await pool.query(
-      "DELETE FROM monthly_expenses WHERE id = $1 RETURNING *",
-      [id]
+      'DELETE FROM "monthly_expenses" WHERE id = $1 AND user_id = $2 RETURNING *;',
+      [id, id_user]
     );
 
     if (result.rowCount === 0) {
-      return res.status(404).json({ error: "Eintrag nicht gefunden" });
+      return res.status(404).json({ error: "Eintrag nicht gefunden oder gehört nicht zu diesem User" });
     }
 
     res.status(200).json({ message: "Erfolgreich gelöscht" });
