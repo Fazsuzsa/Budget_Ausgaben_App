@@ -708,6 +708,38 @@ app.put("/monthly_expenses/:id_user/:id", async (req, res) => {
 
 
 
+app.get("/monthly_expenses/sum/:user_id", authenticateToken, async (req, res) => {
+  const { user_id } = req.params;
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1; // janvier = 0
+  const currentYear = currentDate.getFullYear();
+
+  try {
+    const result = await pool.query(
+      `SELECT COALESCE(SUM(amount), 0) AS total_monthly_expenses
+       FROM monthly_expenses
+       WHERE user_id = $1
+         AND (
+           (EXTRACT(YEAR FROM date_start) < $2 OR 
+           (EXTRACT(YEAR FROM date_start) = $2 AND EXTRACT(MONTH FROM date_start) <= $3))
+         )
+         AND (
+           date_end IS NULL OR 
+           (EXTRACT(YEAR FROM date_end) > $2 OR 
+           (EXTRACT(YEAR FROM date_end) = $2 AND EXTRACT(MONTH FROM date_end) >= $3))
+         );`,
+      [user_id, currentYear, currentMonth]
+    );
+
+    res.json({ totalMonthlyExpenses: result.rows[0].total_monthly_expenses });
+  } catch (err) {
+    console.error("Erreur lors du calcul des dépenses mensuelles:", err);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+});
+
+
+
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);
 });
