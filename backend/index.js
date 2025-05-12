@@ -108,11 +108,9 @@ app.delete("/expenses/:id_user/:id", authenticateToken, async (req, res) => {
     );
 
     if (result.rowCount === 0) {
-      return res
-        .status(404)
-        .json({
-          error: "Eintrag nicht gefunden oder gehört nicht zu diesem User",
-        });
+      return res.status(404).json({
+        error: "Eintrag nicht gefunden oder gehört nicht zu diesem User",
+      });
     }
 
     res.status(200).json({ message: "Erfolgreich gelöscht" });
@@ -170,11 +168,9 @@ app.delete(
       );
 
       if (result.rowCount === 0) {
-        return res
-          .status(404)
-          .json({
-            error: "Eintrag nicht gefunden oder gehört nicht zu diesem User",
-          });
+        return res.status(404).json({
+          error: "Eintrag nicht gefunden oder gehört nicht zu diesem User",
+        });
       }
 
       res.status(200).json({ message: "Erfolgreich gelöscht" });
@@ -363,11 +359,9 @@ app.delete(
       );
 
       if (result.rowCount === 0) {
-        return res
-          .status(404)
-          .json({
-            error: "Eintrag nicht gefunden oder gehört nicht zu diesem User",
-          });
+        return res.status(404).json({
+          error: "Eintrag nicht gefunden oder gehört nicht zu diesem User",
+        });
       }
 
       res.status(200).json({ message: "Erfolgreich gelöscht" });
@@ -758,120 +752,6 @@ app.get(
     }
   }
 );
-
-// app.post("/bardata/:id_user", async (req, res) => {
-//   const { year, month } = req.body;
-//   const { id_user } = req.params;
-
-//   console.log(`Request for year: ${year}, month: ${month}`);
-
-//   let result;
-//   let monthly_result;
-// try {
-//     // Hier wird kontroliert ob mindestens ein Datei --> Expense existiert für (Jahr, Monat, User)
-//     // Hier werden vom Datum das Jahr und den Monat herausgeholt --> extract
-//     result = await pool.query(
-//       `SELECT EXISTS (
-//          SELECT 1 FROM expenses
-//          WHERE user_id = $1
-//           AND EXTRACT(YEAR FROM date) = $2
-//           AND EXTRACT(MONTH FROM date) = $3
-//        )`,
-//       [id_user, year, month]
-//     );
-//   } catch (err) {
-//     console.error("Error checking expenses:", err);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-
-//   try {
-//     monthly_result = await pool.query(
-//       `SELECT EXISTS (
-//          SELECT 1 FROM monthly_expenses
-//          WHERE user_id = $1 AND
-//           ( (EXTRACT(YEAR FROM date_start) < $2
-//             OR (EXTRACT(YEAR FROM date_start) = $2
-//                 AND EXTRACT(MONTH FROM date_start) <= $3)
-//             ) AND
-// 		    	(date_end IS NULL OR
-//            (EXTRACT(YEAR FROM date_end) > $2
-//              OR (EXTRACT(MONTH FROM date_end) = $2
-//                  AND EXTRACT(MONTH FROM date_end) >= $3
-// 		      	))
-//           )
-//          )
-//        )`,
-//       [id_user, year, month]
-//     );
-//   } catch (err) {
-//     console.error("Error checking monthly expenses:", err);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-
-//   // If no data is returned  (expense & monthly expense), send an empty response
-//   if (!result.rows[0].exists && !monthly_result.rows[0].exists) {
-//     return res.json({
-//       labels: [],
-//       datasets: [
-//         {
-//           label: "Expenses",
-//           data: [],
-//           backgroundColor: [],
-//           borderWidth: 1,
-//         },
-//       ],
-//     });
-//   }
-
-//   // SQL query to join expenses and categories tables and sum the amounts per category
-//   result = await pool.query(
-//     `SELECT c.category, COALESCE(SUM(e.amount), 0) AS total_amount
-//        FROM categories c
-//        LEFT JOIN expenses e ON c.id = e.category_id AND e.user_id = $1
-//        AND EXTRACT(YEAR FROM e.date) = $2
-//        AND EXTRACT(MONTH FROM e.date) = $3
-//        GROUP BY c.category
-//        ORDER BY total_amount DESC;`,
-//     [id_user, year, month]
-//   );
-
-//   monthly_result = await pool.query(
-//     `SELECT c.category, COALESCE(SUM(e.amount), 0) AS total_amount
-//        FROM categories c
-//        LEFT JOIN monthly_expenses e ON c.id = e.category_id AND e.user_id = $1 AND
-//          ( (EXTRACT(YEAR FROM date_start) < $2
-//             OR (EXTRACT(YEAR FROM date_start) = $2
-//                 AND EXTRACT(MONTH FROM date_start) <= $3)
-//             ) AND
-// 		      (date_end IS NULL OR
-//            (EXTRACT(YEAR FROM date_end) > $2
-//              OR (EXTRACT(MONTH FROM date_end) = $2
-//                  AND EXTRACT(MONTH FROM date_end) >= $3
-// 			      ))
-//           )
-//          )
-//        GROUP BY c.category
-//        ORDER BY total_amount DESC;`,
-//     [id_user, year, month]
-//   );
-
-//   // Merge and sum up the results monthly and non monthly
-//   const categoryMap = new Map();
-
-//   for (const row of result.rows) {
-//     categoryMap.set(row.category, row.total_amount);
-//   }
-
-//   for (const row of monthly_result.rows) {
-//     categoryMap.set(
-//       row.category,
-//       (categoryMap.get(row.category) || 0) + row.total_amount
-//     );
-//   }
-
-//   // Prepare the data for the bar chart
-//   const categories = Array.from(categoryMap.keys());
-//   const totalAmounts = Array.from(categoryMap.values());
 
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);
