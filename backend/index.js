@@ -235,7 +235,7 @@ app.post("/login", async (req, res) => {
       user: { id: user.id, e_mail: user.e_mail },
       token,
     });
-    res.json({ token });
+
   } catch (error) {
     console.error("Error login:", error);
     res.status(500).json({ error: "Error server" });
