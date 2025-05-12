@@ -44,31 +44,31 @@ function Expenses() {
       setLoading(false);
     }
   };
-  const handleDelete = async (id) => {
-    const confirmed = window.confirm(
-      "Willst du diesen Eintrag wirklich löschen?"
-    );
-    if (!confirmed) return;
+const handleDelete = async (id) => {
+  const confirmed = window.confirm("Willst du diesen Eintrag wirklich löschen?");
+  if (!confirmed) return;
 
-    try {
-      const res = await fetch(
-        `http://localhost:5005/expenses/${userId}/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
+  const token = localStorage.getItem("token");
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Fehler beim Löschen");
-      }
+  try {
+    const res = await fetch(`http://localhost:5005/expenses/${userId}/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-      // Entferne gelöschten Eintrag aus der Liste
-      setExpenses((prev) => prev.filter((e) => e.id !== id));
-    } catch (err) {
-      alert("Löschen fehlgeschlagen: " + err.message);
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || "Fehler beim Löschen");
     }
-  };
+
+    setExpenses((prev) => prev.filter((e) => e.id !== id));
+  } catch (err) {
+    alert("Löschen fehlgeschlagen: " + err.message);
+  }
+};
 
   return (
     <>

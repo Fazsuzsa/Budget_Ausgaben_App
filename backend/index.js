@@ -98,17 +98,17 @@ app.post("/expenses", async (req, res) => {
   }
 });
 
-app.delete("/expenses/:id", async (req, res) => {
-  const { id } = req.params;
+app.delete("/expenses/:id_user/:id", authenticateToken, async (req, res) => {
+  const { id_user, id } = req.params;
 
   try {
     const result = await pool.query(
-      "DELETE FROM expenses WHERE id = $1 RETURNING *",
-      [id]
+      'DELETE FROM "expenses" WHERE id = $1 AND user_id = $2 RETURNING *;',
+      [id, id_user]
     );
 
     if (result.rowCount === 0) {
-      return res.status(404).json({ error: "Eintrag nicht gefunden" });
+      return res.status(404).json({ error: "Eintrag nicht gefunden oder gehört nicht zu diesem User" });
     }
 
     res.status(200).json({ message: "Erfolgreich gelöscht" });
@@ -117,6 +117,7 @@ app.delete("/expenses/:id", async (req, res) => {
     res.status(500).json({ error: "Interner Serverfehler" });
   }
 });
+
 
 app.get("/monthly_expenses/:user_id", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
@@ -139,26 +140,6 @@ app.post("/monthly_expenses", async (req, res) => {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
-  // app.delete("/monthly_expenses/:id", async (req, res) => {
-  //   const { id } = req.params;
-
-  //   try {
-  //     const result = await pool.query(
-  //       "DELETE FROM monthly_expenses WHERE id = $1 RETURNING *",
-  //       [id]
-  //     );
-
-  //     if (result.rowCount === 0) {
-  //       return res.status(404).json({ error: "Eintrag nicht gefunden" });
-  //     }
-
-  //     res.status(200).json({ message: "Erfolgreich gelöscht" });
-  //   } catch (err) {
-  //     console.error("Fehler beim Löschen:", err);
-  //     res.status(500).json({ error: "Interner Serverfehler" });
-  //   }
-  // });
-
   try {
     const result = await pool.query(
       `INSERT INTO monthly_expenses (user_id, category_id, amount, name, date_start)
@@ -171,6 +152,28 @@ app.post("/monthly_expenses", async (req, res) => {
     res.status(500).json({ error: "Interner Serverfehler" });
   }
 });
+
+// DELETE: Monatlichen Eintrag löschen
+app.delete("/monthly_expenses/:id_user/:id", authenticateToken, async (req, res) => {
+  const { id_user, id } = req.params;
+
+  try {
+    const result = await pool.query(
+      'DELETE FROM "monthly_expenses" WHERE id = $1 AND user_id = $2 RETURNING *;',
+      [id, id_user]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Eintrag nicht gefunden oder gehört nicht zu diesem User" });
+    }
+
+    res.status(200).json({ message: "Erfolgreich gelöscht" });
+  } catch (err) {
+    console.error("Fehler beim Löschen:", err);
+    res.status(500).json({ error: "Interner Serverfehler" });
+  }
+});
+
 
 app.get("/incomes/:user_id", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
@@ -221,26 +224,37 @@ app.get("/monthly_incomes/:user_id", authenticateToken, async (req, res) => {
   }
 });
 
-app.post("/monthly_incomes", async (req, res) => {
-  const { user_id, amount, name, date_start } = req.body;
-
-  if (!user_id || !amount || !date_start) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
-
+app.put("/monthly_incomes/:id_user/:id", authenticateToken, async (req, res) => {
   try {
-    const result = await pool.query(
-      `INSERT INTO "monthly_incomes" (user_id, amount, name, date_start)
-       VALUES ($1, $2, $3, $4) RETURNING *`,
-      [user_id, amount, name || "", date_start]
-    );
+    const { id, id_user } = req.params;
+    const { amount, name, date_start, date_end } = req.body;
 
-    res.status(201).json(result.rows[0]);
+    const updateQuery = `
+      UPDATE monthly_incomes
+      SET amount = $1, name = $2, date_start = $3, date_end = $4
+      WHERE id = $5 AND user_id = $6
+      RETURNING *;
+    `;
+
+    const updateValues = [amount, name, date_start, date_end, id, id_user];
+
+    const { rows } = await pool.query(updateQuery, updateValues);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Income not found" });
+    }
+
+    res.status(200).json({
+      message: "Income updated successfully",
+      updatedEntry: rows[0],
+    });
   } catch (err) {
-    console.error("Fehler beim Einfügen in monthly_incomes:", err);
-    res.status(500).json({ error: "Interner Serverfehler" });
+    console.error(err);
+    res.status(500).send("An error occurred");
   }
 });
+
+
 
 app.post("/login", async (req, res) => {
   const { e_mail, password } = req.body;
@@ -323,6 +337,28 @@ app.delete("/income/:id_user/:id", async (req, res) => {
     res.status(500).send("some error has occured");
   }
 });
+
+app.delete("/monthly_incomes/:id_user/:id", authenticateToken, async (req, res) => {
+  const { id_user, id } = req.params;
+
+  try {
+    const result = await pool.query(
+      'DELETE FROM "monthly_incomes" WHERE id = $1 AND user_id = $2 RETURNING *;',
+      [id, id_user]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Eintrag nicht gefunden oder gehört nicht zu diesem User" });
+    }
+
+    res.status(200).json({ message: "Erfolgreich gelöscht" });
+  } catch (err) {
+    console.error("Fehler beim Löschen:", err);
+    res.status(500).json({ error: "Interner Serverfehler" });
+  }
+});
+
+
 app.put("/expenses/:id_user/:id", async (req, res) => {
   try {
     const { id } = req.params;
