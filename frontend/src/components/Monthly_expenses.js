@@ -170,6 +170,8 @@ function Monthly_expenses() {
                 <TableCell>{parseFloat(monthlySum).toFixed(2)} €</TableCell>
                 <TableCell />
                 <TableCell />
+                <TableCell />
+                <TableCell />
               </TableRow>
             </TableBody>
           </Table>
