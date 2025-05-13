@@ -3,13 +3,7 @@ import { useForm } from "react-hook-form";
 
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "./ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "./ui/form";
 import { Select, SelectItem } from "./ui/select";
 
 const AddExpenseForm = () => {
@@ -83,10 +77,7 @@ const AddExpenseForm = () => {
             <FormItem>
               <FormLabel>Typ</FormLabel>
               <FormControl>
-                <Select
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
-                >
+                <Select value={type} onChange={(e) => setType(e.target.value)}>
                   <SelectItem value="once">Einmalig</SelectItem>
                   <SelectItem value="monthly">Monatlich</SelectItem>
                 </Select>
@@ -96,14 +87,23 @@ const AddExpenseForm = () => {
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="Name der Ausgabe" {...register("name")} required />
+                <Input
+                  placeholder="Name der Ausgabe"
+                  {...register("name")}
+                  required
+                />
               </FormControl>
             </FormItem>
 
             <FormItem>
               <FormLabel>Betrag (€)</FormLabel>
               <FormControl>
-                <Input type="number" step="0.01" {...register("amount")} required />
+                <Input
+                  type="number"
+                  step="0.01"
+                  {...register("amount")}
+                  required
+                />
               </FormControl>
             </FormItem>
 
