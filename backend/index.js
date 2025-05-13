@@ -733,8 +733,8 @@ app.get("/monthly_expenses/sum/:user_id", authenticateToken, async (req, res) =>
 
     res.json({ totalMonthlyExpenses: result.rows[0].total_monthly_expenses });
   } catch (err) {
-    console.error("Erreur lors du calcul des dépenses mensuelles:", err);
-    res.status(500).json({ error: "Erreur serveur" });
+    console.error("Error calculating monthly expenses:", err);
+    res.status(500).json({ error: "Error server" });
   }
 });
 
