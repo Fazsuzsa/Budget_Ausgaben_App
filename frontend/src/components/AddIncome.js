@@ -6,7 +6,7 @@ import { Input } from "./ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "./ui/form";
 import { Select, SelectItem } from "./ui/select";
 
-const AddExpenseForm = () => {
+const AddIncomeForm = () => {
   const [showForm, setShowForm] = useState(false);
   const [type, setType] = useState("once");
 
@@ -14,10 +14,8 @@ const AddExpenseForm = () => {
     defaultValues: {
       name: "",
       amount: "",
-      category_id: "",
       date: "",
-      start_date: "",
-      end_date: "",
+      date_start: "",
     },
   });
 
@@ -25,21 +23,20 @@ const AddExpenseForm = () => {
     const payload = {
       user_id: 1,
       ...values,
-      category_id: parseInt(values.category_id),
       amount: parseFloat(values.amount),
     };
 
     if (type === "monthly") {
       delete payload.date;
+      payload.date_start = values.date_start + "-01";
     } else {
-      delete payload.start_date;
-      delete payload.end_date;
+      delete payload.date_start;
     }
 
     const url =
       type === "monthly"
-        ? "http://localhost:5005/monthly_expenses"
-        : "http://localhost:5005/expenses";
+        ? `http://localhost:5005/monthly_incomes`
+        : `http://localhost:5005/incomes`;
 
     try {
       const res = await fetch(url, {
@@ -65,7 +62,7 @@ const AddExpenseForm = () => {
   return (
     <div className="text-center mt-10">
       <Button onClick={() => setShowForm(!showForm)} className="mb-4">
-        {showForm ? "Formular schließen" : "Neue Ausgabe hinzufügen"}
+        {showForm ? "Formular schließen" : "Neue Einnahme hinzufügen"}
       </Button>
 
       {showForm && (
@@ -88,7 +85,7 @@ const AddExpenseForm = () => {
               <FormLabel>Name</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Name der Ausgabe"
+                  placeholder="Name der Einnahme"
                   {...register("name")}
                   required
                 />
@@ -107,20 +104,6 @@ const AddExpenseForm = () => {
               </FormControl>
             </FormItem>
 
-            <FormItem>
-              <FormLabel>Kategorie</FormLabel>
-              <FormControl>
-                <Select {...register("category_id")} required>
-                  <SelectItem value="">-- Kategorie wählen --</SelectItem>
-                  <SelectItem value="1">Shopping</SelectItem>
-                  <SelectItem value="2">Entertainment</SelectItem>
-                  <SelectItem value="3">Transport</SelectItem>
-                  <SelectItem value="4">Rent & Energy</SelectItem>
-                  <SelectItem value="5">Other</SelectItem>
-                </Select>
-              </FormControl>
-            </FormItem>
-
             {type === "once" && (
               <FormItem>
                 <FormLabel>Datum</FormLabel>
@@ -131,21 +114,12 @@ const AddExpenseForm = () => {
             )}
 
             {type === "monthly" && (
-              <>
-                <FormItem>
-                  <FormLabel>Startdatum</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...register("start_date")} required />
-                  </FormControl>
-                </FormItem>
-
-                <FormItem>
-                  <FormLabel>Enddatum</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...register("end_date")} />
-                  </FormControl>
-                </FormItem>
-              </>
+              <FormItem>
+                <FormLabel>Startmonat</FormLabel>
+                <FormControl>
+                  <Input type="month" {...register("date_start")} required />
+                </FormControl>
+              </FormItem>
             )}
 
             <Button type="submit" className="w-full">
@@ -158,4 +132,4 @@ const AddExpenseForm = () => {
   );
 };
 
-export default AddExpenseForm;
+export default AddIncomeForm;
