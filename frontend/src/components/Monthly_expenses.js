@@ -119,6 +119,8 @@ function Monthly_expenses() {
                 <TableHead className="w-[100px]">Name</TableHead>
                 <TableHead>Price (€)</TableHead>
                 <TableHead>Category</TableHead>
+                <TableHead>Start Date</TableHead>
+                <TableHead>End Date</TableHead>
                 <TableHead className="text-right">Aktionen</TableHead>
               </TableRow>
             </TableHeader>
@@ -128,6 +130,18 @@ function Monthly_expenses() {
                   <TableCell className="font-medium">{expense.name}</TableCell>
                   <TableCell>{parseFloat(expense.amount).toFixed(2)}</TableCell>
                   <TableCell>{expense.category}</TableCell>
+                  <TableCell>
+                    {expense.date_start
+                      ? new Date(expense.date_start).toLocaleDateString()
+                      : "No start date"}
+                  </TableCell>
+                  <TableCell>
+                    {expense.date_end
+                      ? new Date(expense.date_end).toLocaleDateString()
+                      : "Ongoing"}
+                  </TableCell>
+
+
                   <TableCell className="text-right">
                     <Link
                       to={`/edit-monthlyexpense/${expense.user_id}/${expense.id}`}

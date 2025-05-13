@@ -124,7 +124,7 @@ app.get("/monthly_expenses/:user_id", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
   try {
     const result = await pool.query(
-      "SELECT monthly_expenses.id, monthly_expenses.user_id, monthly_expenses.amount, monthly_expenses.name, monthly_expenses.category_id, categories.category FROM public.monthly_expenses JOIN public.categories on monthly_expenses.category_id = categories.id WHERE monthly_expenses.user_id = $1",
+      "SELECT monthly_expenses.id, monthly_expenses.user_id, monthly_expenses.amount, monthly_expenses.name, monthly_expenses.category_id, categories.category, monthly_expenses.date_start, monthly_expenses.date_end FROM public.monthly_expenses JOIN public.categories on monthly_expenses.category_id = categories.id WHERE monthly_expenses.user_id = $1",
       [user_id]
     );
     res.json(result.rows);
