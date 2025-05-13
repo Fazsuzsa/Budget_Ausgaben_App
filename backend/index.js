@@ -134,18 +134,19 @@ app.get("/monthly_expenses/:user_id", authenticateToken, async (req, res) => {
 });
 
 app.post("/monthly_expenses", async (req, res) => {
-  const { user_id, category_id, amount, name, date_start } = req.body;
+  const { user_id, category_id, amount, name, date_start, date_end } = req.body;
 
-  if (!user_id || !category_id || !amount) {
+  if (!user_id || !category_id || !amount || !date_start) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
     const result = await pool.query(
-      `INSERT INTO monthly_expenses (user_id, category_id, amount, name, date_start)
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [user_id, category_id, amount, name, date_start || ""]
+      `INSERT INTO monthly_expenses (user_id, category_id, amount, name, date_start, date_end)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [user_id, category_id, amount, name, date_start, date_end]
     );
+
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error("Fehler beim Einfügen in monthly_expenses:", err);
