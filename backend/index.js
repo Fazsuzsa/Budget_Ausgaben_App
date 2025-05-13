@@ -598,6 +598,62 @@ app.post("/piedata/:id_user", async (req, res) => {
   res.json(data);
 });
 
+app.barchartdata = async (req, res) => {
+  const { year, month } = req.body;
+  const { id_user } = req.params;
+
+  console.log(`Request for year: ${year}, month: ${month}`);
+
+  let result;
+  let monthly_result;
+
+  try {
+    // Hier wird kontroliert ob mindestens ein Datei --> Expense existiert für (Jahr, Monat, User)
+    // Hier werden vom Datum das Jahr und den Monat herausgeholt --> extract
+    result = await pool.query(
+      `SELECT EXISTS (
+         SELECT 1 FROM expenses
+         WHERE user_id = $1 
+          AND EXTRACT(YEAR FROM date) = $2 
+          AND EXTRACT(MONTH FROM date) = $3
+       )`,
+      [id_user, year, month]
+    );
+  } catch (err) {
+    console.error("Error checking expenses:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+  try {
+    monthly_result = await pool.query(
+      `SELECT EXISTS (
+         SELECT 1 FROM monthly_expenses
+         WHERE user_id = $1 AND
+          ( (EXTRACT(YEAR FROM date_start) < $2
+            OR (EXTRACT(YEAR FROM date_start) = $2
+                AND EXTRACT(MONTH FROM date_start) <= $3)
+            ) AND
+		    	(date_end IS NULL OR
+           ((EXTRACT(YEAR FROM date_end) > $2
+             OR (EXTRACT(MONTH FROM date_end) = $2)
+                 AND EXTRACT(MONTH FROM date_end)>= $3
+    ))
+          )
+         )
+       )`,
+      [id_user, year, month]
+    );
+  } catch (err) {
+    console.error("Error checking monthly expenses:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+
+  if (result.rows[0].exists || monthly_result.rows[0].exists) {
+    res.json({ exists: true });
+  } else {
+    res.json({ exists: false });
+  }
+};
+
 // app.put("/monthly_expenses/:id_user/:id", async (req, res) => {
 //   try {
 //     const { id, id_user } = req.params;
