@@ -80,15 +80,15 @@ app.get("/expenses/:user_id", authenticateToken, async (req, res) => {
 app.post("/expenses", async (req, res) => {
   const { user_id, category_id, amount, name, date } = req.body;
 
-  if (!user_id || !category_id || !amount || !date) {
+  if (!user_id || !category_id || !amount || !name || !date) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
     const result = await pool.query(
-      `INSERT INTO "expenses" (user_id, category_id, "amount", name, date)
+      `INSERT INTO "expenses" (user_id, category_id, amount, name, date)
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [user_id, category_id, amount, name || "", date]
+      [user_id, category_id, amount, name, date]
     );
 
     res.status(201).json(result.rows[0]);
