@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -128,6 +129,13 @@ function Monthly_expenses() {
                   <TableCell>{parseFloat(expense.amount).toFixed(2)}</TableCell>
                   <TableCell>{expense.category}</TableCell>
                   <TableCell className="text-right">
+                    <Link
+                      to={`/edit-monthlyexpense/${expense.user_id}/${expense.id}`}
+                      state={{ expense }}
+                      className="text-blue-500 underline"
+                    >
+                      Edit
+                    </Link>
                     <button
                       onClick={() => handleDelete(expense.id)}
                       className="text-red-500 underline"
