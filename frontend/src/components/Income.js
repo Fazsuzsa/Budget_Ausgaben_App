@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
+import AddIncomeForm from "./AddIncome";
 import {
   Table,
   TableBody,
@@ -31,8 +32,8 @@ function Income() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
@@ -132,6 +133,8 @@ function Income() {
           </Table>
         </div>
       )}
+
+      <AddIncomeForm />
     </>
   );
 }
