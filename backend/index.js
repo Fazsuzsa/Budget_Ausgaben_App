@@ -108,7 +108,9 @@ app.delete("/expenses/:id_user/:id", authenticateToken, async (req, res) => {
     );
 
     if (result.rowCount === 0) {
-      return res.status(404).json({ error: "Eintrag nicht gefunden oder gehört nicht zu diesem User" });
+      return res.status(404).json({
+        error: "Eintrag nicht gefunden oder gehört nicht zu diesem User",
+      });
     }
 
     res.status(200).json({ message: "Erfolgreich gelöscht" });
@@ -117,7 +119,6 @@ app.delete("/expenses/:id_user/:id", authenticateToken, async (req, res) => {
     res.status(500).json({ error: "Interner Serverfehler" });
   }
 });
-
 
 app.get("/monthly_expenses/:user_id", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
@@ -155,26 +156,31 @@ app.post("/monthly_expenses", async (req, res) => {
 });
 
 // DELETE: Monatlichen Eintrag löschen
-app.delete("/monthly_expenses/:id_user/:id", authenticateToken, async (req, res) => {
-  const { id_user, id } = req.params;
+app.delete(
+  "/monthly_expenses/:id_user/:id",
+  authenticateToken,
+  async (req, res) => {
+    const { id_user, id } = req.params;
 
-  try {
-    const result = await pool.query(
-      'DELETE FROM "monthly_expenses" WHERE id = $1 AND user_id = $2 RETURNING *;',
-      [id, id_user]
-    );
+    try {
+      const result = await pool.query(
+        'DELETE FROM "monthly_expenses" WHERE id = $1 AND user_id = $2 RETURNING *;',
+        [id, id_user]
+      );
 
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: "Eintrag nicht gefunden oder gehört nicht zu diesem User" });
+      if (result.rowCount === 0) {
+        return res.status(404).json({
+          error: "Eintrag nicht gefunden oder gehört nicht zu diesem User",
+        });
+      }
+
+      res.status(200).json({ message: "Erfolgreich gelöscht" });
+    } catch (err) {
+      console.error("Fehler beim Löschen:", err);
+      res.status(500).json({ error: "Interner Serverfehler" });
     }
-
-    res.status(200).json({ message: "Erfolgreich gelöscht" });
-  } catch (err) {
-    console.error("Fehler beim Löschen:", err);
-    res.status(500).json({ error: "Interner Serverfehler" });
   }
-});
-
+);
 
 app.get("/incomes/:user_id", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
@@ -211,6 +217,27 @@ app.post("/incomes", async (req, res) => {
   }
 });
 
+app.post("/monthly_incomes", async (req, res) => {
+  const { user_id, amount, name, date_start, date_end } = req.body;
+
+  if (!user_id || !amount || !date_start) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO monthly_incomes (user_id, amount, name, date_start, date_end)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [user_id, amount, name, date_start, date_end]
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error("Fehler beim Einfügen in monthly_incomes:", err);
+    res.status(500).json({ error: "Interner Serverfehler" });
+  }
+});
+
 app.get("/monthly_incomes/:user_id", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
   try {
@@ -225,37 +252,39 @@ app.get("/monthly_incomes/:user_id", authenticateToken, async (req, res) => {
   }
 });
 
-app.put("/monthly_incomes/:id_user/:id", authenticateToken, async (req, res) => {
-  try {
-    const { id, id_user } = req.params;
-    const { amount, name, date_start, date_end } = req.body;
+app.put(
+  "/monthly_incomes/:id_user/:id",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const { id, id_user } = req.params;
+      const { amount, name, date_start, date_end } = req.body;
 
-    const updateQuery = `
+      const updateQuery = `
       UPDATE monthly_incomes
       SET amount = $1, name = $2, date_start = $3, date_end = $4
       WHERE id = $5 AND user_id = $6
       RETURNING *;
     `;
 
-    const updateValues = [amount, name, date_start, date_end, id, id_user];
+      const updateValues = [amount, name, date_start, date_end, id, id_user];
 
-    const { rows } = await pool.query(updateQuery, updateValues);
+      const { rows } = await pool.query(updateQuery, updateValues);
 
-    if (rows.length === 0) {
-      return res.status(404).json({ message: "Income not found" });
+      if (rows.length === 0) {
+        return res.status(404).json({ message: "Income not found" });
+      }
+
+      res.status(200).json({
+        message: "Income updated successfully",
+        updatedEntry: rows[0],
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).send("An error occurred");
     }
-
-    res.status(200).json({
-      message: "Income updated successfully",
-      updatedEntry: rows[0],
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("An error occurred");
   }
-});
-
-
+);
 
 app.post("/login", async (req, res) => {
   const { e_mail, password } = req.body;
@@ -339,26 +368,31 @@ app.delete("/income/:id_user/:id", async (req, res) => {
   }
 });
 
-app.delete("/monthly_incomes/:id_user/:id", authenticateToken, async (req, res) => {
-  const { id_user, id } = req.params;
+app.delete(
+  "/monthly_incomes/:id_user/:id",
+  authenticateToken,
+  async (req, res) => {
+    const { id_user, id } = req.params;
 
-  try {
-    const result = await pool.query(
-      'DELETE FROM "monthly_incomes" WHERE id = $1 AND user_id = $2 RETURNING *;',
-      [id, id_user]
-    );
+    try {
+      const result = await pool.query(
+        'DELETE FROM "monthly_incomes" WHERE id = $1 AND user_id = $2 RETURNING *;',
+        [id, id_user]
+      );
 
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: "Eintrag nicht gefunden oder gehört nicht zu diesem User" });
+      if (result.rowCount === 0) {
+        return res.status(404).json({
+          error: "Eintrag nicht gefunden oder gehört nicht zu diesem User",
+        });
+      }
+
+      res.status(200).json({ message: "Erfolgreich gelöscht" });
+    } catch (err) {
+      console.error("Fehler beim Löschen:", err);
+      res.status(500).json({ error: "Interner Serverfehler" });
     }
-
-    res.status(200).json({ message: "Erfolgreich gelöscht" });
-  } catch (err) {
-    console.error("Fehler beim Löschen:", err);
-    res.status(500).json({ error: "Interner Serverfehler" });
   }
-});
-
+);
 
 app.put("/expenses/:id_user/:id", async (req, res) => {
   try {
@@ -585,13 +619,11 @@ app.post("/piedata/:id_user", async (req, res) => {
   res.json(data);
 });
 
-
 // app.put("/monthly_expenses/:id_user/:id", async (req, res) => {
 //   try {
 //     const { id, id_user } = req.params;
 //     const { category_id, amount, name } = req.body;
 //     const today = new Date();
-
 
 //     const selectQuery = `
 //       SELECT * FROM monthly_expenses
@@ -605,7 +637,6 @@ app.post("/piedata/:id_user", async (req, res) => {
 
 //     const original = originalRows[0];
 
-
 //     const isSame =
 //       original.amount === amount &&
 //       original.name === name &&
@@ -615,7 +646,6 @@ app.post("/piedata/:id_user", async (req, res) => {
 //       return res.status(200).json({ message: "No changes detected" });
 //     }
 
-
 //     const updateQuery = `
 //       UPDATE monthly_expenses
 //       SET date_end = $1
@@ -623,7 +653,6 @@ app.post("/piedata/:id_user", async (req, res) => {
 //       RETURNING *;
 //     `;
 //     await pool.query(updateQuery, [today, id, id_user]);
-
 
 //     const insertQuery = `
 //       INSERT INTO monthly_expenses (user_id, amount, name, category_id, date_start, date_end)
@@ -676,7 +705,6 @@ app.put("/monthly_expenses/:id_user/:id", async (req, res) => {
       original.name === name &&
       parseInt(original.category_id) === parseInt(category_id);
 
-
     if (isSame) {
       return res.status(200).json({ message: "No changes detected" });
     }
@@ -694,7 +722,13 @@ app.put("/monthly_expenses/:id_user/:id", async (req, res) => {
       VALUES ($1, $2, $3, $4, $5)
       RETURNING *;
     `;
-    const insertValues = [id_user, amount, name, category_id, nextMonthFirstDay];
+    const insertValues = [
+      id_user,
+      amount,
+      name,
+      category_id,
+      nextMonthFirstDay,
+    ];
     const { rows: newRows } = await pool.query(insertQuery, insertValues);
 
     res.status(200).json({
@@ -707,17 +741,18 @@ app.put("/monthly_expenses/:id_user/:id", async (req, res) => {
   }
 });
 
+app.get(
+  "/monthly_expenses/sum/:user_id",
+  authenticateToken,
+  async (req, res) => {
+    const { user_id } = req.params;
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1; // janvier = 0
+    const currentYear = currentDate.getFullYear();
 
-
-app.get("/monthly_expenses/sum/:user_id", authenticateToken, async (req, res) => {
-  const { user_id } = req.params;
-  const currentDate = new Date();
-  const currentMonth = currentDate.getMonth() + 1; // janvier = 0
-  const currentYear = currentDate.getFullYear();
-
-  try {
-    const result = await pool.query(
-      `SELECT COALESCE(SUM(amount), 0) AS total_monthly_expenses
+    try {
+      const result = await pool.query(
+        `SELECT COALESCE(SUM(amount), 0) AS total_monthly_expenses
        FROM monthly_expenses
        WHERE user_id = $1
          AND (
@@ -729,17 +764,16 @@ app.get("/monthly_expenses/sum/:user_id", authenticateToken, async (req, res) =>
            (EXTRACT(YEAR FROM date_end) > $2 OR 
            (EXTRACT(YEAR FROM date_end) = $2 AND EXTRACT(MONTH FROM date_end) >= $3))
          );`,
-      [user_id, currentYear, currentMonth]
-    );
+        [user_id, currentYear, currentMonth]
+      );
 
-    res.json({ totalMonthlyExpenses: result.rows[0].total_monthly_expenses });
-  } catch (err) {
-    console.error("Erreur lors du calcul des dépenses mensuelles:", err);
-    res.status(500).json({ error: "Erreur serveur" });
+      res.json({ totalMonthlyExpenses: result.rows[0].total_monthly_expenses });
+    } catch (err) {
+      console.error("Erreur lors du calcul des dépenses mensuelles:", err);
+      res.status(500).json({ error: "Erreur serveur" });
+    }
   }
-});
-
-
+);
 
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);

@@ -20,8 +20,11 @@ const AddIncomeForm = () => {
   });
 
   const onSubmit = async (values) => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user?.id;
+
     const payload = {
-      user_id: 1,
+      user_id: userId,
       ...values,
       amount: parseFloat(values.amount),
     };
@@ -66,67 +69,67 @@ const AddIncomeForm = () => {
       </Button>
 
       {showForm && (
-        <Form>
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="max-w-sm mx-auto space-y-4"
-          >
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="max-w-sm mx-auto space-y-4"
+        >
+          <FormItem>
+            <FormLabel>Typ</FormLabel>
+            <FormControl>
+              <Select value={type} onChange={(e) => setType(e.target.value)}>
+                <SelectItem value="once">Einmalig</SelectItem>
+                <SelectItem value="monthly">Monatlich</SelectItem>
+              </Select>
+            </FormControl>
+          </FormItem>
+
+          <FormItem>
+            <FormLabel>Name</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="Name der Einnahme"
+                {...register("name")}
+                required
+              />
+            </FormControl>
+          </FormItem>
+
+          <FormItem>
+            <FormLabel>Betrag (€)</FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                step="0.01"
+                {...register("amount")}
+                required
+              />
+            </FormControl>
+          </FormItem>
+
+          {type === "once" && (
             <FormItem>
-              <FormLabel>Typ</FormLabel>
+              <FormLabel>Datum</FormLabel>
               <FormControl>
-                <Select value={type} onChange={(e) => setType(e.target.value)}>
-                  <SelectItem value="once">Einmalig</SelectItem>
-                  <SelectItem value="monthly">Monatlich</SelectItem>
-                </Select>
+                <Input type="date" {...register("date")} required />
               </FormControl>
             </FormItem>
+          )}
 
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Name der Einnahme"
-                  {...register("name")}
-                  required
-                />
-              </FormControl>
-            </FormItem>
-
-            <FormItem>
-              <FormLabel>Betrag (€)</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="0.01"
-                  {...register("amount")}
-                  required
-                />
-              </FormControl>
-            </FormItem>
-
-            {type === "once" && (
-              <FormItem>
-                <FormLabel>Datum</FormLabel>
-                <FormControl>
-                  <Input type="date" {...register("date")} required />
-                </FormControl>
-              </FormItem>
-            )}
-
-            {type === "monthly" && (
+          {type === "monthly" && (
+            <>
               <FormItem>
                 <FormLabel>Startmonat</FormLabel>
                 <FormControl>
                   <Input type="month" {...register("date_start")} required />
                 </FormControl>
               </FormItem>
-            )}
+            </>
+          )}
 
-            <Button type="submit" className="w-full">
-              Speichern
-            </Button>
-          </form>
-        </Form>
+          <Button type="submit" className="w-full">
+            Speichern
+          </Button>
+        </form>
       )}
     </div>
   );
