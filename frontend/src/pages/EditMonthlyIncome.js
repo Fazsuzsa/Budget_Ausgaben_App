@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { cn } from "../lib/utils";
 import {
   Card,
   CardContent,
@@ -15,7 +16,7 @@ import Navbar from "../components/Navbar";
 export default function EditMonthlyIncome() {
   const { state } = useLocation();
   const income = state?.income;
-
+  const token = localStorage.getItem("token");
   const navigate = useNavigate();
   const { userId: paramUserId, incomeId: paramIncomeId } = useParams();
 
@@ -24,7 +25,6 @@ export default function EditMonthlyIncome() {
 
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
-  const [dateStart, setDateStart] = useState("");
 
   const [message, setMessage] = useState("");
 
@@ -34,7 +34,6 @@ export default function EditMonthlyIncome() {
       setUserId(income.user_id || paramUserId);
       setName(income.name || "");
       setAmount(income.amount || "");
-      setDateStart(income.date_start || "");
     }
   }, [income, paramIncomeId, paramUserId]);
 
@@ -48,11 +47,11 @@ export default function EditMonthlyIncome() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            amount,
-            name,
-            date_start: dateStart,
+            amount: amount,
+            name: name,
           }),
         }
       );
@@ -64,7 +63,7 @@ export default function EditMonthlyIncome() {
       const updatedIncome = await response.json();
       console.log("Update successful:", updatedIncome);
       setMessage("Income updated successfully!");
-      setTimeout(() => navigate("/monthly-incomes"), 1000);
+      setTimeout(() => navigate("/incomes"), 1000);
     } catch (err) {
       console.error(err);
       alert("An error occurred while updating the income.");
@@ -81,50 +80,43 @@ export default function EditMonthlyIncome() {
             <CardDescription>Update the fields below</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label>Income ID</Label>
-                <Input value={incomeId} disabled />
-              </div>
-              <div>
-                <Label>User ID</Label>
-                <Input value={userId} disabled />
-              </div>
-              <div>
-                <Label>Amount (€)</Label>
-                <Input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <Label>Name</Label>
-                <Input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <Label>Start Monat</Label>
-                <Input
-                  type="month"
-                  value={dateStart.slice(0, 7)}
-                  onChange={(e) => setDateStart(e.target.value + "-01")}
-                  required
-                />
-              </div>
+            <form onSubmit={handleSubmit}>
+              <div className="flex flex-col gap-6">
+                <div className="grid gap-2">
+                  <Label>Income ID</Label>
+                  <Input value={incomeId} disabled />
+                </div>
+                <div className="grid gap-2">
+                  <Label>User ID</Label>
+                  <Input value={userId} disabled />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Price (€)</Label>
+                  <Input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="grid gap-2" v>
+                  <Label>Name</Label>
+                  <Input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+                </div>
 
-              {message && (
-                <div className="text-sm text-green-600">{message}</div>
-              )}
+                {message && (
+                  <div className="text-sm text-green-600">{message}</div>
+                )}
 
-              <Button type="submit" className="w-full">
-                Speichern
-              </Button>
+                <Button type="submit" className="w-full">
+                  Speichern
+                </Button>
+              </div>
             </form>
           </CardContent>
         </Card>
