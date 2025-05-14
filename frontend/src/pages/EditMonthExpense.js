@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { cn } from "../lib/utils";
 import {
   Card,
@@ -80,7 +79,7 @@ export default function EditMonthExpense() {
       <div className={cn("flex flex-col gap-6")}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Edit Expense</CardTitle>
+            <CardTitle className="text-2xl">Edit Monthly Expense</CardTitle>
             <CardDescription>Update the fields below</CardDescription>
           </CardHeader>
           <CardContent>
@@ -95,7 +94,7 @@ export default function EditMonthExpense() {
                   <Input value={userId} disabled />
                 </div>
                 <div className="grid gap-2">
-                  <Label>Amount</Label>
+                  <Label>Price (€)</Label>
                   <Input
                     type="number"
                     value={amount}
