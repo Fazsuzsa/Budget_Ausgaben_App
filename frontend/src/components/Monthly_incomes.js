@@ -24,13 +24,14 @@ function Monthly_incomes() {
     const token = localStorage.getItem("token");
     try {
       const response = await fetch(
-        `http://localhost:5005/monthly_incomes/${user_id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+        `http://localhost:5005/monthly_incomes/${user_id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         }
-      }
       );
 
       if (!response.ok) {
@@ -45,31 +46,34 @@ function Monthly_incomes() {
     }
   };
 
-const handleDelete = async (id) => {
-  const confirmed = window.confirm(
-    "Diesen monatlichen Income-Eintrag löschen?"
-  );
-  if (!confirmed) return;
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm(
+      "Diesen monatlichen Income-Eintrag löschen?"
+    );
+    if (!confirmed) return;
 
-  try {
-    const res = await fetch(`http://localhost:5005/monthly_incomes/${user_id}/${id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
+    try {
+      const res = await fetch(
+        `http://localhost:5005/monthly_incomes/${user_id}/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.error || "Fehler beim Löschen");
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Fehler beim Löschen");
+      }
+
+      setIncome((prev) => prev.filter((item) => item.id !== id));
+    } catch (err) {
+      alert("Löschen fehlgeschlagen: " + err.message);
     }
-
-    setIncome((prev) => prev.filter((item) => item.id !== id));
-  } catch (err) {
-    alert("Löschen fehlgeschlagen: " + err.message);
-  }
-};
+  };
 
   return (
     <>

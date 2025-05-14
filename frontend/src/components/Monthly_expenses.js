@@ -27,13 +27,14 @@ function Monthly_expenses() {
 
     try {
       const response = await fetch(
-        `http://localhost:5005/monthly_expenses/${userId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+        `http://localhost:5005/monthly_expenses/${userId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         }
-      }
       );
 
       if (!response.ok) {
@@ -47,7 +48,6 @@ function Monthly_expenses() {
       setLoading(false);
     }
   };
-
 
   const fetchMonthlyExpensesSum = async () => {
     const token = localStorage.getItem("token");
@@ -75,7 +75,6 @@ function Monthly_expenses() {
     }
   };
 
-
   const handleDelete = async (id) => {
     const confirmed = window.confirm("Diesen monatlichen Eintrag löschen?");
     if (!confirmed) return;
@@ -83,13 +82,16 @@ function Monthly_expenses() {
     const token = localStorage.getItem("token");
 
     try {
-      const res = await fetch(`http://localhost:5005/monthly_expenses/${userId}/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await fetch(
+        `http://localhost:5005/monthly_expenses/${userId}/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!res.ok) {
         const data = await res.json();
@@ -141,7 +143,6 @@ function Monthly_expenses() {
                       : "Ongoing"}
                   </TableCell>
 
-
                   <TableCell className="text-right">
                     <Link
                       to={`/edit-monthlyexpense/${expense.user_id}/${expense.id}`}
@@ -166,7 +167,9 @@ function Monthly_expenses() {
                   color: "#333",
                 }}
               >
-                <TableCell className="font-medium">Sum Monthly Expenses</TableCell>
+                <TableCell className="font-medium">
+                  Sum Monthly Expenses
+                </TableCell>
                 <TableCell>{parseFloat(monthlySum).toFixed(2)} €</TableCell>
                 <TableCell />
                 <TableCell />

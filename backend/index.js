@@ -783,9 +783,8 @@ app.get(
       console.error("Error calculating monthly expenses:", err);
       res.status(500).json({ error: "Error server" });
     }
-  });
-
-
+  }
+);
 
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);
