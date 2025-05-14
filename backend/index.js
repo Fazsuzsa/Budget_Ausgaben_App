@@ -77,7 +77,7 @@ app.get("/expenses/:user_id", authenticateToken, async (req, res) => {
   }
 });
 
-app.post("/expenses", async (req, res) => {
+app.post("/expenses", authenticateToken, async (req, res) => {
   const { user_id, category_id, amount, name, date } = req.body;
 
   if (!user_id || !category_id || !amount || !name || !date) {
@@ -134,7 +134,7 @@ app.get("/monthly_expenses/:user_id", authenticateToken, async (req, res) => {
   }
 });
 
-app.post("/monthly_expenses", async (req, res) => {
+app.post("/monthly_expenses", authenticateToken, async (req, res) => {
   const { user_id, category_id, amount, name, date_start, date_end } = req.body;
 
   if (!user_id || !category_id || !amount || !date_start) {
@@ -196,7 +196,7 @@ app.get("/incomes/:user_id", authenticateToken, async (req, res) => {
   }
 });
 
-app.post("/incomes", async (req, res) => {
+app.post("/incomes", authenticateToken, async (req, res) => {
   const { user_id, amount, name, date } = req.body;
 
   if (!user_id || !amount || !date) {
@@ -217,7 +217,7 @@ app.post("/incomes", async (req, res) => {
   }
 });
 
-app.post("/monthly_incomes", async (req, res) => {
+app.post("/monthly_incomes", authenticateToken, async (req, res) => {
   const { user_id, amount, name, date_start, date_end } = req.body;
 
   if (!user_id || !amount || !date_start) {
@@ -772,9 +772,8 @@ app.get(
       console.error("Error calculating monthly expenses:", err);
       res.status(500).json({ error: "Error server" });
     }
-  });
-
-
+  }
+);
 
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);
