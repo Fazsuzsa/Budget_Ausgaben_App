@@ -32,12 +32,12 @@ const AddExpenseForm = () => {
       amount: parseFloat(values.amount),
     };
 
-if (type === "monthly") {
-  payload.date_start = values.date_start + "-01";  // hier die Monatskorrektur
-  delete payload.date;
-} else {
-  delete payload.date_start;
-}
+    if (type === "monthly") {
+      payload.date_start = values.date_start + "-01"; // hier die Monatskorrektur
+      delete payload.date;
+    } else {
+      delete payload.date_start;
+    }
 
     const url =
       type === "monthly"
@@ -60,6 +60,7 @@ if (type === "monthly") {
         alert("Gespeichert!");
         reset();
         setShowForm(false);
+        window.location.reload();
       } else {
         const data = await res.json();
         alert("Fehler: " + data.error);

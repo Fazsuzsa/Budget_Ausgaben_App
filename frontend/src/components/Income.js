@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Navigate } from "react-router-dom";
 import AddIncomeForm from "./AddIncome";
 import {
@@ -67,7 +68,7 @@ function Income() {
       {!loading && !error && (
         <div className="max-w-4xl mx-auto">
           <Table>
-            <TableCaption>Einnahmen des Nutzers</TableCaption>
+            <TableCaption></TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[100px]">Name</TableHead>
@@ -88,6 +89,13 @@ function Income() {
                     {new Date(income.date).toISOString().split("T")[0]}
                   </TableCell>
                   <TableCell className="text-right">
+                    <Link
+                      to={`/edit-income/${income.user_id}/${income.id}`}
+                      state={{ income }}
+                      className="text-blue-500 underline"
+                    >
+                      Edit
+                    </Link>
                     <button
                       onClick={() => handleDelete(income.id)}
                       className="text-red-500 underline"
