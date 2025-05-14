@@ -77,7 +77,10 @@ const PieChart = () => {
       try {
         const res = await fetch(`http://localhost:5005/piedata/${user_id}`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify(payload),
         });
 

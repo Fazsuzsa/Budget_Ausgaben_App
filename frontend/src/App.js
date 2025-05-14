@@ -1,6 +1,8 @@
 import React from "react";
 import Navbar from "./components/Navbar";
 import PieChart from "./components/PieChart";
+import ImExBarChart from "./components/ImExBarChart";
+
 import { Navigate } from "react-router-dom";
 import "./App.css";
 
@@ -14,6 +16,7 @@ function App() {
     <>
       <Navbar></Navbar>
       <PieChart></PieChart>
+      <ImExBarChart></ImExBarChart>
     </>
   );
 }
