@@ -14,6 +14,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import MyForm from "./pages/MyForm";
 import EditIncome from "./pages/EditIncome";
 import Expenses from "./components/Expenses";
+import EditMonthExpense from "./pages/EditMonthExpense";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -29,6 +30,10 @@ root.render(
         <Route
           path="/edit-expense/:userId/:expenseId"
           element={<MyForm></MyForm>}
+        ></Route>
+        <Route
+          path="/edit-monthlyexpense/:userId/:expenseId"
+          element={<EditMonthExpense></EditMonthExpense>}
         ></Route>
 
         <Route path="/dark_light" element={<Dark_light></Dark_light>}></Route>
