@@ -10,56 +10,64 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { useParams } from "react-router-dom";
 function Income() {
   const [income, setIncome] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const user = JSON.parse(localStorage.getItem("user"));
+  const user_id = user?.id;
   useEffect(() => {
-    fetch("http://localhost:5005/incomes")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to fetch income");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setIncome(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
+    if (user) {
+      fetchIncomes();
+    }
+    //return <Navigate to="/login" />;
   }, []);
-  const updateIncome = (user_id, id) => {
-    console.log("Update income with ID:", id);
-    fetch(`http://localhost:5005/income/${user_id}/${id}`, {
-      method: "UPDATE",
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to update income");
-        }
-
+  const fetchIncomes = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch(`http://localhost:5005/incomes/${user_id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch incomes");
+      }
+      const data = await response.json();
+      setIncome(data);
+      setLoading(false);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm("Diesen Income-Eintrag löschen?");
+    if (!confirmed) return;
+    try {
+      const res = await fetch(`http://localhost:5005/income/${user_id}/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Fehler beim Löschen");
+      }
       setIncome((prev) => prev.filter((item) => item.id !== id));
     } catch (err) {
       alert("Löschen fehlgeschlagen: " + err.message);
     }
   };
-
   return (
     <>
       <h1 className="text-2xl font-bold text-center my-6">One-Time Incomes</h1>
-
       {loading && <p className="text-center">Loading income...</p>}
       {error && <p className="text-center text-red-500">{error}</p>}
-
       {!loading && !error && (
         <div className="max-w-4xl mx-auto">
           <Table>
-            <TableCaption></TableCaption>
+            <TableCaption>Einnahmen des Nutzers</TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[100px]">Name</TableHead>
@@ -89,7 +97,6 @@ function Income() {
                   </TableCell>
                 </TableRow>
               ))}
-
               <TableRow
                 style={{
                   backgroundColor: "#61DAFB",
@@ -114,10 +121,8 @@ function Income() {
           </Table>
         </div>
       )}
-
       <AddIncomeForm />
     </>
   );
 }
-
 export default Income;
