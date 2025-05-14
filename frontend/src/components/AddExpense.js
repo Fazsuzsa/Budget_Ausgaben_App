@@ -32,16 +32,12 @@ const onSubmit = async (values) => {
     amount: parseFloat(values.amount),
   };
 
-  if (type === "monthly") {
-    payload.date_start = values.date_start;
-    payload.date_end = values.end_date || null;  // neu: date_end mitgeben
-    delete payload.date;
-    delete payload.start_date; // falls alt noch vorhanden
-    delete payload.end_date;
-  } else {
-    delete payload.start_date;
-    delete payload.end_date;
-  }
+if (type === "monthly") {
+  payload.date_start = values.date_start + "-01";  // hier die Monatskorrektur
+  delete payload.date;
+} else {
+  delete payload.date_start;
+}
 
   const url =
     type === "monthly"
@@ -129,14 +125,7 @@ const onSubmit = async (values) => {
               <FormItem>
                 <FormLabel>Startdatum</FormLabel>
                 <FormControl>
-                  <Input type="date" {...register("date_start")} required />
-                </FormControl>
-              </FormItem>
-
-              <FormItem>
-                <FormLabel>Enddatum</FormLabel>
-                <FormControl>
-                  <Input type="date" {...register("end_date")} />
+                  <Input type="month" {...register("date_start")} required />
                 </FormControl>
               </FormItem>
             </>
