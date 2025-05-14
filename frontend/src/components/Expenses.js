@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
+import { useParams } from "react-router-dom";
 
 function Expenses() {
   const [expenses, setExpenses] = useState([]);
@@ -29,8 +30,8 @@ function Expenses() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!res.ok) {
@@ -44,31 +45,36 @@ function Expenses() {
       setLoading(false);
     }
   };
-const handleDelete = async (id) => {
-  const confirmed = window.confirm("Willst du diesen Eintrag wirklich löschen?");
-  if (!confirmed) return;
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm(
+      "Willst du diesen Eintrag wirklich löschen?"
+    );
+    if (!confirmed) return;
 
-  const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
-  try {
-    const res = await fetch(`http://localhost:5005/expenses/${userId}/${id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    try {
+      const res = await fetch(
+        `http://localhost:5005/expenses/${userId}/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.error || "Fehler beim Löschen");
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Fehler beim Löschen");
+      }
+
+      setExpenses((prev) => prev.filter((e) => e.id !== id));
+    } catch (err) {
+      alert("Löschen fehlgeschlagen: " + err.message);
     }
-
-    setExpenses((prev) => prev.filter((e) => e.id !== id));
-  } catch (err) {
-    alert("Löschen fehlgeschlagen: " + err.message);
-  }
-};
+  };
 
   return (
     <>

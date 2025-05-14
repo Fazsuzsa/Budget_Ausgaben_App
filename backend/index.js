@@ -77,7 +77,7 @@ app.get("/expenses/:user_id", authenticateToken, async (req, res) => {
   }
 });
 
-app.post("/expenses", async (req, res) => {
+app.post("/expenses", authenticateToken, async (req, res) => {
   const { user_id, category_id, amount, name, date } = req.body;
 
   if (!user_id || !category_id || !amount || !name || !date) {
@@ -134,7 +134,8 @@ app.get("/monthly_expenses/:user_id", authenticateToken, async (req, res) => {
   }
 });
 
-app.post("/monthly_expenses", async (req, res) => {
+app.post("/monthly_expenses", authenticateToken, async (req, res) => {
+
   const { user_id, category_id, amount, name, date_start, date_end } = req.body;
 
   if (!user_id || !category_id || !amount || !date_start) {
@@ -161,11 +162,12 @@ app.delete(
   authenticateToken,
   async (req, res) => {
     const { id_user, id } = req.params;
+    const new_date = new Date();
 
     try {
       const result = await pool.query(
-        'DELETE FROM "monthly_expenses" WHERE id = $1 AND user_id = $2 RETURNING *;',
-        [id, id_user]
+        'UPDATE  "monthly_expenses" SET date_end = $1 WHERE id = $2 AND user_id = $3 RETURNING *;',
+        [new_date, id, id_user]
       );
 
       if (result.rowCount === 0) {
@@ -196,7 +198,7 @@ app.get("/incomes/:user_id", authenticateToken, async (req, res) => {
   }
 });
 
-app.post("/incomes", async (req, res) => {
+app.post("/incomes", authenticateToken, async (req, res) => {
   const { user_id, amount, name, date } = req.body;
 
   if (!user_id || !amount || !date) {
@@ -217,7 +219,7 @@ app.post("/incomes", async (req, res) => {
   }
 });
 
-app.post("/monthly_incomes", async (req, res) => {
+app.post("/monthly_incomes", authenticateToken, async (req, res) => {
   const { user_id, amount, name, date_start, date_end } = req.body;
 
   if (!user_id || !amount || !date_start) {
@@ -322,7 +324,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.put("/income/:id_user/:id", async (req, res) => {
+app.put("/income/:id_user/:id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { id_user } = req.params;
@@ -347,7 +349,7 @@ app.put("/income/:id_user/:id", async (req, res) => {
     res.status(500).send("An error occurred");
   }
 });
-app.delete("/income/:id_user/:id", async (req, res) => {
+app.delete("/income/:id_user/:id", authenticateToken, async (req, res) => {
   try {
     const id = req.params.id;
     const user_id = req.params.id_user;
@@ -394,7 +396,7 @@ app.delete(
   }
 );
 
-app.put("/expenses/:id_user/:id", async (req, res) => {
+app.put("/expenses/:id_user/:id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { id_user } = req.params;
@@ -418,7 +420,7 @@ app.put("/expenses/:id_user/:id", async (req, res) => {
     res.status(500).send("some error has occured");
   }
 });
-app.get("/expenses/search", async (req, res) => {
+app.get("/expenses/search", authenticateToken, async (req, res) => {
   const { year } = req.query; // Get the year from the query string
 
   if (!year) {
@@ -478,7 +480,7 @@ app.get("/expenses/search", async (req, res) => {
   }
 });
 
-app.post("/piedata/:id_user", async (req, res) => {
+app.post("/piedata/:id_user", authenticateToken, async (req, res) => {
   const { year, month } = req.body;
   const { id_user } = req.params;
 
@@ -514,10 +516,10 @@ app.post("/piedata/:id_user", async (req, res) => {
                 AND EXTRACT(MONTH FROM date_start) <= $3)
             ) AND
 		    	(date_end IS NULL OR
-           (EXTRACT(YEAR FROM date_end) > $2
-             OR (EXTRACT(MONTH FROM date_end) = $2
-                 AND EXTRACT(MONTH FROM date_end) >= $3
-		      	))
+           ((EXTRACT(YEAR FROM date_end) > $2
+             OR (EXTRACT(MONTH FROM date_end) = $2)
+                 AND EXTRACT(MONTH FROM date_end)>= $3
+    ))
           )
          )
        )`,
@@ -565,7 +567,7 @@ app.post("/piedata/:id_user", async (req, res) => {
             ) AND
 		      (date_end IS NULL OR
            (EXTRACT(YEAR FROM date_end) > $2
-             OR (EXTRACT(MONTH FROM date_end) = $2
+             OR (EXTRACT(YEAR FROM date_end) = $2
                  AND EXTRACT(MONTH FROM date_end) >= $3
 			      ))
           )
@@ -619,127 +621,141 @@ app.post("/piedata/:id_user", async (req, res) => {
   res.json(data);
 });
 
-// app.put("/monthly_expenses/:id_user/:id", async (req, res) => {
-//   try {
-//     const { id, id_user } = req.params;
-//     const { category_id, amount, name } = req.body;
-//     const today = new Date();
+app.post(
+  "/barchartdata/:id_user",
+  authenticateToken,
+  (async = async (req, res) => {
+    const { year, month } = req.body;
+    const { id_user } = req.params;
 
-//     const selectQuery = `
-//       SELECT * FROM monthly_expenses
-//       WHERE id = $1 AND user_id = $2;
-//     `;
-//     const { rows: originalRows } = await pool.query(selectQuery, [id, id_user]);
+    console.log(`Request for year: ${year}, month: ${month}`);
 
-//     if (originalRows.length === 0) {
-//       return res.status(404).send("Expense not found");
-//     }
+    let result;
+    let monthly_result;
 
-//     const original = originalRows[0];
+    try {
+      // Hier wird kontroliert ob mindestens ein Datei --> Expense existiert für (Jahr, Monat, User)
+      // Hier werden vom Datum das Jahr und den Monat herausgeholt --> extract
+      result = await pool.query(
+        `SELECT EXISTS (
+         SELECT 1 FROM expenses
+         WHERE user_id = $1 
+          AND EXTRACT(YEAR FROM date) = $2 
+          AND EXTRACT(MONTH FROM date) = $3
+       )`,
+        [id_user, year, month]
+      );
+    } catch (err) {
+      console.error("Error checking expenses:", err);
+      res.status(500).json({ error: "Internal server error" });
+    }
+    try {
+      monthly_result = await pool.query(
+        `SELECT EXISTS (
+         SELECT 1 FROM monthly_expenses
+         WHERE user_id = $1 AND
+          ( (EXTRACT(YEAR FROM date_start) < $2
+            OR (EXTRACT(YEAR FROM date_start) = $2
+                AND EXTRACT(MONTH FROM date_start) <= $3)
+            ) AND
+		    	(date_end IS NULL OR
+           ((EXTRACT(YEAR FROM date_end) > $2
+             OR (EXTRACT(MONTH FROM date_end) = $2)
+                 AND EXTRACT(MONTH FROM date_end)>= $3
+    ))
+          )
+         )
+       )`,
+        [id_user, year, month]
+      );
+    } catch (err) {
+      console.error("Error checking monthly expenses:", err);
+      res.status(500).json({ error: "Internal server error" });
+    }
 
-//     const isSame =
-//       original.amount === amount &&
-//       original.name === name &&
-//       original.category_id === category_id;
+    if (result.rows[0].exists || monthly_result.rows[0].exists) {
+      res.json({ exists: true });
+    } else {
+      res.json({ exists: false });
+    }
+  })
+);
 
-//     if (isSame) {
-//       return res.status(200).json({ message: "No changes detected" });
-//     }
+app.put(
+  "/monthly_expenses/:id_user/:id",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const { id, id_user } = req.params;
+      const { category_id, amount, name } = req.body;
 
-//     const updateQuery = `
-//       UPDATE monthly_expenses
-//       SET date_end = $1
-//       WHERE id = $2 AND user_id = $3
-//       RETURNING *;
-//     `;
-//     await pool.query(updateQuery, [today, id, id_user]);
+      // Calcul first day of next month
+      const nextMonthFirstDay = new Date();
 
-//     const insertQuery = `
-//       INSERT INTO monthly_expenses (user_id, amount, name, category_id, date_start, date_end)
-//       VALUES ($1, $2, $3, $4, $5, NULL)
-//       RETURNING *;
-//     `;
-//     const insertValues = [id_user, amount, name, category_id, today];
-//     const { rows: newRows } = await pool.query(insertQuery, insertValues);
+      nextMonthFirstDay.setMonth(nextMonthFirstDay.getMonth() + 1);
+      nextMonthFirstDay.setDate(1);
+      const lastDay = new Date(nextMonthFirstDay);
+      lastDay.setDate(lastDay.getDate() - 1);
+      nextMonthFirstDay.setUTCHours(0, 0, 0, 0);
+      lastDay.setUTCHours(0, 0, 0, 0);
+      console.log(nextMonthFirstDay, lastDay);
 
-//     res.status(200).json({
-//       message: "Expense updated with versioning",
-//       newEntry: newRows[0],
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).send("An error occurred");
-//   }
-// });
-
-app.put("/monthly_expenses/:id_user/:id", async (req, res) => {
-  try {
-    const { id, id_user } = req.params;
-    const { category_id, amount, name } = req.body;
-
-    // Calcul first day of next month
-    const nextMonthFirstDay = new Date();
-
-    nextMonthFirstDay.setMonth(nextMonthFirstDay.getMonth() + 1);
-    nextMonthFirstDay.setDate(1);
-    const lastDay = new Date(nextMonthFirstDay);
-    lastDay.setDate(lastDay.getDate() - 1);
-    nextMonthFirstDay.setUTCHours(0, 0, 0, 0);
-    lastDay.setUTCHours(0, 0, 0, 0);
-    console.log(nextMonthFirstDay, lastDay);
-
-    const selectQuery = `
+      const selectQuery = `
       SELECT * FROM monthly_expenses
       WHERE id = $1 AND user_id = $2;
     `;
-    const { rows: originalRows } = await pool.query(selectQuery, [id, id_user]);
+      const { rows: originalRows } = await pool.query(selectQuery, [
+        id,
+        id_user,
+      ]);
 
-    if (originalRows.length === 0) {
-      return res.status(404).send("Expense not found");
-    }
+      if (originalRows.length === 0) {
+        return res.status(404).send("Expense not found");
+      }
 
-    const original = originalRows[0];
+      const original = originalRows[0];
 
-    const isSame =
-      parseFloat(original.amount) === parseFloat(amount) &&
-      original.name === name &&
-      parseInt(original.category_id) === parseInt(category_id);
+      const isSame =
+        parseFloat(original.amount) === parseFloat(amount) &&
+        original.name === name &&
+        parseInt(original.category_id) === parseInt(category_id);
 
-    if (isSame) {
-      return res.status(200).json({ message: "No changes detected" });
-    }
+      if (isSame) {
+        return res.status(200).json({ message: "No changes detected" });
+      }
 
-    const updateQuery = `
+      const updateQuery = `
       UPDATE monthly_expenses
       SET date_end = $1
       WHERE id = $2 AND user_id = $3
       RETURNING *;
     `;
-    await pool.query(updateQuery, [lastDay, id, id_user]);
+      await pool.query(updateQuery, [lastDay, id, id_user]);
 
-    const insertQuery = `
+      const insertQuery = `
       INSERT INTO monthly_expenses (user_id, amount, name, category_id, date_start)
       VALUES ($1, $2, $3, $4, $5)
       RETURNING *;
     `;
-    const insertValues = [
-      id_user,
-      amount,
-      name,
-      category_id,
-      nextMonthFirstDay,
-    ];
-    const { rows: newRows } = await pool.query(insertQuery, insertValues);
+      const insertValues = [
+        id_user,
+        amount,
+        name,
+        category_id,
+        nextMonthFirstDay,
+      ];
+      const { rows: newRows } = await pool.query(insertQuery, insertValues);
 
-    res.status(200).json({
-      message: "Expense updated with versioning",
-      newEntry: newRows[0],
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("An error occurred");
+      res.status(200).json({
+        message: "Expense updated with versioning",
+        newEntry: newRows[0],
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).send("An error occurred");
+    }
   }
-});
+);
 
 app.get(
   "/monthly_expenses/sum/:user_id",
@@ -772,9 +788,8 @@ app.get(
       console.error("Error calculating monthly expenses:", err);
       res.status(500).json({ error: "Error server" });
     }
-  });
-
-
+  }
+);
 
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);
