@@ -21,53 +21,58 @@ const AddExpenseForm = () => {
     },
   });
 
-const onSubmit = async (values) => {
-  const user = JSON.parse(localStorage.getItem("user"));
-  const userId = user?.id;
+  const onSubmit = async (values) => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user?.id;
 
-  const payload = {
-    user_id: userId,
-    ...values,
-    category_id: parseInt(values.category_id),
-    amount: parseFloat(values.amount),
-  };
+    const payload = {
+      user_id: userId,
+      ...values,
+      category_id: parseInt(values.category_id),
+      amount: parseFloat(values.amount),
+    };
 
-  if (type === "monthly") {
-    payload.date_start = values.date_start;
-    payload.date_end = values.end_date || null;  // neu: date_end mitgeben
-    delete payload.date;
-    delete payload.start_date; // falls alt noch vorhanden
-    delete payload.end_date;
-  } else {
-    delete payload.start_date;
-    delete payload.end_date;
-  }
-
-  const url =
-    type === "monthly"
-      ? "http://localhost:5005/monthly_expenses"
-      : "http://localhost:5005/expenses";
-
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (res.ok) {
-      alert("Gespeichert!");
-      reset();
-      setShowForm(false);
+    if (type === "monthly") {
+      payload.date_start = values.date_start;
+      payload.date_end = values.end_date || null; // neu: date_end mitgeben
+      delete payload.date;
+      delete payload.start_date; // falls alt noch vorhanden
+      delete payload.end_date;
     } else {
-      const data = await res.json();
-      alert("Fehler: " + data.error);
+      delete payload.start_date;
+      delete payload.end_date;
     }
-  } catch (err) {
-    console.error("Fehler:", err);
-    alert("Serverfehler!");
-  }
-};
+
+    const url =
+      type === "monthly"
+        ? "http://localhost:5005/monthly_expenses"
+        : "http://localhost:5005/expenses";
+
+    const token = localStorage.getItem("token");
+
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        alert("Gespeichert!");
+        reset();
+        setShowForm(false);
+      } else {
+        const data = await res.json();
+        alert("Fehler: " + data.error);
+      }
+    } catch (err) {
+      console.error("Fehler:", err);
+      alert("Serverfehler!");
+    }
+  };
 
   return (
     <div className="text-center mt-10">
@@ -76,7 +81,10 @@ const onSubmit = async (values) => {
       </Button>
 
       {showForm && (
-        <form onSubmit={handleSubmit(onSubmit)} className="max-w-sm mx-auto space-y-4">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="max-w-sm mx-auto space-y-4"
+        >
           <FormItem>
             <FormLabel>Typ</FormLabel>
             <FormControl>
@@ -90,14 +98,23 @@ const onSubmit = async (values) => {
           <FormItem>
             <FormLabel>Name</FormLabel>
             <FormControl>
-              <Input placeholder="Name der Ausgabe" {...register("name")} required />
+              <Input
+                placeholder="Name der Ausgabe"
+                {...register("name")}
+                required
+              />
             </FormControl>
           </FormItem>
 
           <FormItem>
             <FormLabel>Betrag (€)</FormLabel>
             <FormControl>
-              <Input type="number" step="0.01" {...register("amount")} required />
+              <Input
+                type="number"
+                step="0.01"
+                {...register("amount")}
+                required
+              />
             </FormControl>
           </FormItem>
 

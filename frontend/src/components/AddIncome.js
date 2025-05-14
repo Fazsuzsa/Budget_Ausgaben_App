@@ -41,10 +41,16 @@ const AddIncomeForm = () => {
         ? `http://localhost:5005/monthly_incomes`
         : `http://localhost:5005/incomes`;
 
+    const token = localStorage.getItem("token");
+
     try {
       const res = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+
         body: JSON.stringify(payload),
       });
 
