@@ -25,7 +25,6 @@ export default function EditMonthlyIncome() {
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [dateStart, setDateStart] = useState("");
-  const [dateEnd, setDateEnd] = useState("");
 
   const [message, setMessage] = useState("");
 
@@ -36,7 +35,6 @@ export default function EditMonthlyIncome() {
       setName(income.name || "");
       setAmount(income.amount || "");
       setDateStart(income.date_start || "");
-      setDateEnd(income.date_end || "");
     }
   }, [income, paramIncomeId, paramUserId]);
 
@@ -55,7 +53,6 @@ export default function EditMonthlyIncome() {
             amount,
             name,
             date_start: dateStart,
-            date_end: dateEnd || null,
           }),
         }
       );
@@ -112,24 +109,18 @@ export default function EditMonthlyIncome() {
                 />
               </div>
               <div>
-                <Label>Start Date</Label>
+                <Label>Start Monat</Label>
                 <Input
-                  type="date"
-                  value={dateStart}
-                  onChange={(e) => setDateStart(e.target.value)}
+                  type="month"
+                  value={dateStart.slice(0, 7)}
+                  onChange={(e) => setDateStart(e.target.value + "-01")}
                   required
                 />
               </div>
-              <div>
-                <Label>End Date</Label>
-                <Input
-                  type="date"
-                  value={dateEnd}
-                  onChange={(e) => setDateEnd(e.target.value)}
-                />
-              </div>
 
-              {message && <div className="text-sm text-green-600">{message}</div>}
+              {message && (
+                <div className="text-sm text-green-600">{message}</div>
+              )}
 
               <Button type="submit" className="w-full">
                 Speichern

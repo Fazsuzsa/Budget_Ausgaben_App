@@ -267,7 +267,7 @@ app.put(
       RETURNING *;
     `;
 
-      const updateValues = [amount, name, date_start, date_end, id, id_user];
+      const updateValues = [amount, name, date_start, id, id_user];
 
       const { rows } = await pool.query(updateQuery, updateValues);
 
