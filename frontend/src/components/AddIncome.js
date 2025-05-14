@@ -58,6 +58,7 @@ const AddIncomeForm = () => {
         alert("Gespeichert!");
         reset();
         setShowForm(false);
+        window.location.reload();
       } else {
         const data = await res.json();
         alert("Fehler: " + data.error);
