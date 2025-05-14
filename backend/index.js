@@ -747,7 +747,7 @@ app.put(
       const { rows: newRows } = await pool.query(insertQuery, insertValues);
 
       res.status(200).json({
-        message: "Expense updated with versioning",
+        message: "Expense updated",
         newEntry: newRows[0],
       });
     } catch (err) {
@@ -790,6 +790,89 @@ app.get(
     }
   }
 );
+
+app.get("/total_expenses/:user_id", authenticateToken, async (req, res) => {
+  const { user_id } = req.params;
+
+  try {
+
+    const expensesResult = await pool.query(
+      `
+      SELECT SUM(amount) AS total_expenses
+      FROM expenses
+      WHERE user_id = $1
+        AND EXTRACT(YEAR FROM date) = EXTRACT(YEAR FROM CURRENT_DATE)
+        AND EXTRACT(MONTH FROM date) = EXTRACT(MONTH FROM CURRENT_DATE);
+      `,
+      [user_id]
+    );
+
+
+    const monthlyExpensesResult = await pool.query(
+      `
+      SELECT SUM(amount) AS total_monthly_expenses
+      FROM monthly_expenses
+      WHERE user_id = $1
+        AND date_start <= CURRENT_DATE
+        AND (date_end IS NULL OR date_end >= CURRENT_DATE);
+      `,
+      [user_id]
+    );
+
+
+    const totalExpenses = (expensesResult.rows[0].total_expenses || 0) + (monthlyExpensesResult.rows[0].total_monthly_expenses || 0);
+
+    res.json({ totalExpenses });
+  } catch (err) {
+    console.error("Error calculating total expenses:", err);
+    res.status(500).json({ error: "server error" });
+  }
+});
+
+app.get("/total_balance/:user_id", authenticateToken, async (req, res) => {
+  const { user_id } = req.params;
+
+  try {
+    const expensesQuery = `
+      SELECT COALESCE(SUM(amount), 0) AS total
+      FROM expenses
+      WHERE user_id = $1
+        AND EXTRACT(YEAR FROM date) = EXTRACT(YEAR FROM CURRENT_DATE)
+        AND EXTRACT(MONTH FROM date) = EXTRACT(MONTH FROM CURRENT_DATE)
+    `;
+
+    const monthlyExpensesQuery = `
+      SELECT COALESCE(SUM(amount), 0) AS total
+      FROM monthly_expenses
+      WHERE user_id = $1
+        AND date_start <= DATE_TRUNC('month', CURRENT_DATE)
+        AND (date_end IS NULL OR date_end >= DATE_TRUNC('month', CURRENT_DATE))
+    `;
+
+    const incomeQuery = `
+      SELECT COALESCE(SUM(amount), 0) AS total
+      FROM income
+      WHERE user_id = $1
+        AND EXTRACT(YEAR FROM date) = EXTRACT(YEAR FROM CURRENT_DATE)
+        AND EXTRACT(MONTH FROM date) = EXTRACT(MONTH FROM CURRENT_DATE)
+    `;
+
+    const [expensesResult, monthlyResult, incomeResult] = await Promise.all([
+      pool.query(expensesQuery, [user_id]),
+      pool.query(monthlyExpensesQuery, [user_id]),
+      pool.query(incomeQuery, [user_id])
+    ]);
+
+    const totalExpenses =
+      Number(expensesResult.rows[0].total) + Number(monthlyResult.rows[0].total);
+    const totalIncome = Number(incomeResult.rows[0].total);
+
+    res.json({ totalExpenses, totalIncome });
+  } catch (err) {
+    console.error("Error calculating totals:", err);
+    res.status(500).json({ error: "server error" });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);
