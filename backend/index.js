@@ -654,58 +654,91 @@ app.post(
     const { year, month } = req.body;
     const { id_user } = req.params;
 
-    console.log(`Request for year: ${year}, month: ${month}`);
+    console.log(`Request bar chart data for year: ${year}, month: ${month}`);
 
-    let result;
-    let monthly_result;
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
 
-    try {
-      // Hier wird kontroliert ob mindestens ein Datei --> Expense existiert für (Jahr, Monat, User)
-      // Hier werden vom Datum das Jahr und den Monat herausgeholt --> extract
-      result = await pool.query(
-        `SELECT EXISTS (
-         SELECT 1 FROM expenses
-         WHERE user_id = $1 
-          AND EXTRACT(YEAR FROM date) = $2 
-          AND EXTRACT(MONTH FROM date) = $3
-       )`,
-        [id_user, year, month]
-      );
-    } catch (err) {
-      console.error("Error checking expenses:", err);
-      res.status(500).json({ error: "Internal server error" });
-    }
-    try {
-      monthly_result = await pool.query(
-        `SELECT EXISTS (
-         SELECT 1 FROM monthly_expenses
-         WHERE user_id = $1 AND
-          ( (EXTRACT(YEAR FROM date_start) < $2
-            OR (EXTRACT(YEAR FROM date_start) = $2
-                AND EXTRACT(MONTH FROM date_start) <= $3)
-            ) AND
-		    	(date_end IS NULL OR
-           ((EXTRACT(YEAR FROM date_end) > $2
-             OR (EXTRACT(MONTH FROM date_end) = $2)
-                 AND EXTRACT(MONTH FROM date_end)>= $3
-    ))
-          )
-         )
-       )`,
-        [id_user, year, month]
-      );
-    } catch (err) {
-      console.error("Error checking monthly expenses:", err);
-      res.status(500).json({ error: "Internal server error" });
+    let chartData = [
+      { month: "", expenses: 0.0, income: 0.0 },
+      { month: "", expenses: 0.0, income: 0.0 },
+      { month: "", expenses: 0.0, income: 0.0 },
+      { month: "", expenses: 0.0, income: 0.0 },
+      { month: "", expenses: 0.0, income: 0.0 },
+      { month: "", expenses: 0.0, income: 0.0 },
+      { month: "", expenses: 0.0, income: 0.0 },
+      { month: "", expenses: 0.0, income: 0.0 },
+      { month: "", expenses: 0.0, income: 0.0 },
+      { month: "", expenses: 0.0, income: 0.0 },
+      { month: "", expenses: 0.0, income: 0.0 },
+      { month: "", expenses: 0.0, income: 0.0 },
+    ];
+
+    for (let i = 0; i < 12; i++) {
+      let i_month = month - i;
+      let i_year = year;
+
+      if (i_month < 1) {
+        i_month = 12 + i_month;
+        i_year--;
+      }
+
+      chartData[11 - i].month = months[i_month - 1];
+
+      let result;
+
+      try {
+        result = await pool.query(
+          `SELECT COALESCE(SUM(e.amount), 0) AS total_amount
+         FROM expenses e 
+         WHERE e.user_id = $1
+           AND EXTRACT(YEAR FROM e.date) = $2
+           AND EXTRACT(MONTH FROM e.date) = $3;`,
+          [id_user, i_year, i_month]
+        );
+      } catch (err) {
+        console.error("Error checking expenses:", err);
+        res.status(500).json({ error: "Internal server error" });
+      }
+
+      chartData[11 - i].expenses =
+        chartData[11 - i].expenses + result.rows[0].total_amount;
+
+      try {
+        result = await pool.query(
+          `SELECT COALESCE(SUM(i.amount), 0) AS total_amount
+         FROM incomes i 
+         WHERE i.user_id = $1
+           AND EXTRACT(YEAR FROM i.date) = $2
+           AND EXTRACT(MONTH FROM i.date) = $3;`,
+          [id_user, i_year, i_month]
+        );
+      } catch (err) {
+        console.error("Error checking incomes:", err);
+        res.status(500).json({ error: "Internal server error" });
+      }
+
+      chartData[11 - i].income =
+        chartData[11 - i].expenses + result.rows[0].total_amount;
     }
 
-    if (result.rows[0].exists || monthly_result.rows[0].exists) {
-      res.json({ exists: true });
-    } else {
-      res.json({ exists: false });
-    }
+    return res.json(chartData);
   })
 );
+
+// Must add the monthly_expenses and monthly incomes
 
 app.put(
   "/monthly_expenses/:id_user/:id",
