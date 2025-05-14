@@ -9,7 +9,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels"; // Import the plugin
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title, ChartDataLabels);
-
+const token = localStorage.getItem("token");
 const options = {
   responsive: true,
   maintainAspectRatio: false,
@@ -73,7 +73,6 @@ const PieChart = () => {
         year: parseFloat(year),
         month: parseFloat(month),
       };
-
       try {
         const res = await fetch(`http://localhost:5005/piedata/${user_id}`, {
           method: "POST",
