@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -95,6 +96,13 @@ const handleDelete = async (id) => {
                   <TableCell className="font-medium">{income.name}</TableCell>
                   <TableCell>{parseFloat(income.amount).toFixed(2)}</TableCell>
                   <TableCell className="text-right">
+                    <Link
+                      to={`/edit-monthly-income/${income.user_id}/${income.id}`}
+                      state={{ income }}
+                      className="text-blue-500 underline"
+                    >
+                      Edit
+                    </Link>
                     <button
                       onClick={() => handleDelete(income.id)}
                       className="text-red-500 underline"
