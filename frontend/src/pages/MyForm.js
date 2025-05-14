@@ -51,7 +51,7 @@ export default function MyForm() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            authorization: `Bearer ${token}`,
+            authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify({
             category_id: categoryId,
