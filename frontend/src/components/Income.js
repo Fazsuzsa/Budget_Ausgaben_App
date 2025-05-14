@@ -10,57 +10,38 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-
+import { useParams } from "react-router-dom";
 function Income() {
   const [income, setIncome] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const user = JSON.parse(localStorage.getItem("user"));
-  const user_id = user?.id;
 
   useEffect(() => {
-    if (user) {
-      fetchIncomes();
-    }
-    //return <Navigate to="/login" />;
+    fetch("http://localhost:5005/incomes")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch income");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setIncome(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
   }, []);
-
-  const fetchIncomes = async () => {
-    const token = localStorage.getItem("token");
-    try {
-      const response = await fetch(`http://localhost:5005/incomes/${user_id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch incomes");
-      }
-      const data = await response.json();
-      setIncome(data);
-      setLoading(false);
-    } catch (err) {
-      setError(err.message);
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    const confirmed = window.confirm("Diesen Income-Eintrag löschen?");
-    if (!confirmed) return;
-
-    try {
-      const res = await fetch(`http://localhost:5005/income/${user_id}/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Fehler beim Löschen");
-      }
+  const updateIncome = (user_id, id) => {
+    console.log("Update income with ID:", id);
+    fetch(`http://localhost:5005/income/${user_id}/${id}`, {
+      method: "UPDATE",
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to update income");
+        }
 
       setIncome((prev) => prev.filter((item) => item.id !== id));
     } catch (err) {
