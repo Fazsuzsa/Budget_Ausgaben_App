@@ -85,6 +85,7 @@ function Expenses() {
 
       {!loading && !error && (
         <div className="max-w-4xl mx-auto">
+          <div className="table-wrapper">
           <Table>
             <TableCaption></TableCaption>
             <TableHeader>
@@ -149,6 +150,7 @@ function Expenses() {
               </TableRow>
             </TableBody>
           </Table>
+          </div>
         </div>
       )}
 
