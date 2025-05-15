@@ -287,8 +287,7 @@ app.put(
   async (req, res) => {
     try {
       const { id, id_user } = req.params;
-      const { amount, name } = req.body;
-
+      const express = require("express");
       // Calcul first day of next month
       const nextMonthFirstDay = new Date();
 
@@ -312,13 +311,10 @@ app.put(
       if (originalRows.length === 0) {
         return res.status(404).send("Income not found");
       }
-
       const original = originalRows[0];
-
       const isSame =
         parseFloat(original.amount) === parseFloat(amount) &&
         original.name === name;
-
       if (isSame) {
         return res.status(200).json({ message: "No changes detected" });
       }
@@ -338,7 +334,6 @@ app.put(
     `;
       const insertValues = [id_user, amount, name, nextMonthFirstDay];
       const { rows: newRows } = await pool.query(insertQuery, insertValues);
-
       res.status(200).json({
         message: "Income updated with versioning",
         newEntry: newRows[0],
@@ -349,7 +344,41 @@ app.put(
     }
   }
 );
+app.post("/login", async (req, res) => {
+  const { e_mail, password } = req.body;
+  console.log("Request login:", e_mail, password);
 
+  try {
+    const result = await pool.query("SELECT * FROM users WHERE e_mail = $1", [
+      e_mail,
+    ]);
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.json({ error: "e_mail incorrect!" });
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(401).json({ error: "Passwort incorrect!" });
+    }
+
+    const token = jwt.sign(
+      { userId: user.id, e_mail: user.e_mail },
+      process.env.JWT_SECRET || "default_secret",
+      { expiresIn: "1d" }
+    );
+
+    res.json({
+      message: "Connexion OK",
+      user: { id: user.id, e_mail: user.e_mail },
+      token,
+    });
+  } catch (error) {
+    console.error("Error login:", error);
+    res.status(500).json({ error: "Error server" });
+  }
+});
 app.put("/income/:id_user/:id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -653,9 +682,7 @@ app.post(
   (async = async (req, res) => {
     const { year, month } = req.body;
     const { id_user } = req.params;
-
     console.log(`Request bar chart data for year: ${year}, month: ${month}`);
-
     const months = [
       "January",
       "February",
@@ -670,7 +697,6 @@ app.post(
       "November",
       "December",
     ];
-
     let chartData = [
       { month: "", expenses: 0.0, income: 0.0 },
       { month: "", expenses: 0.0, income: 0.0 },
@@ -685,24 +711,19 @@ app.post(
       { month: "", expenses: 0.0, income: 0.0 },
       { month: "", expenses: 0.0, income: 0.0 },
     ];
-
     for (let i = 0; i < 12; i++) {
       let i_month = month - i;
       let i_year = year;
-
       if (i_month < 1) {
         i_month = 12 + i_month;
         i_year--;
       }
-
       chartData[11 - i].month = months[i_month - 1];
-
       let result;
-
       try {
         result = await pool.query(
           `SELECT COALESCE(SUM(e.amount), 0) AS total_amount
-         FROM expenses e 
+         FROM expenses e
          WHERE e.user_id = $1
            AND EXTRACT(YEAR FROM e.date) = $2
            AND EXTRACT(MONTH FROM e.date) = $3;`,
@@ -712,14 +733,12 @@ app.post(
         console.error("Error checking expenses:", err);
         res.status(500).json({ error: "Internal server error" });
       }
-
       chartData[11 - i].expenses =
         chartData[11 - i].expenses + result.rows[0].total_amount;
-
       try {
         result = await pool.query(
           `SELECT COALESCE(SUM(i.amount), 0) AS total_amount
-         FROM incomes i 
+         FROM incomes i
          WHERE i.user_id = $1
            AND EXTRACT(YEAR FROM i.date) = $2
            AND EXTRACT(MONTH FROM i.date) = $3;`,
@@ -729,16 +748,12 @@ app.post(
         console.error("Error checking incomes:", err);
         res.status(500).json({ error: "Internal server error" });
       }
-
       chartData[11 - i].income =
         chartData[11 - i].expenses + result.rows[0].total_amount;
     }
-
     return res.json(chartData);
   })
 );
-
-// Must add the monthly_expenses and monthly incomes
 
 app.put(
   "/monthly_expenses/:id_user/:id",
