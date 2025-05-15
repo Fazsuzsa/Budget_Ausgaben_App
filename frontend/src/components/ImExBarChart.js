@@ -3,6 +3,7 @@ import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { ChartTooltip, ChartTooltipContent } from "./ui/chart";
 import { ChartLegend, ChartLegendContent } from "./ui/chart";
 import { ChartContainer } from "./ui/chart"; // No type imports in JS
+import { Navigate } from "react-router-dom";
 
 const chartData = [
   { month: "January", expenses: 186, income: 80 },
