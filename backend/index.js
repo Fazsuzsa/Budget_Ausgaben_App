@@ -77,6 +77,34 @@ app.get("/expenses/:user_id", authenticateToken, async (req, res) => {
   }
 });
 
+app.get("/expenses/:user_id/search", authenticateToken, async (req, res) => {
+  const { user_id } = req.params;
+  const { month } = req.query;
+
+  try {
+    let query = `
+      SELECT expenses.id, expenses.user_id, expenses.amount, expenses.name,
+             expenses.category_id, expenses.date, categories.category
+      FROM public.expenses
+      JOIN public.categories ON expenses.category_id = categories.id
+      WHERE expenses.user_id = $1
+    `;
+    const values = [user_id];
+
+    if (month) {
+      const monthNumber = new Date(`${month} 1, 2000`).getMonth() + 1;
+      query += " AND EXTRACT(MONTH FROM expenses.date) = $2";
+      values.push(monthNumber);
+    }
+
+    const result = await pool.query(query, values);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Fehler beim Abrufen der Ausgaben:", err);
+    res.status(500).json({ error: "Interner Serverfehler" });
+  }
+});
+
 app.post("/expenses", authenticateToken, async (req, res) => {
   const { user_id, category_id, amount, name, date } = req.body;
 
@@ -259,7 +287,6 @@ app.put(
   async (req, res) => {
     try {
       const { id, id_user } = req.params;
-
       const express = require("express");
       // Calcul first day of next month
       const nextMonthFirstDay = new Date();
@@ -292,14 +319,13 @@ app.put(
         return res.status(200).json({ message: "No changes detected" });
       }
 
-
       const updateQuery = `
       UPDATE monthly_incomes
-      SET amount = $1, name = $2, date_start = $3, date_end = $4
-      WHERE id = $5 AND user_id = $6
+      SET date_end = $1
+      WHERE id = $2 AND user_id = $3
       RETURNING *;
     `;
-
+      await pool.query(updateQuery, [lastDay, id, id_user]);
 
       const insertQuery = `
       INSERT INTO monthly_incomes (user_id, amount, name, date_start)
@@ -308,10 +334,9 @@ app.put(
     `;
       const insertValues = [id_user, amount, name, nextMonthFirstDay];
       const { rows: newRows } = await pool.query(insertQuery, insertValues);
-
       res.status(200).json({
-        message: "Income updated successfully",
-        updatedEntry: rows[0],
+        message: "Income updated with versioning",
+        newEntry: newRows[0],
       });
     } catch (err) {
       console.error(err);
@@ -319,16 +344,6 @@ app.put(
     }
   }
 );
-app.post("/login", async (req, res) => {
-  const { e_mail, password } = req.body;
-  console.log("Request login:", e_mail, password);
-
-  try {
-    const result = await pool.query("SELECT * FROM users WHERE e_mail = $1", [
-      e_mail,
-    ]);
-    const user = result.rows[0];
-
 app.post("/login", async (req, res) => {
   const { e_mail, password } = req.body;
   console.log("Request login:", e_mail, password);
@@ -364,8 +379,6 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ error: "Error server" });
   }
 });
-
-
 app.put("/income/:id_user/:id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
