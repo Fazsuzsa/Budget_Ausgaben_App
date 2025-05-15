@@ -350,6 +350,43 @@ app.put(
   }
 );
 
+app.post("/login", async (req, res) => {
+  const { e_mail, password } = req.body;
+  console.log("Request login:", e_mail, password);
+
+  try {
+    const result = await pool.query("SELECT * FROM users WHERE e_mail = $1", [
+      e_mail,
+    ]);
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.json({ error: "e_mail incorrect!" });
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(401).json({ error: "Passwort incorrect!" });
+    }
+
+    const token = jwt.sign(
+      { userId: user.id, e_mail: user.e_mail },
+      process.env.JWT_SECRET || "default_secret",
+      { expiresIn: "1d" }
+    );
+
+    res.json({
+      message: "Connexion OK",
+      user: { id: user.id, e_mail: user.e_mail },
+      token,
+    });
+  } catch (error) {
+    console.error("Error login:", error);
+    res.status(500).json({ error: "Error server" });
+  }
+});
+
+
 app.put("/income/:id_user/:id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -849,6 +886,35 @@ app.get(
     }
   }
 );
+// '
+// app.get(
+//   "/expenses/sum/:user_id",
+//   authenticateToken,
+//   async (req, res) => {
+//     const { user_id } = req.params;
+//     const currentDate = new Date();
+//     const currentMonth = currentDate.getMonth() + 1; // janvier = 0
+//     const currentYear = currentDate.getFullYear();
+
+//     try {
+//         const expensesResult = await pool.query(
+//       `
+//       SELECT SUM(amount) AS total_expenses
+//       FROM expenses
+//       WHERE user_id = $1
+//         AND EXTRACT(YEAR FROM date) = EXTRACT(YEAR FROM CURRENT_DATE)
+//         AND EXTRACT(MONTH FROM date) = EXTRACT(MONTH FROM CURRENT_DATE);
+//       `,
+//       [user_id]
+//     );
+
+//       res.json({ totalMonthlyExpenses: result.rows[0].total_monthly_expenses });
+//     } catch (err) {
+//       console.error("Error calculating monthly expenses:", err);
+//       res.status(500).json({ error: "Error server" });
+//     }
+//   }
+// );'
 
 app.get("/total_expenses/:user_id", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
