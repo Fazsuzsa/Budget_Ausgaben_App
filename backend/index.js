@@ -77,6 +77,34 @@ app.get("/expenses/:user_id", authenticateToken, async (req, res) => {
   }
 });
 
+app.get("/expenses/:user_id/search", authenticateToken, async (req, res) => {
+  const { user_id } = req.params;
+  const { month } = req.query;
+
+  try {
+    let query = `
+      SELECT expenses.id, expenses.user_id, expenses.amount, expenses.name,
+             expenses.category_id, expenses.date, categories.category
+      FROM public.expenses
+      JOIN public.categories ON expenses.category_id = categories.id
+      WHERE expenses.user_id = $1
+    `;
+    const values = [user_id];
+
+    if (month) {
+      const monthNumber = new Date(`${month} 1, 2000`).getMonth() + 1;
+      query += " AND EXTRACT(MONTH FROM expenses.date) = $2";
+      values.push(monthNumber);
+    }
+
+    const result = await pool.query(query, values);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Fehler beim Abrufen der Ausgaben:", err);
+    res.status(500).json({ error: "Interner Serverfehler" });
+  }
+});
+
 app.post("/expenses", authenticateToken, async (req, res) => {
   const { user_id, category_id, amount, name, date } = req.body;
 
@@ -135,7 +163,6 @@ app.get("/monthly_expenses/:user_id", authenticateToken, async (req, res) => {
 });
 
 app.post("/monthly_expenses", authenticateToken, async (req, res) => {
-
   const { user_id, category_id, amount, name, date_start, date_end } = req.body;
 
   if (!user_id || !category_id || !amount || !date_start) {

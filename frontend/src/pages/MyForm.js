@@ -36,7 +36,10 @@ export default function MyForm() {
       setName(expense.name || "");
       setAmount(expense.amount || "");
       setCategoryId(expense.category_id || "");
-      setDate(expense.date || "");
+      const formattedDate = expense.date
+        ? new Date(expense.date).toISOString().slice(0, 10)
+        : "";
+      setDate(formattedDate);
     }
   }, [expense, paramExpenseId, paramUserId]);
 
@@ -125,7 +128,7 @@ export default function MyForm() {
                 <div className="grid gap-2">
                   <Label>Date</Label>
                   <Input
-                    type="text"
+                    type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
                     required

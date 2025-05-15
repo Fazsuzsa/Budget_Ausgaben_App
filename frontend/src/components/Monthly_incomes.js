@@ -91,7 +91,9 @@ function Monthly_incomes() {
               <TableRow>
                 <TableHead className="w-[100px]">Name</TableHead>
                 <TableHead>Price (€)</TableHead>
-                <TableHead className="text-right">Aktion</TableHead>
+                <TableHead>Start Date</TableHead>
+                <TableHead>End Date</TableHead>
+                <TableHead className="text-right">Aktionen</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -99,6 +101,16 @@ function Monthly_incomes() {
                 <TableRow key={income.id}>
                   <TableCell className="font-medium">{income.name}</TableCell>
                   <TableCell>{parseFloat(income.amount).toFixed(2)}</TableCell>
+                  <TableCell>
+                    {income.date_start
+                      ? new Date(income.date_start).toLocaleDateString()
+                      : "No start date"}
+                  </TableCell>
+                  <TableCell>
+                    {income.date_end
+                      ? new Date(income.date_end).toLocaleDateString()
+                      : "Ongoing"}
+                  </TableCell>
                   <TableCell className="text-right">
                     <Link
                       to={`/edit-monthly-income/${income.user_id}/${income.id}`}
