@@ -17,6 +17,7 @@ import Navbar from "../components/Navbar";
 export default function MyForm() {
   const { state } = useLocation();
   const expense = state?.expense;
+  const token = localStorage.getItem("token");
   const navigate = useNavigate();
   const { userId: paramUserId, expenseId: paramExpenseId } = useParams();
 

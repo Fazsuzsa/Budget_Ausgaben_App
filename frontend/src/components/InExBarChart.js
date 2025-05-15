@@ -5,14 +5,17 @@ import { ChartLegend, ChartLegendContent } from "./ui/chart";
 import { ChartContainer } from "./ui/chart"; // No type imports in JS
 import { Navigate } from "react-router-dom";
 
-const chartData = [
-  { month: "January", expenses: 186, income: 80 },
-  { month: "February", expenses: 305, income: 200 },
-  { month: "March", expenses: 237, income: 120 },
-  { month: "April", expenses: 73, income: 190 },
-  { month: "May", expenses: 209, income: 130 },
-  { month: "June", expenses: 214, income: 140 },
-];
+const user = JSON.parse(localStorage.getItem("user"));
+const user_id = user?.id; // ohne Token nur der user
+
+// const chartData = [
+// { month: "January", expenses: 186, income: 80 },
+// { month: "February", expenses: 305, income: 200 },
+// { month: "March", expenses: 237, income: 120 },
+// { month: "April", expenses: 73, income: 190 },
+// { month: "May", expenses: 209, income: 130 },
+// { month: "June", expenses: 214, income: 140 },
+// ];
 
 const chartConfig = {
   expenses: {
@@ -25,43 +28,42 @@ const chartConfig = {
   },
 };
 
-const ImExBarChart = () => {
+const InExBarChart = () => {
   const now = new Date();
   const year = now.getFullYear().toString();
   const month = (now.getMonth() + 1).toString();
 
-  const [chartData, setChartData] = useState({
-    labels: [],
-    datasets: [
-      {
-        data: [],
-        backgroundColor: [],
-      },
-    ],
-  });
-
-  const user = JSON.parse(localStorage.getItem("user"));
-  const user_id = user?.id; // ohne Token nur der user
+  const [chartData, setChartData] = useState([
+    { month: "", expenses: 0, income: 0 },
+  ]);
 
   useEffect(() => {
-    const fetchChartData = async () => {
-      if (!year || !month) return;
+    const user = JSON.parse(localStorage.getItem("user"));
+    const user_id = user?.id; // ohne Token nur der user
+    if (!user_id) return; // User not logged in || !month) return;
 
+    const fetchChartData = async () => {
       const payload = {
         year: parseFloat(year),
         month: parseFloat(month),
       };
 
       try {
-        const res = await fetch(`http://localhost:5005/piedata/${user_id}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+        const res = await fetch(
+          `http://localhost:5005/barchartdata/${user_id}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+          }
+        );
 
         if (res.ok) {
           const data = await res.json();
-          setChartData(data); // Update pie chart data
+          setChartData(data); // Update bar chart data
         } else {
           const err = await res.json();
           console.error("Backend error:", err.error);
@@ -74,8 +76,10 @@ const ImExBarChart = () => {
     fetchChartData();
   }, [year, month]); // Runs whenever year or month changes
 
-  const isChartEmpty = chartData && chartData.labels.length === 0;
-
+  const token = localStorage.getItem("token");
+  if (!token) {
+    return <Navigate to="/login" />;
+  }
   return (
     <>
       <ChartContainer
@@ -101,4 +105,4 @@ const ImExBarChart = () => {
   );
 };
 
-export default ImExBarChart;
+export default InExBarChart;
