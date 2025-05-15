@@ -14,12 +14,39 @@ function Monthly_incomes() {
   const [income, setIncome] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [monthlySum, setMonthlySum] = useState(0);
   const user = JSON.parse(localStorage.getItem("user"));
   const user_id = user?.id;
 
   useEffect(() => {
     fetchMonthlyIncomes();
+    fetchMonthlyIncomesSum();
   }, []);
+  const fetchMonthlyIncomesSum = async () => {
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await fetch(
+        `http://localhost:5005/monthly_incomes/sum/${user_id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch sum");
+      }
+
+      const data = await response.json();
+      setMonthlySum(data.totalMonthlyIncomes || 0);
+    } catch (err) {
+      console.error("Error fetching sum:", err.message);
+    }
+  };
 
   const fetchMonthlyIncomes = async () => {
     const token = localStorage.getItem("token");
@@ -91,7 +118,9 @@ function Monthly_incomes() {
               <TableRow>
                 <TableHead className="w-[100px]">Name</TableHead>
                 <TableHead>Price (€)</TableHead>
-                <TableHead className="text-right">Aktion</TableHead>
+                <TableHead>Start Date</TableHead>
+                <TableHead>End Date</TableHead>
+                <TableHead className="text-right">Aktionen</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -99,6 +128,16 @@ function Monthly_incomes() {
                 <TableRow key={income.id}>
                   <TableCell className="font-medium">{income.name}</TableCell>
                   <TableCell>{parseFloat(income.amount).toFixed(2)}</TableCell>
+                  <TableCell>
+                    {income.date_start
+                      ? new Date(income.date_start).toLocaleDateString()
+                      : "No start date"}
+                  </TableCell>
+                  <TableCell>
+                    {income.date_end
+                      ? new Date(income.date_end).toLocaleDateString()
+                      : "Ongoing"}
+                  </TableCell>
                   <TableCell className="text-right">
                     <Link
                       to={`/edit-monthly-income/${income.user_id}/${income.id}`}
@@ -126,15 +165,10 @@ function Monthly_incomes() {
                 <TableCell className="font-medium">
                   Sum Monthly Incomes
                 </TableCell>
-                <TableCell>
-                  {income
-                    .reduce(
-                      (sum, item) => sum + parseFloat(item.amount || 0),
-                      0
-                    )
-                    .toFixed(2)}{" "}
-                  €
-                </TableCell>
+                <TableCell>{parseFloat(monthlySum).toFixed(2)} €</TableCell>
+
+                <TableCell />
+                <TableCell />
                 <TableCell />
               </TableRow>
             </TableBody>

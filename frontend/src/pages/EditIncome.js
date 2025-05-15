@@ -35,7 +35,10 @@ export default function EditIncome() {
       setUserId(income.user_id || paramUserId);
       setName(income.name || "");
       setAmount(income.amount || "");
-      setDate(income.date || "");
+      const formattedDate = income.date
+        ? new Date(income.date).toISOString().slice(0, 10)
+        : "";
+      setDate(formattedDate);
     }
   }, [income, paramIncomeId, paramUserId]);
 
@@ -49,6 +52,7 @@ export default function EditIncome() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify({
             amount: amount,
@@ -65,7 +69,7 @@ export default function EditIncome() {
       const updatedIncome = await response.json();
       console.log("Update successful:", updatedIncome);
       setMessage("Income updated successfully!");
-      setTimeout(() => navigate("/income"), 1000);
+      setTimeout(() => navigate("/incomes"), 1000);
     } catch (err) {
       console.error(err);
       alert("An error occurred while updating the income.");
@@ -122,7 +126,7 @@ export default function EditIncome() {
                 <div className="grid gap-2">
                   <Label>Date</Label>
                   <Input
-                    type="text"
+                    type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
                     required

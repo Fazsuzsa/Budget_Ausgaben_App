@@ -77,6 +77,34 @@ app.get("/expenses/:user_id", authenticateToken, async (req, res) => {
   }
 });
 
+app.get("/expenses/:user_id/search", authenticateToken, async (req, res) => {
+  const { user_id } = req.params;
+  const { month } = req.query;
+
+  try {
+    let query = `
+      SELECT expenses.id, expenses.user_id, expenses.amount, expenses.name,
+             expenses.category_id, expenses.date, categories.category
+      FROM public.expenses
+      JOIN public.categories ON expenses.category_id = categories.id
+      WHERE expenses.user_id = $1
+    `;
+    const values = [user_id];
+
+    if (month) {
+      const monthNumber = new Date(`${month} 1, 2000`).getMonth() + 1;
+      query += " AND EXTRACT(MONTH FROM expenses.date) = $2";
+      values.push(monthNumber);
+    }
+
+    const result = await pool.query(query, values);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Fehler beim Abrufen der Ausgaben:", err);
+    res.status(500).json({ error: "Interner Serverfehler" });
+  }
+});
+
 app.post("/expenses", authenticateToken, async (req, res) => {
   const { user_id, category_id, amount, name, date } = req.body;
 
@@ -259,26 +287,56 @@ app.put(
   async (req, res) => {
     try {
       const { id, id_user } = req.params;
-      const { amount, name, date_start, date_end } = req.body;
+      const { amount, name } = req.body;
+      // Calcul first day of next month
+      const nextMonthFirstDay = new Date();
+
+      nextMonthFirstDay.setMonth(nextMonthFirstDay.getMonth() + 1);
+      nextMonthFirstDay.setDate(1);
+      const lastDay = new Date(nextMonthFirstDay);
+      lastDay.setDate(lastDay.getDate() - 1);
+      nextMonthFirstDay.setUTCHours(0, 0, 0, 0);
+      lastDay.setUTCHours(0, 0, 0, 0);
+      console.log(nextMonthFirstDay, lastDay);
+
+      const selectQuery = `
+      SELECT * FROM monthly_incomes
+      WHERE id = $1 AND user_id = $2;
+    `;
+      const { rows: originalRows } = await pool.query(selectQuery, [
+        id,
+        id_user,
+      ]);
+
+      if (originalRows.length === 0) {
+        return res.status(404).send("Income not found");
+      }
+      const original = originalRows[0];
+      const isSame =
+        parseFloat(original.amount) === parseFloat(amount) &&
+        original.name === name;
+      if (isSame) {
+        return res.status(200).json({ message: "No changes detected" });
+      }
 
       const updateQuery = `
       UPDATE monthly_incomes
-      SET amount = $1, name = $2, date_start = $3, date_end = $4
-      WHERE id = $5 AND user_id = $6
+      SET date_end = $1
+      WHERE id = $2 AND user_id = $3
       RETURNING *;
     `;
+      await pool.query(updateQuery, [lastDay, id, id_user]);
 
-      const updateValues = [amount, name, date_start, id, id_user];
-
-      const { rows } = await pool.query(updateQuery, updateValues);
-
-      if (rows.length === 0) {
-        return res.status(404).json({ message: "Income not found" });
-      }
-
+      const insertQuery = `
+      INSERT INTO monthly_incomes (user_id, amount, name, date_start)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *;
+    `;
+      const insertValues = [id_user, amount, name, nextMonthFirstDay];
+      const { rows: newRows } = await pool.query(insertQuery, insertValues);
       res.status(200).json({
-        message: "Income updated successfully",
-        updatedEntry: rows[0],
+        message: "Income updated with versioning",
+        newEntry: newRows[0],
       });
     } catch (err) {
       console.error(err);
@@ -322,6 +380,7 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ error: "Error server" });
   }
 });
+
 
 app.put("/income/:id_user/:id", authenticateToken, async (req, res) => {
   try {
@@ -626,9 +685,7 @@ app.post(
   (async = async (req, res) => {
     const { year, month } = req.body;
     const { id_user } = req.params;
-
     console.log(`Request bar chart data for year: ${year}, month: ${month}`);
-
     const months = [
       "January",
       "February",
@@ -643,7 +700,6 @@ app.post(
       "November",
       "December",
     ];
-
     let chartData = [
       { month: "", expenses: 0.0, income: 0.0 },
       { month: "", expenses: 0.0, income: 0.0 },
@@ -658,24 +714,19 @@ app.post(
       { month: "", expenses: 0.0, income: 0.0 },
       { month: "", expenses: 0.0, income: 0.0 },
     ];
-
     for (let i = 0; i < 12; i++) {
       let i_month = month - i;
       let i_year = year;
-
       if (i_month < 1) {
         i_month = 12 + i_month;
         i_year--;
       }
-
       chartData[11 - i].month = months[i_month - 1];
-
       let result;
-
       try {
         result = await pool.query(
           `SELECT COALESCE(SUM(e.amount), 0) AS total_amount
-         FROM expenses e 
+         FROM expenses e
          WHERE e.user_id = $1
            AND EXTRACT(YEAR FROM e.date) = $2
            AND EXTRACT(MONTH FROM e.date) = $3;`,
@@ -685,14 +736,12 @@ app.post(
         console.error("Error checking expenses:", err);
         res.status(500).json({ error: "Internal server error" });
       }
-
       chartData[11 - i].expenses =
         chartData[11 - i].expenses + result.rows[0].total_amount;
-
       try {
         result = await pool.query(
           `SELECT COALESCE(SUM(i.amount), 0) AS total_amount
-         FROM incomes i 
+         FROM incomes i
          WHERE i.user_id = $1
            AND EXTRACT(YEAR FROM i.date) = $2
            AND EXTRACT(MONTH FROM i.date) = $3;`,
@@ -702,17 +751,12 @@ app.post(
         console.error("Error checking incomes:", err);
         res.status(500).json({ error: "Internal server error" });
       }
-
       chartData[11 - i].income =
         chartData[11 - i].expenses + result.rows[0].total_amount;
     }
-
     return res.json(chartData);
   })
 );
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// Must add the monthly_expenses and monthly incomes
 
 app.put(
   "/monthly_expenses/:id_user/:id",
@@ -780,7 +824,7 @@ app.put(
       const { rows: newRows } = await pool.query(insertQuery, insertValues);
 
       res.status(200).json({
-        message: "Expense updated with versioning",
+        message: "Expense updated",
         newEntry: newRows[0],
       });
     } catch (err) {
@@ -801,7 +845,7 @@ app.get(
 
     try {
       const result = await pool.query(
-        `SELECT COALESCE(SUM(amount), 0) AS total_monthly_expenses
+        `SELECT SUM(amount) AS total_monthly_expenses
        FROM monthly_expenses
        WHERE user_id = $1
          AND (
@@ -823,6 +867,176 @@ app.get(
     }
   }
 );
+
+app.get(
+  "/monthly_incomes/sum/:user_id",
+  authenticateToken,
+  async (req, res) => {
+    const { user_id } = req.params;
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1; // janvier = 0
+    const currentYear = currentDate.getFullYear();
+
+    try {
+      const result = await pool.query(
+        `SELECT SUM(amount) AS total_monthly_incomes
+       FROM monthly_incomes
+       WHERE user_id = $1
+         AND (
+           (EXTRACT(YEAR FROM date_start) < $2 OR 
+           (EXTRACT(YEAR FROM date_start) = $2 AND EXTRACT(MONTH FROM date_start) <= $3))
+         )
+         AND (
+           date_end IS NULL OR 
+           (EXTRACT(YEAR FROM date_end) > $2 OR 
+           (EXTRACT(YEAR FROM date_end) = $2 AND EXTRACT(MONTH FROM date_end) >= $3))
+         );`,
+        [user_id, currentYear, currentMonth]
+      );
+
+      res.json({ totalMonthlyIncomes: result.rows[0].total_monthly_incomes });
+    } catch (err) {
+      console.error("Error calculating monthly incomes:", err);
+      res.status(500).json({ error: "Error server" });
+    }
+  }
+);
+
+
+app.get(
+  "/expenses/sum/:user_id",
+  authenticateToken,
+  async (req, res) => {
+    const { user_id } = req.params;
+
+    try {
+      const expensesResult = await pool.query(
+        `
+        SELECT SUM(amount) AS total_expenses
+        FROM expenses
+        WHERE user_id = $1
+          AND EXTRACT(YEAR FROM date) = EXTRACT(YEAR FROM CURRENT_DATE)
+          AND EXTRACT(MONTH FROM date) = EXTRACT(MONTH FROM CURRENT_DATE);
+        `,
+        [user_id]
+      );
+
+      res.json({ totalExpenses: expensesResult.rows[0].total_expenses });
+    } catch (err) {
+      console.error("Error calculating monthly expenses:", err);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+
+
+app.get(
+  "/incomes/sum/:user_id",
+  authenticateToken,
+  async (req, res) => {
+    const { user_id } = req.params;
+
+    try {
+      const incomesResult = await pool.query(
+        `
+        SELECT SUM(amount) AS total_incomes
+        FROM incomes
+        WHERE user_id = $1
+          AND EXTRACT(YEAR FROM date) = EXTRACT(YEAR FROM CURRENT_DATE)
+          AND EXTRACT(MONTH FROM date) = EXTRACT(MONTH FROM CURRENT_DATE);
+        `,
+        [user_id]
+      );
+
+      res.json({ totalIncomes: incomesResult.rows[0].total_incomes });
+    } catch (err) {
+      console.error("Error calculating monthly incomes:", err);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+
+
+
+app.get("/total_balance/:user_id", authenticateToken, async (req, res) => {
+  const { user_id } = req.params;
+
+  try {
+    const expensesQuery = `
+      SELECT SUM(amount) AS total
+      FROM expenses
+      WHERE user_id = $1
+        AND EXTRACT(YEAR FROM date) = EXTRACT(YEAR FROM CURRENT_DATE)
+        AND EXTRACT(MONTH FROM date) = EXTRACT(MONTH FROM CURRENT_DATE)
+    `;
+
+    const monthlyExpensesQuery = `
+      SELECT SUM(amount) AS total
+      FROM monthly_expenses
+      WHERE user_id = $1
+        AND date_start <= DATE_TRUNC('month', CURRENT_DATE)
+        AND (date_end IS NULL OR date_end >= DATE_TRUNC('month', CURRENT_DATE))
+    `;
+
+    const incomeQuery = `
+      SELECT SUM(amount) AS total
+      FROM incomes
+      WHERE user_id = $1
+        AND EXTRACT(YEAR FROM date) = EXTRACT(YEAR FROM CURRENT_DATE)
+        AND EXTRACT(MONTH FROM date) = EXTRACT(MONTH FROM CURRENT_DATE)
+    `;
+
+    const monthlyIncomeQuery = `
+      SELECT SUM(amount) AS total
+      FROM monthly_incomes
+      WHERE user_id = $1
+        AND date_start <= DATE_TRUNC('month', CURRENT_DATE)
+        AND (date_end IS NULL OR date_end >= DATE_TRUNC('month', CURRENT_DATE))
+    `;
+
+    const [expensesResult, monthlyExpResult, incomeResult, monthlyIncResult] = await Promise.all([
+      pool.query(expensesQuery, [user_id]),
+      pool.query(monthlyExpensesQuery, [user_id]),
+      pool.query(incomeQuery, [user_id]),
+      pool.query(monthlyIncomeQuery, [user_id])
+    ]);
+
+    const totalExpenses =
+      (expensesResult.rows[0].total || 0) +
+      (monthlyExpResult.rows[0].total || 0);
+
+    const totalIncome =
+      (incomeResult.rows[0].total || 0) +
+      (monthlyIncResult.rows[0].total || 0);
+
+
+    let balance = totalIncome - totalExpenses;
+
+
+    let debitPerMonth = null;
+    let message = null;
+    if (balance < 0) {
+      message = `To recover your balance, you need to divide the debit over the next 4 months. Save ${Math.abs(debitPerMonth).toFixed(2)} € each month to avoid further debt.`;
+    }
+
+
+
+    if (totalExpenses > totalIncome) {
+      message = "Warning: Your expenses exceed your income this month!";
+    }
+
+    res.json({
+      totalExpenses,
+      totalIncome,
+      balance,
+      debitPerMonth,
+      message
+    });
+  } catch (err) {
+    console.error("Error calculating totals:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);

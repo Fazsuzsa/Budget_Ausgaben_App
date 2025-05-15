@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Navigate } from "react-router-dom";
 import AddIncomeForm from "./AddIncome";
 import {
@@ -12,6 +13,7 @@ import {
 } from "./ui/table";
 function Income() {
   const [income, setIncome] = useState([]);
+  const [Sum, setSum] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const user = JSON.parse(localStorage.getItem("user"));
@@ -19,6 +21,7 @@ function Income() {
   useEffect(() => {
     if (user) {
       fetchIncomes();
+      fetchIncomesSum();
     }
     //return <Navigate to="/login" />;
   }, []);
@@ -59,6 +62,33 @@ function Income() {
       alert("Löschen fehlgeschlagen: " + err.message);
     }
   };
+
+  const fetchIncomesSum = async () => {
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await fetch(
+        `http://localhost:5005/incomes/sum/${user_id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch sum");
+      }
+
+      const data = await response.json();
+      setSum(data.totalIncomes || 0);
+    } catch (err) {
+      console.error("Error fetching sum:", err.message);
+    }
+  };
+
   return (
     <>
       <h1 className="text-2xl font-bold text-center my-6">One-Time Incomes</h1>
@@ -67,7 +97,7 @@ function Income() {
       {!loading && !error && (
         <div className="max-w-4xl mx-auto">
           <Table>
-            <TableCaption>Einnahmen des Nutzers</TableCaption>
+            <TableCaption></TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[100px]">Name</TableHead>
@@ -88,6 +118,13 @@ function Income() {
                     {new Date(income.date).toISOString().split("T")[0]}
                   </TableCell>
                   <TableCell className="text-right">
+                    <Link
+                      to={`/edit-income/${income.user_id}/${income.id}`}
+                      state={{ income }}
+                      className="text-blue-500 underline"
+                    >
+                      Edit
+                    </Link>
                     <button
                       onClick={() => handleDelete(income.id)}
                       className="text-red-500 underline"
@@ -106,12 +143,7 @@ function Income() {
               >
                 <TableCell>Sum One-Time Incomes</TableCell>
                 <TableCell>
-                  {income
-                    .reduce(
-                      (sum, item) => sum + parseFloat(item.amount || 0),
-                      0
-                    )
-                    .toFixed(2)}{" "}
+                  {parseFloat(Sum).toFixed(2)}
                   €
                 </TableCell>
                 <TableCell />

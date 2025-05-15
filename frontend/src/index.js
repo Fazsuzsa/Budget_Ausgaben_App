@@ -28,7 +28,14 @@ root.render(
         <Route path="/about" element={<About></About>}></Route>
         <Route path="/login" element={<Login></Login>}></Route>
         <Route path="/test" element={<FormExpenses></FormExpenses>}></Route>
-        <Route path="/edit-monthly-income/:user_id/:id" element={<EditMonthlyIncome />}></Route>
+        <Route
+          path="/edit-income/:userId/:expenseId"
+          element={<EditIncome></EditIncome>}
+        ></Route>
+        <Route
+          path="/edit-monthly-income/:user_id/:id"
+          element={<EditMonthlyIncome />}
+        ></Route>
         <Route
           path="/edit-expense/:userId/:expenseId"
           element={<MyForm></MyForm>}
@@ -37,7 +44,6 @@ root.render(
           path="/edit-monthlyexpense/:userId/:expenseId"
           element={<EditMonthExpense></EditMonthExpense>}
         ></Route>
-
         <Route path="/dark_light" element={<Dark_light></Dark_light>}></Route>
 
         {/*<Route path="/Expenses" element={<Expenses></Expenses>}></Route>
