@@ -287,7 +287,7 @@ app.put(
   async (req, res) => {
     try {
       const { id, id_user } = req.params;
-      const express = require("express");
+      const { amount, name } = req.body;
       // Calcul first day of next month
       const nextMonthFirstDay = new Date();
 
