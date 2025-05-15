@@ -16,11 +16,13 @@ function Expenses() {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [Sum, setSum] = useState(0);
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?.id;
 
   useEffect(() => {
     fetchExpenses();
+    fetchExpensesSum();
   }, []);
   const fetchExpenses = async () => {
     const token = localStorage.getItem("token");
@@ -73,6 +75,32 @@ function Expenses() {
       setExpenses((prev) => prev.filter((e) => e.id !== id));
     } catch (err) {
       alert("Löschen fehlgeschlagen: " + err.message);
+    }
+  };
+
+  const fetchExpensesSum = async () => {
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await fetch(
+        `http://localhost:5005/expenses/sum/${userId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch sum");
+      }
+
+      const data = await response.json();
+      setSum(data.totalExpenses || 0);
+    } catch (err) {
+      console.error("Error fetching sum:", err.message);
     }
   };
 
@@ -136,12 +164,7 @@ function Expenses() {
               >
                 <TableCell className="font-medium">Sum Expenses</TableCell>
                 <TableCell>
-                  {expenses
-                    .reduce(
-                      (sum, item) => sum + parseFloat(item.amount || 0),
-                      0
-                    )
-                    .toFixed(2)}{" "}
+                  {parseFloat(Sum).toFixed(2)}
                   €
                 </TableCell>
                 <TableCell></TableCell>
