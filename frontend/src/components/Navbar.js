@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/images/AppIcon.png";
-import "../styles/navbar.css";
+import "../styles/responsive.css";
 
 function Navbar() {
   const user = JSON.parse(localStorage.getItem("user"));

@@ -1,3 +1,5 @@
+/* Anvbar*/
+
 .hamburger {
   display: none;
   font-size: 2rem;
@@ -35,4 +37,12 @@
   .navbar-links.open {
     display: flex;
   }
+}
+
+
+/*Tabellen*/
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
 }
