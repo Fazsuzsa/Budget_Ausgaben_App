@@ -291,6 +291,7 @@ app.put(
         return res.status(200).json({ message: "No changes detected" });
       }
 
+
       const updateQuery = `
       UPDATE monthly_incomes
       SET amount = $1, name = $2, date_start = $3, date_end = $4
@@ -317,6 +318,12 @@ app.put(
     }
   }
 );
+
+  try {
+    const result = await pool.query("SELECT * FROM users WHERE e_mail = $1", [
+      e_mail,
+    ]);
+    const user = result.rows[0];
 
 app.post("/login", async (req, res) => {
   const { e_mail, password } = req.body;
