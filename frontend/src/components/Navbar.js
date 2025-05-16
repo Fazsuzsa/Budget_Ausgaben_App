@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/images/AppIcon.png";
 import "../styles/responsive.css";
+import { ModeToggle } from "./ModeToggle";
 
 function Navbar() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -48,6 +49,10 @@ function Navbar() {
             Logout
           </button>
         </div>
+      </div>
+
+      <div style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)" }}>
+        <ModeToggle />
       </div>
     </div>
   );

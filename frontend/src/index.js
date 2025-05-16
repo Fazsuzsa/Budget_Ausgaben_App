@@ -16,45 +16,31 @@ import EditIncome from "./pages/EditIncome";
 import Expenses from "./components/Expenses";
 import EditMonthExpense from "./pages/EditMonthExpense";
 import EditMonthlyIncome from "./pages/EditMonthlyIncome";
+import { ThemeProvider } from "next-themes";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <Router>
-      <Routes>
-        <Route path="/" element={<App></App>}></Route>
-        <Route path="/expenses" element={<ExpensesNav></ExpensesNav>}></Route>
-        <Route path="/incomes" element={<IncomesNav></IncomesNav>}></Route>
-        <Route path="/about" element={<About></About>}></Route>
-        <Route path="/login" element={<Login></Login>}></Route>
-        <Route path="/test" element={<FormExpenses></FormExpenses>}></Route>
-        <Route
-          path="/edit-income/:userId/:expenseId"
-          element={<EditIncome></EditIncome>}
-        ></Route>
-        <Route
-          path="/edit-monthly-income/:user_id/:id"
-          element={<EditMonthlyIncome />}
-        ></Route>
-        <Route
-          path="/edit-expense/:userId/:expenseId"
-          element={<MyForm></MyForm>}
-        ></Route>
-        <Route
-          path="/edit-monthlyexpense/:userId/:expenseId"
-          element={<EditMonthExpense></EditMonthExpense>}
-        ></Route>
-        <Route path="/dark_light" element={<Dark_light></Dark_light>}></Route>
-
-        {/*<Route path="/Expenses" element={<Expenses></Expenses>}></Route>
-          <Route
-            path="/Categories/:id"
-            element={<Categories></Categories>}
-          ></Route>
-          <Route path="/incomes" element={<incomes></incomes>}></Route>
-          <Route path="/Users/:id" element={<Users></Users>}></Route>*/}
-      </Routes>
-    </Router>
+    <React.StrictMode>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <Router>
+          <Routes>
+            <Route path="/" element={<App />} />
+            <Route path="/expenses" element={<ExpensesNav />} />
+            <Route path="/incomes" element={<IncomesNav />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/test" element={<FormExpenses />} />
+            <Route path="/edit-income/:userId/:expenseId" element={<EditIncome />} />
+            <Route path="/edit-monthly-income/:user_id/:id" element={<EditMonthlyIncome />} />
+            <Route path="/edit-expense/:userId/:expenseId" element={<MyForm />} />
+            <Route path="/edit-monthlyexpense/:userId/:expenseId" element={<EditMonthExpense />} />
+            <Route path="/dark_light" element={<Dark_light />} />
+            {/* autres routes */}
+          </Routes>
+        </Router>
+      </ThemeProvider>
+    </React.StrictMode>
   </React.StrictMode>
 );
 
