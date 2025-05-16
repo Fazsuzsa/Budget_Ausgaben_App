@@ -1,7 +1,5 @@
-// seed.js
 import { faker } from "@faker-js/faker";
 import pg from "pg";
-
 const pool = new pg.Pool({
   user: "postgres",
   host: "localhost",
@@ -40,7 +38,7 @@ async function seedExpenses(user_id, count = 20) {
       categoryIds[Math.floor(Math.random() * categoryIds.length)];
     await pool.query(
       `INSERT INTO expenses (user_id, name, amount, date, category_id)
-       VALUES ($1, $2, $3, $4,$5)`,
+       VALUES ($1, $2, $3, $4, $5)`,
       [
         user_id,
         faker.commerce.product(),

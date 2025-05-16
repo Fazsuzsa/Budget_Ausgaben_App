@@ -683,7 +683,7 @@ app.post(
   authenticateToken,
   (async = async (req, res) => {
     const { year, month } = req.body;
-    const { id_user } = req.params;
+    const { user_id } = req.params;
     console.log(`Request bar chart data for year: ${year}, month: ${month}`);
     const months = [
       "January",
@@ -723,89 +723,116 @@ app.post(
       chartData[11 - i].month = months[i_month - 1];
       let result;
       try {
-        result = await pool.query(
-          `SELECT COALESCE(SUM(e.amount), 0) AS total_amount
-          FROM expenses e
-          WHERE e.user_id = $1
-            AND EXTRACT(YEAR FROM e.date) = $2
-            AND EXTRACT(MONTH FROM e.date) = $3;`,
-          [id_user, i_year, i_month]
-        );
-      } catch (err) {
-        console.error("Error checking expenses:", err);
-        res.status(500).json({ error: "Internal server error" });
-      }
-      chartData[11 - i].expenses = result.rows[0].total_amount;
+        const expensesQuery = `
+      SELECT SUM(amount) AS total
+      FROM expenses
+      WHERE user_id = $1
+         AND EXTRACT(YEAR FROM date) = EXTRACT(YEAR FROM CURRENT_DATE)
+        AND EXTRACT(MONTH FROM date) = EXTRACT(MONTH FROM CURRENT_DATE)
+    `;
 
-      try {
-        result = await pool.query(
-          `SELECT COALESCE(SUM(e.amount), 0) AS total_amount
-            FROM monthly_expenses e
-            WHERE e.user_id = $1 AND
-              ( (EXTRACT(YEAR FROM date_start) < $2
-                OR (EXTRACT(YEAR FROM date_start) = $2
-                    AND EXTRACT(MONTH FROM date_start) <= $3)
-                ) AND
-              (date_end IS NULL OR
-              (EXTRACT(YEAR FROM date_end) > $2
-                OR (EXTRACT(YEAR FROM date_end) = $2
-                    AND EXTRACT(MONTH FROM date_end) >= $3
-                ))
-              )
-            )`,
-          [id_user, i_year, i_month]
-        );
-      } catch (err) {
-        console.error("Error checking rxpenses:", err);
-        res.status(500).json({ error: "Internal server error" });
-      }
+    const monthlyExpensesQuery = `
+      SELECT SUM(amount) AS total
+      FROM monthly_expenses
+      WHERE user_id = $1
+         AND date_start <= DATE_TRUNC('month', CURRENT_DATE)
+        AND (date_end IS NULL OR date_end >= DATE_TRUNC('month', CURRENT_DATE))
+    `;
 
-      chartData[11 - i].expenses =
-        chartData[11 - i].expenses + result.rows[0].total_amount;
+    const incomeQuery = `
+      SELECT SUM(amount) AS total
+      FROM incomes
+      WHERE user_id = $1
+        AND EXTRACT(YEAR FROM date) = EXTRACT(YEAR FROM CURRENT_DATE)
+        AND EXTRACT(MONTH FROM date) = EXTRACT(MONTH FROM CURRENT_DATE)
+    `;
 
-      try {
-        result = await pool.query(
-          `SELECT COALESCE(SUM(i.amount), 0) AS total_amount
-          FROM incomes i
-          WHERE i.user_id = $1
-            AND EXTRACT(YEAR FROM i.date) = $2
-            AND EXTRACT(MONTH FROM i.date) = $3;`,
-          [id_user, i_year, i_month]
-        );
-      } catch (err) {
-        console.error("Error checking incomes:", err);
-        res.status(500).json({ error: "Internal server error" });
-      }
-      chartData[11 - i].income = result.rows[0].total_amount;
+    const monthlyIncomeQuery = `
+      SELECT SUM(amount) AS total
+      FROM monthly_incomes
+      WHERE user_id = $1
+        AND date_start <= DATE_TRUNC('month', CURRENT_DATE)
+        AND (date_end IS NULL OR date_end >= DATE_TRUNC('month', CURRENT_DATE))
+    `;
 
-      try {
-        result = await pool.query(
-          `SELECT COALESCE(SUM(i.amount), 0) AS total_amount
-            FROM monthly_incomes i
-            WHERE i.user_id = $1 AND
-              ( (EXTRACT(YEAR FROM date_start) < $2
-                OR (EXTRACT(YEAR FROM date_start) = $2
-                    AND EXTRACT(MONTH FROM date_start) <= $3)
-                ) AND
-              (date_end IS NULL OR
-              (EXTRACT(YEAR FROM date_end) > $2
-                OR (EXTRACT(YEAR FROM date_end) = $2
-                    AND EXTRACT(MONTH FROM date_end) >= $3
-                ))
-              )
-            )`,
-          [id_user, i_year, i_month]
-        );
-      } catch (err) {
-        console.error("Error checking incomes:", err);
-        res.status(500).json({ error: "Internal server error" });
-      }
+    const [expensesResult, monthlyExpResult, incomeResult, monthlyIncResult] =
+      await Promise.all([
+        pool.query(expensesQuery, [user_id]),
+        pool.query(monthlyExpensesQuery, [user_id]),
+        pool.query(incomeQuery, [user_id]),
+        pool.query(monthlyIncomeQuery, [user_id]),
+      ]);
 
-      chartData[11 - i].income =
-        chartData[11 - i].income + result.rows[0].total_amount;
-    } // for
-    return res.json(chartData);
-  })
+    const totalExpenses =
+      (expensesResult.rows[0].total || 0) +
+      (monthlyExpResult.rows[0].total || 0);
+
+    const totalIncome =
+      (incomeResult.rows[0].total || 0) + (monthlyIncResult.rows[0].total || 0);
+
+    res.json({
+      totalExpenses,
+      totalIncome
+  
+    });
+  } 
+  catch (err) {
+    console.error("Error calculating totals:", err);
+    res.status(500).json({ error: "Server error" });
+  }}
+        // result = await pool.query(
+          // `SELECT COALESCE(SUM(e.amount), 0) AS total_amount
+        //  FROM expenses e
+        //  WHERE e.user_id = $1
+          //  AND EXTRACT(YEAR FROM e.date) = $2
+          //  AND EXTRACT(MONTH FROM e.date) = $3;`,
+          // [id_user, i_year, i_month]
+        // );
+      // } catch (err) {
+        // console.error("Error checking expenses:", err);
+        // res.status(500).json({ error: "Internal server error" });
+    // }
+ // chartData[11 - i].expenses =
+        // chartData[11 - i].expenses + result.rows[0].total_amount;
+
+
+      // try {
+        // result = await pool.query(
+          // `SELECT COALESCE(SUM(i.amount), 0) AS total_amount
+        //  FROM incomes i
+        //  WHERE i.user_id = $1
+          //  AND EXTRACT(YEAR FROM i.date) = $2
+          //  AND EXTRACT(MONTH FROM i.date) = $3;`,
+          // [id_user, i_year, i_month]
+      // );
+      // } catch (err) {
+        // console.error("Error checking incomes:", err);
+        // res.status(500).json({ error: "Internal server error" });
+      // }
+      // chartData[11 - i].income =
+        // chartData[11 - i].income + result.rows[0].total_amount;
+    // }
+    // return res.json(chartData);
+    
+  // })
+
+
+
+  
+  // chartData[11 - i].monthlyExpensees =
+        // chartData[11 - i].monthlyExpensees + result.rows[0].total_amount;
+    //  try {
+        // result = await pool.query(
+          // `SELECT COALESCE(SUM(i.amount), 0) AS total_amount
+        //  FROM incomes i
+        //  WHERE i.user_id = $1
+          //  AND EXTRACT(YEAR FROM i.date) = $2
+          //  AND EXTRACT(MONTH FROM i.date) = $3;`,
+          // [id_user, i_year, i_month]
+        // );
+      // } catch (err) {
+        // console.error("Error checking incomes:", err);
+}        // res.status(500).json({ error: "Internal server error" });}
 );
 
 app.put(
@@ -883,7 +910,7 @@ app.put(
     }
   }
 );
-////////////////////////////////////////
+
 app.get(
   "/monthly_expenses/sum/:user_id",
   authenticateToken,
