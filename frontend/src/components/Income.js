@@ -67,6 +67,7 @@ function Income() {
         throw new Error(data.error || "Fehler beim Löschen");
       }
       setIncome((prev) => prev.filter((i) => i.id !== id));
+      window.location.reload();
     } catch (err) {
       alert("Löschen fehlgeschlagen: " + err.message);
     }

@@ -193,6 +193,28 @@ app.delete(
     const new_date = new Date();
 
     try {
+      const existingResult = await pool.query(
+        'SELECT "date_start" FROM "monthly_expenses" WHERE id = $1 AND user_id = $2;',
+        [id, id_user]
+      );
+
+      if (existingResult.rowCount === 0) {
+        return res.status(404).json({
+          error: "Eintrag nicht gefunden oder gehört nicht zu diesem User",
+        });
+      }
+
+      const { date_start } = existingResult.rows[0];
+
+      if (new Date(date_start) > new_date) {
+        await pool.query(
+          'DELETE FROM "monthly_expenses" WHERE id = $1 AND user_id = $2;',
+          [id, id_user]
+        );
+
+        return res.status(200).json({ message: "Erfolgreich gelöscht" });
+      }
+
       const result = await pool.query(
         'UPDATE  "monthly_expenses" SET date_end = $1 WHERE id = $2 AND user_id = $3 RETURNING *;',
         [new_date, id, id_user]
@@ -433,11 +455,34 @@ app.delete(
   authenticateToken,
   async (req, res) => {
     const { id_user, id } = req.params;
+    const new_date = new Date(); // heutiges Datum
 
     try {
-      const result = await pool.query(
-        'DELETE FROM "monthly_incomes" WHERE id = $1 AND user_id = $2 RETURNING *;',
+      const existingResult = await pool.query(
+        'SELECT "date_start" FROM "monthly_incomes" WHERE id = $1 AND user_id = $2;',
         [id, id_user]
+      );
+
+      if (existingResult.rowCount === 0) {
+        return res.status(404).json({
+          error: "Eintrag nicht gefunden oder gehört nicht zu diesem User",
+        });
+      }
+
+      const { date_start } = existingResult.rows[0];
+
+      if (new Date(date_start) > new_date) {
+        await pool.query(
+          'DELETE FROM "monthly_incomes" WHERE id = $1 AND user_id = $2;',
+          [id, id_user]
+        );
+
+        return res.status(200).json({ message: "Erfolgreich gelöscht" });
+      }
+
+      const result = await pool.query(
+        'UPDATE "monthly_incomes" SET date_end = $1 WHERE id = $2 AND user_id = $3 RETURNING *;',
+        [new_date, id, id_user]
       );
 
       if (result.rowCount === 0) {

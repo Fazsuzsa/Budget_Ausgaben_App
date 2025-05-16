@@ -72,6 +72,7 @@ function Expenses() {
       }
 
       setExpenses((prev) => prev.filter((e) => e.id !== id));
+      window.location.reload();
     } catch (err) {
       alert("Löschen fehlgeschlagen: " + err.message);
     }
