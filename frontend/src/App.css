@@ -52,3 +52,8 @@
 .dark .navbar-links button {
   color: red !important;
 }
+
+.dark form button {
+  color: white !important;
+  border: 1px solid white;
+}
