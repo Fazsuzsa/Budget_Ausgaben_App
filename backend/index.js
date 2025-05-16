@@ -1024,6 +1024,22 @@ app.get("/total_balance/:user_id", authenticateToken, async (req, res) => {
   }
 });
 
+app.post("/signup", async (req, res) => {
+  const { e_mail, name, password } = req.body;
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const result = await pool.query(
+      "INSERT INTO users (name,password,e_mail) VALUES ($1, $2, $3) RETURNING *",
+      [name, hashedPassword, e_mail]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Error signing up:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);
 });
