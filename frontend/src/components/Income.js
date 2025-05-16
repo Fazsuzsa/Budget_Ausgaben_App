@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Navigate } from "react-router-dom";
 import AddIncomeForm from "./AddIncome";
 import {
   Table,
@@ -11,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
+
 function Income() {
   const [income, setIncome] = useState([]);
   const [Sum, setSum] = useState(0);
@@ -18,27 +18,27 @@ function Income() {
   const [error, setError] = useState(null);
   const user = JSON.parse(localStorage.getItem("user"));
   const user_id = user?.id;
+
   useEffect(() => {
-    if (user) {
-      fetchIncomes();
-      fetchIncomesSum();
-    }
-    //return <Navigate to="/login" />;
+    fetchIncomes();
+    fetchIncomesSum();
   }, []);
   const fetchIncomes = async () => {
     const token = localStorage.getItem("token");
+
     try {
-      const response = await fetch(`http://localhost:5005/incomes/${user_id}`, {
+      const res = await fetch(`http://localhost:5005/incomes/${user_id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
-      if (!response.ok) {
+
+      if (!res.ok) {
         throw new Error("Failed to fetch incomes");
       }
-      const data = await response.json();
+      const data = await res.json();
       setIncome(data);
       setLoading(false);
     } catch (err) {
@@ -47,17 +47,26 @@ function Income() {
     }
   };
   const handleDelete = async (id) => {
-    const confirmed = window.confirm("Diesen Income-Eintrag löschen?");
+    const confirmed = window.confirm(
+      "Willst du diesen Eintrag wirklich löschen?"
+    );
     if (!confirmed) return;
+
+    const token = localStorage.getItem("token");
+
     try {
       const res = await fetch(`http://localhost:5005/income/${user_id}/${id}`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || "Fehler beim Löschen");
       }
-      setIncome((prev) => prev.filter((item) => item.id !== id));
+      setIncome((prev) => prev.filter((i) => i.id !== id));
     } catch (err) {
       alert("Löschen fehlgeschlagen: " + err.message);
     }
@@ -143,10 +152,7 @@ function Income() {
                 }}
               >
                 <TableCell>Sum One-Time Incomes</TableCell>
-                <TableCell>
-                  {parseFloat(Sum).toFixed(2)}
-                  €
-                </TableCell>
+                <TableCell>{parseFloat(Sum).toFixed(2)}€</TableCell>
                 <TableCell />
                 <TableCell />
               </TableRow>
