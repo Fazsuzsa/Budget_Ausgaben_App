@@ -79,6 +79,7 @@ app.get("/expenses/:user_id", authenticateToken, async (req, res) => {
 
 app.get("/expenses/:user_id/search", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
+  // z.B.: localhost:5005/expenses/1/search?month=april
   const { month } = req.query;
 
   try {
@@ -380,7 +381,6 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ error: "Error server" });
   }
 });
-
 
 app.put("/income/:id_user/:id", authenticateToken, async (req, res) => {
   try {
@@ -902,61 +902,49 @@ app.get(
   }
 );
 
+app.get("/expenses/sum/:user_id", authenticateToken, async (req, res) => {
+  const { user_id } = req.params;
 
-app.get(
-  "/expenses/sum/:user_id",
-  authenticateToken,
-  async (req, res) => {
-    const { user_id } = req.params;
-
-    try {
-      const expensesResult = await pool.query(
-        `
+  try {
+    const expensesResult = await pool.query(
+      `
         SELECT SUM(amount) AS total_expenses
         FROM expenses
         WHERE user_id = $1
           AND EXTRACT(YEAR FROM date) = EXTRACT(YEAR FROM CURRENT_DATE)
           AND EXTRACT(MONTH FROM date) = EXTRACT(MONTH FROM CURRENT_DATE);
         `,
-        [user_id]
-      );
+      [user_id]
+    );
 
-      res.json({ totalExpenses: expensesResult.rows[0].total_expenses });
-    } catch (err) {
-      console.error("Error calculating monthly expenses:", err);
-      res.status(500).json({ error: "Server error" });
-    }
+    res.json({ totalExpenses: expensesResult.rows[0].total_expenses });
+  } catch (err) {
+    console.error("Error calculating monthly expenses:", err);
+    res.status(500).json({ error: "Server error" });
   }
-);
+});
 
+app.get("/incomes/sum/:user_id", authenticateToken, async (req, res) => {
+  const { user_id } = req.params;
 
-app.get(
-  "/incomes/sum/:user_id",
-  authenticateToken,
-  async (req, res) => {
-    const { user_id } = req.params;
-
-    try {
-      const incomesResult = await pool.query(
-        `
+  try {
+    const incomesResult = await pool.query(
+      `
         SELECT SUM(amount) AS total_incomes
         FROM incomes
         WHERE user_id = $1
           AND EXTRACT(YEAR FROM date) = EXTRACT(YEAR FROM CURRENT_DATE)
           AND EXTRACT(MONTH FROM date) = EXTRACT(MONTH FROM CURRENT_DATE);
         `,
-        [user_id]
-      );
+      [user_id]
+    );
 
-      res.json({ totalIncomes: incomesResult.rows[0].total_incomes });
-    } catch (err) {
-      console.error("Error calculating monthly incomes:", err);
-      res.status(500).json({ error: "Server error" });
-    }
+    res.json({ totalIncomes: incomesResult.rows[0].total_incomes });
+  } catch (err) {
+    console.error("Error calculating monthly incomes:", err);
+    res.status(500).json({ error: "Server error" });
   }
-);
-
-
+});
 
 app.get("/total_balance/:user_id", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
@@ -994,32 +982,30 @@ app.get("/total_balance/:user_id", authenticateToken, async (req, res) => {
         AND (date_end IS NULL OR date_end >= DATE_TRUNC('month', CURRENT_DATE))
     `;
 
-    const [expensesResult, monthlyExpResult, incomeResult, monthlyIncResult] = await Promise.all([
-      pool.query(expensesQuery, [user_id]),
-      pool.query(monthlyExpensesQuery, [user_id]),
-      pool.query(incomeQuery, [user_id]),
-      pool.query(monthlyIncomeQuery, [user_id])
-    ]);
+    const [expensesResult, monthlyExpResult, incomeResult, monthlyIncResult] =
+      await Promise.all([
+        pool.query(expensesQuery, [user_id]),
+        pool.query(monthlyExpensesQuery, [user_id]),
+        pool.query(incomeQuery, [user_id]),
+        pool.query(monthlyIncomeQuery, [user_id]),
+      ]);
 
     const totalExpenses =
       (expensesResult.rows[0].total || 0) +
       (monthlyExpResult.rows[0].total || 0);
 
     const totalIncome =
-      (incomeResult.rows[0].total || 0) +
-      (monthlyIncResult.rows[0].total || 0);
-
+      (incomeResult.rows[0].total || 0) + (monthlyIncResult.rows[0].total || 0);
 
     let balance = totalIncome - totalExpenses;
-
 
     let debitPerMonth = null;
     let message = null;
     if (balance < 0) {
-      message = `To recover your balance, you need to divide the debit over the next 4 months. Save ${Math.abs(debitPerMonth).toFixed(2)} € each month to avoid further debt.`;
+      message = `To recover your balance, you need to divide the debit over the next 4 months. Save ${Math.abs(
+        debitPerMonth
+      ).toFixed(2)} € each month to avoid further debt.`;
     }
-
-
 
     if (totalExpenses > totalIncome) {
       message = "Warning: Your expenses exceed your income this month!";
@@ -1030,7 +1016,7 @@ app.get("/total_balance/:user_id", authenticateToken, async (req, res) => {
       totalIncome,
       balance,
       debitPerMonth,
-      message
+      message,
     });
   } catch (err) {
     console.error("Error calculating totals:", err);
