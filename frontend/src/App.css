@@ -32,7 +32,28 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
+}
+
+
+
+.dark .navbar-links * {
+  color: white !important
+}
+
+.dark .shadow,
+.dark .expenses-nav {
+  background-color: black !important;
+}
+
+.dark .navbar-links button {
+  color: red !important;
+}
+
+.dark form button {
+  color: white !important;
+  border: 1px solid white;
 }

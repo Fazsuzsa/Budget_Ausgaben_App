@@ -79,6 +79,7 @@ app.get("/expenses/:user_id", authenticateToken, async (req, res) => {
 
 app.get("/expenses/:user_id/search", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
+  // z.B.: localhost:5005/expenses/1/search?month=april
   const { month } = req.query;
 
   try {

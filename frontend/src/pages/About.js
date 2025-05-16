@@ -3,6 +3,9 @@ import Navbar from "../components/Navbar";
 import sampleTable from "../assets/images/sampleTable.png";
 import barChart from "../assets/images/barChart.png";
 import pieChart from "../assets/images/pieChart.png";
+
+
+
 // import { Navigate } from "react-router-dom";
 
 function About() {
@@ -12,7 +15,9 @@ function About() {
   // }
   return (
     <>
-      <Navbar></Navbar>
+      <Navbar />
+
+
       <div style={styles.pageContainer}>
         <div style={{ color: "red" }}>
           ZENS: About us (Work in progress ...)
