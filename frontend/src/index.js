@@ -17,6 +17,7 @@ import Expenses from "./components/Expenses";
 import EditMonthExpense from "./pages/EditMonthExpense";
 import EditMonthlyIncome from "./pages/EditMonthlyIncome";
 import { ThemeProvider } from "next-themes";
+import Signup from "./pages/Signup";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -35,6 +36,7 @@ root.render(
             <Route path="/edit-monthly-income/:user_id/:id" element={<EditMonthlyIncome />} />
             <Route path="/edit-expense/:userId/:expenseId" element={<MyForm />} />
             <Route path="/edit-monthlyexpense/:userId/:expenseId" element={<EditMonthExpense />} />
+            <Route path="/signup" element={<Signup />} />
             <Route path="/dark_light" element={<Dark_light />} />
             {/* autres routes */}
           </Routes>
