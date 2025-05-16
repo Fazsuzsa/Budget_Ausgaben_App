@@ -64,7 +64,7 @@ const styles = {
     textDecoration: "none",
     color: "blue",
     fontWeight: "bold",
-    fontSize: "24px",
+    fontSize: "20px",
   },
   logoutButton: {
     background: "none",

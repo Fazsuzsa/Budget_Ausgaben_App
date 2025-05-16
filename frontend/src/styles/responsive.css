@@ -14,8 +14,8 @@
   align-items: center;
 }
 
-/* Mobile Dropdown - nur unter 870px */
-@media (max-width: 870px) {
+/* Mobile Dropdown - nur unter 768px */
+@media (max-width: 768px) {
   .hamburger {
     display: block;
   }
@@ -41,29 +41,13 @@
 
 
 /*Tabellen*/
-
-.table-wrapper {
-  width: 100%;
-  overflow-x: auto;
-}
-
-@media (max-width: 870px) {
-  .hide-mobile-column {
-    display: none;
+@media (max-width: 768px) {
+  .expenses-table tbody tr td:nth-child(3),
+  .expenses-table tbody tr td:nth-child(4) {
+    display: none !important;
   }
 
-  .more-toggle {
-    display: inline-block;
-    cursor: pointer;
-    color: blue;
-    text-decoration: underline;
-  }
-
-  .more-content {
-    display: none;
-  }
-
-  .more-content.show {
-    display: table-row;
+  .incomes-table tbody tr td:nth-child(3) {
+    display: none !important;
   }
 }
