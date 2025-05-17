@@ -193,6 +193,28 @@ app.delete(
     const new_date = new Date();
 
     try {
+      const existingResult = await pool.query(
+        'SELECT "date_start" FROM "monthly_expenses" WHERE id = $1 AND user_id = $2;',
+        [id, id_user]
+      );
+
+      if (existingResult.rowCount === 0) {
+        return res.status(404).json({
+          error: "Eintrag nicht gefunden oder gehört nicht zu diesem User",
+        });
+      }
+
+      const { date_start } = existingResult.rows[0];
+
+      if (new Date(date_start) > new_date) {
+        await pool.query(
+          'DELETE FROM "monthly_expenses" WHERE id = $1 AND user_id = $2;',
+          [id, id_user]
+        );
+
+        return res.status(200).json({ message: "Erfolgreich gelöscht" });
+      }
+
       const result = await pool.query(
         'UPDATE  "monthly_expenses" SET date_end = $1 WHERE id = $2 AND user_id = $3 RETURNING *;',
         [new_date, id, id_user]
@@ -433,11 +455,34 @@ app.delete(
   authenticateToken,
   async (req, res) => {
     const { id_user, id } = req.params;
+    const new_date = new Date(); // heutiges Datum
 
     try {
-      const result = await pool.query(
-        'DELETE FROM "monthly_incomes" WHERE id = $1 AND user_id = $2 RETURNING *;',
+      const existingResult = await pool.query(
+        'SELECT "date_start" FROM "monthly_incomes" WHERE id = $1 AND user_id = $2;',
         [id, id_user]
+      );
+
+      if (existingResult.rowCount === 0) {
+        return res.status(404).json({
+          error: "Eintrag nicht gefunden oder gehört nicht zu diesem User",
+        });
+      }
+
+      const { date_start } = existingResult.rows[0];
+
+      if (new Date(date_start) > new_date) {
+        await pool.query(
+          'DELETE FROM "monthly_incomes" WHERE id = $1 AND user_id = $2;',
+          [id, id_user]
+        );
+
+        return res.status(200).json({ message: "Erfolgreich gelöscht" });
+      }
+
+      const result = await pool.query(
+        'UPDATE "monthly_incomes" SET date_end = $1 WHERE id = $2 AND user_id = $3 RETURNING *;',
+        [new_date, id, id_user]
       );
 
       if (result.rowCount === 0) {
@@ -1071,6 +1116,22 @@ app.get("/total_balance/:user_id", authenticateToken, async (req, res) => {
     });
   } catch (err) {
     console.error("Error calculating totals:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.post("/signup", async (req, res) => {
+  const { e_mail, name, password } = req.body;
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const result = await pool.query(
+      "INSERT INTO users (name,password,e_mail) VALUES ($1, $2, $3) RETURNING *",
+      [name, hashedPassword, e_mail]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Error signing up:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
