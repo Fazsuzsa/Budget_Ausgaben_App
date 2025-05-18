@@ -13,6 +13,8 @@ import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import Navbar from "../components/Navbar";
 
+import { API_URL } from "../lib/utils";
+
 export default function EditMonthExpense() {
   const { state } = useLocation();
   const expense = state?.expense;
@@ -44,7 +46,7 @@ export default function EditMonthExpense() {
 
     try {
       const response = await fetch(
-        `http://localhost:5005/monthly_expenses/${userId}/${expenseId}`,
+        `${API_URL}/monthly_expenses/${userId}/${expenseId}`,
         {
           method: "PUT",
           headers: {

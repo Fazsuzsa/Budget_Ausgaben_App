@@ -67,7 +67,7 @@ app.get("/expenses/:user_id", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
   try {
     const result = await pool.query(
-      "SELECT expenses.id, expenses.user_id, expenses.amount, expenses.name, expenses.category_id, expenses.date, categories.category FROM public.expenses JOIN public.categories on expenses.category_id = categories.id WHERE expenses.user_id = $1",
+      "SELECT expenses.id, expenses.user_id, expenses.amount, expenses.name, expenses.category_id, expenses.date, categories.category FROM public.expenses JOIN public.categories on expenses.category_id = categories.id WHERE expenses.user_id = $1 ORDER BY expenses.date DESC",
       [user_id]
     );
     res.json(result.rows);
@@ -693,10 +693,15 @@ app.post("/piedata/:id_user", authenticateToken, async (req, res) => {
       (categoryMap.get(row.category) || 0) + row.total_amount
     );
   }
+  // Sort the map by category (keys) alphabetically
+  // Otherwise the pie chart colors per category will always change when new data is fetched
+  const sortedCategoryMap = new Map(
+    Array.from(categoryMap.entries()).sort((a, b) => a[0].localeCompare(b[0]))
+  );
 
   // Prepare the data for the pie chart
-  const categories = Array.from(categoryMap.keys());
-  const totalAmounts = Array.from(categoryMap.values());
+  const categories = Array.from(sortedCategoryMap.keys());
+  const totalAmounts = Array.from(sortedCategoryMap.values());
 
   const backgroundColors = categories.map((_, index) => {
     const colors = [

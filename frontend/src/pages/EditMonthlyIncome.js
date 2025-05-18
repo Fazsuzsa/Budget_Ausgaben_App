@@ -13,6 +13,8 @@ import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import Navbar from "../components/Navbar";
 
+import { API_URL } from "../lib/utils";
+
 export default function EditMonthlyIncome() {
   const { state } = useLocation();
   const income = state?.income;
@@ -42,7 +44,7 @@ export default function EditMonthlyIncome() {
 
     try {
       const response = await fetch(
-        `http://localhost:5005/monthly_incomes/${userId}/${incomeId}`,
+        `${API_URL}/monthly_incomes/${userId}/${incomeId}`,
         {
           method: "PUT",
           headers: {

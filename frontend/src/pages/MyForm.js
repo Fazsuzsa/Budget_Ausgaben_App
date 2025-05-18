@@ -14,6 +14,8 @@ import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import Navbar from "../components/Navbar";
 
+import { API_URL } from "../lib/utils";
+
 export default function MyForm() {
   const { state } = useLocation();
   const expense = state?.expense;
@@ -49,7 +51,7 @@ export default function MyForm() {
 
     try {
       const response = await fetch(
-        `http://localhost:5005/expenses/${userId}/${expenseId}`,
+        `${API_URL}/expenses/${userId}/${expenseId}`,
         {
           method: "PUT",
           headers: {

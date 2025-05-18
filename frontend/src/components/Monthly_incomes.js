@@ -10,6 +10,8 @@ import {
   TableRow,
 } from "./ui/table";
 
+import { API_URL } from "../lib/utils";
+
 function Monthly_incomes() {
   const [income, setIncome] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,7 +29,7 @@ function Monthly_incomes() {
 
     try {
       const response = await fetch(
-        `http://localhost:5005/monthly_incomes/sum/${user_id}`,
+        `${API_URL}/monthly_incomes/sum/${user_id}`,
         {
           method: "GET",
           headers: {
@@ -51,16 +53,13 @@ function Monthly_incomes() {
   const fetchMonthlyIncomes = async () => {
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch(
-        `http://localhost:5005/monthly_incomes/${user_id}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/monthly_incomes/${user_id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) {
         throw new Error("Failed to fetch incomes");
@@ -81,16 +80,13 @@ function Monthly_incomes() {
     if (!confirmed) return;
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch(
-        `http://localhost:5005/monthly_incomes/${user_id}/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const res = await fetch(`${API_URL}/monthly_incomes/${user_id}/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
 
       if (!res.ok) {
         const data = await res.json();

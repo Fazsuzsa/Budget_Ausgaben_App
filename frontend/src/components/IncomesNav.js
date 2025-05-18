@@ -3,6 +3,9 @@ import Navbar from "./Navbar";
 import Income from "./Income";
 import Monthly_incomes from "./Monthly_incomes";
 import { useParams } from "react-router-dom";
+
+import { API_URL } from "../lib/utils";
+
 function IncomesNav() {
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?.id;
@@ -13,7 +16,7 @@ function IncomesNav() {
 
   const fetchBalance = async () => {
     try {
-      const response = await fetch(`http://localhost:5005/total_balance/${userId}`, {
+      const response = await fetch(`${API_URL}/total_balance/${userId}`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -43,7 +46,14 @@ function IncomesNav() {
   return (
     <>
       <Navbar />
-      <div className="expenses-nav" style={{ padding: "20px", backgroundColor: "#f4f4f4", marginBottom: "20px" }}>
+      <div
+        className="expenses-nav"
+        style={{
+          padding: "20px",
+          backgroundColor: "#f4f4f4",
+          marginBottom: "20px",
+        }}
+      >
         <h3>Monthly Overview</h3>
         {error && <p style={{ color: "red" }}>{error}</p>}
         {totalExpenses !== null && totalIncome !== null && (
