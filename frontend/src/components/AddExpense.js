@@ -78,7 +78,6 @@ const AddExpenseForm = () => {
       <Button onClick={() => setShowForm(!showForm)} className="mb-4">
         {showForm ? "Formular schließen" : "Neue Ausgabe hinzufügen"}
       </Button>
-
       {showForm && (
         <form
           onSubmit={handleSubmit(onSubmit)}

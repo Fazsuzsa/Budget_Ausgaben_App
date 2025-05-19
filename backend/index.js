@@ -80,9 +80,9 @@ app.get("/expenses/:user_id", authenticateToken, async (req, res) => {
 
 app.get("/expenses/:user_id/search", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
-  // z.B.: localhost:5005/expenses/1/search?month=april
-  const { month } = req.query;
+  const { monthYear } = req.query;
 
+  // z.B.: localhost:5005/expenses/1/search?monthYear=2025-05
   try {
     let query = `
       SELECT expenses.id, expenses.user_id, expenses.amount, expenses.name,
@@ -92,12 +92,14 @@ app.get("/expenses/:user_id/search", authenticateToken, async (req, res) => {
       WHERE expenses.user_id = $1
     `;
     const values = [user_id];
-
-    if (month) {
-      const monthNumber = new Date(`${month} 1, 2000`).getMonth() + 1;
-      query += " AND EXTRACT(MONTH FROM expenses.date) = $2";
-      values.push(monthNumber);
+    if (monthYear) {
+      const [year, month] = monthYear.split("-").map(Number);
+      query +=
+        " AND EXTRACT(MONTH FROM expenses.date) = $2 AND EXTRACT(YEAR FROM expenses.date) = $3";
+      values.push(month, year);
     }
+
+    query += " ORDER BY expenses.date DESC";
 
     const result = await pool.query(query, values);
     res.json(result.rows);

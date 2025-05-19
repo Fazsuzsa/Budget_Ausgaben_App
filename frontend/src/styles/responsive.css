@@ -14,8 +14,8 @@
   align-items: center;
 }
 
-/* Mobile Dropdown - nur unter 870px */
-@media (max-width: 870px) {
+/* Mobile Dropdown - nur unter 768px */
+@media (max-width: 768px) {
   .hamburger {
     display: block;
   }
@@ -41,8 +41,13 @@
 
 
 /*Tabellen*/
+@media (max-width: 768px) {
+  .expenses-table tbody tr td:nth-child(3),
+  .expenses-table tbody tr td:nth-child(4) {
+    display: none !important;
+  }
 
-.table-wrapper {
-  width: 100%;
-  overflow-x: auto;
+  .incomes-table tbody tr td:nth-child(3) {
+    display: none !important;
+  }
 }

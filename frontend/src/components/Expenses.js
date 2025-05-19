@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import AddExpenseForm from "./AddExpense";
 import {
   Table,
   TableBody,
@@ -11,25 +10,39 @@ import {
   TableRow,
 } from "./ui/table";
 
+import { Button } from "./ui/button";
+import {
+  flexRender,
+  getPaginationRowModel,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
 import { API_URL } from "../lib/utils";
 
-function Expenses() {
+function Expenses({ columns, data }) {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [Sum, setSum] = useState(0);
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?.id;
-
+  const [selectedMonthYear, setSelectedMonthYear] = useState("");
   useEffect(() => {
     fetchExpenses();
     fetchExpensesSum();
   }, []);
-  const fetchExpenses = async () => {
+  const fetchExpenses = async (monthYear = "") => {
     const token = localStorage.getItem("token");
 
     try {
-      const res = await fetch(`${API_URL}/expenses/${userId}`, {
+      const url = monthYear
+        ? `${API_URL}/expenses/${userId}/search?monthYear=${monthYear}`
+        : `${API_URL}/expenses/${userId}`;
+
+      const res = await fetch(url, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -40,6 +53,7 @@ function Expenses() {
       if (!res.ok) {
         throw new Error("Failed to fetch expenses");
       }
+
       const data = await res.json();
       setExpenses(data);
       setLoading(false);
@@ -100,8 +114,32 @@ function Expenses() {
     }
   };
 
+  const table = useReactTable({
+    data: expenses,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: { pageIndex: 0, pageSize: 10 },
+    },
+  });
   return (
     <>
+      <div className="flex items-center justify-center gap-4 mb-6">
+        <Label htmlFor="month" className="text-right font-medium">
+          Filter by Month
+        </Label>
+        <Input
+          id="month"
+          type="month"
+          value={selectedMonthYear}
+          onChange={(e) => {
+            setSelectedMonthYear(e.target.value);
+            fetchExpenses(e.target.value);
+          }}
+          className="w-[200px]"
+        />
+      </div>
       <h1 className="text-2xl font-bold text-center my-6">Expenses</h1>
 
       {loading && <p className="text-center">Loading expenses...</p>}
@@ -110,7 +148,7 @@ function Expenses() {
       {!loading && !error && (
         <div className="max-w-4xl mx-auto">
           <div className="table-wrapper">
-            <Table>
+            <Table className="expenses-table">
               <TableCaption></TableCaption>
               <TableHeader>
                 <TableRow>
@@ -122,37 +160,41 @@ function Expenses() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {expenses.map((expense) => (
-                  <TableRow key={expense.id}>
-                    <TableCell className="font-medium">
-                      {expense.name}
-                    </TableCell>
-                    <TableCell>
-                      {parseFloat(
-                        parseFloat(expense.amount).toFixed(2)
-                      ).toFixed(2)}
-                    </TableCell>
-                    <TableCell>{expense.category}</TableCell>
-                    <TableCell>
-                      {new Date(expense.date).toISOString().split("T")[0]}
-                    </TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Link
-                        to={`/edit-expense/${expense.user_id}/${expense.id}`}
-                        state={{ expense }}
-                        className="text-blue-500 underline"
-                      >
-                        Edit
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(expense.id)}
-                        className="text-red-500 underline"
-                      >
-                        Delete
-                      </button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {table.getRowModel().rows.map((row) => {
+                  const expense = row.original;
+                  return (
+                    <TableRow key={expense.id}>
+                      <TableCell className="font-medium">
+                        {expense.name}
+                      </TableCell>
+                      <TableCell>
+                        {parseFloat(
+                          parseFloat(expense.amount).toFixed(2)
+                        ).toFixed(2)}
+                      </TableCell>
+                      <TableCell>{expense.category}</TableCell>
+                      <TableCell>
+                        {new Date(expense.date).toISOString().split("T")[0]}
+                      </TableCell>
+                      <TableCell className="text-right space-x-2">
+                        <Link
+                          to={`/edit-expense/${expense.user_id}/${expense.id}`}
+                          state={{ expense }}
+                          className="text-blue-500 underline"
+                        >
+                          Edit
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(expense.id)}
+                          className="text-red-500 underline"
+                        >
+                          Delete
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+
                 <TableRow
                   style={{
                     backgroundColor: "#61DAFB",
@@ -168,11 +210,27 @@ function Expenses() {
                 </TableRow>
               </TableBody>
             </Table>
+            <div className="flex items-center justify-end space-x-2 py-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              >
+                Next
+              </Button>
+            </div>
           </div>
         </div>
       )}
-
-      <AddExpenseForm />
     </>
   );
 }
