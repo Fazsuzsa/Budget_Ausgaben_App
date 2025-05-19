@@ -10,7 +10,6 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { useParams } from "react-router-dom";
 
 function Expenses() {
   const [expenses, setExpenses] = useState([]);
@@ -114,65 +113,64 @@ function Expenses() {
       {!loading && !error && (
         <div className="max-w-4xl mx-auto">
           <div className="table-wrapper">
-          <Table>
-            <TableCaption></TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">Name</TableHead>
-                <TableHead>Price (€)</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Aktionen</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {expenses.map((expense) => (
-                <TableRow key={expense.id}>
-                  <TableCell className="font-medium">{expense.name}</TableCell>
-                  <TableCell>
-                    {parseFloat(parseFloat(expense.amount).toFixed(2)).toFixed(
-                      2
-                    )}
-                  </TableCell>
-                  <TableCell>{expense.category}</TableCell>
-                  <TableCell>
-                    {new Date(expense.date).toISOString().split("T")[0]}
-                  </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Link
-                      to={`/edit-expense/${expense.user_id}/${expense.id}`}
-                      state={{ expense }}
-                      className="text-blue-500 underline"
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(expense.id)}
-                      className="text-red-500 underline"
-                    >
-                      Delete
-                    </button>
-                  </TableCell>
+            <Table>
+              <TableCaption></TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">Name</TableHead>
+                  <TableHead>Price (€)</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead className="text-right">Aktionen</TableHead>
                 </TableRow>
-              ))}
-              <TableRow
-                style={{
-                  backgroundColor: "#61DAFB",
-                  fontWeight: "bold",
-                  color: "#333",
-                }}
-              >
-                <TableCell className="font-medium">Sum Expenses</TableCell>
-                <TableCell>
-                  {parseFloat(Sum).toFixed(2)}
-                  €
-                </TableCell>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {expenses.map((expense) => (
+                  <TableRow key={expense.id}>
+                    <TableCell className="font-medium">
+                      {expense.name}
+                    </TableCell>
+                    <TableCell>
+                      {parseFloat(
+                        parseFloat(expense.amount).toFixed(2)
+                      ).toFixed(2)}
+                    </TableCell>
+                    <TableCell>{expense.category}</TableCell>
+                    <TableCell>
+                      {new Date(expense.date).toISOString().split("T")[0]}
+                    </TableCell>
+                    <TableCell className="text-right space-x-2">
+                      <Link
+                        to={`/edit-expense/${expense.user_id}/${expense.id}`}
+                        state={{ expense }}
+                        className="text-blue-500 underline"
+                      >
+                        Edit
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(expense.id)}
+                        className="text-red-500 underline"
+                      >
+                        Delete
+                      </button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                <TableRow
+                  style={{
+                    backgroundColor: "#61DAFB",
+                    fontWeight: "bold",
+                    color: "#333",
+                  }}
+                >
+                  <TableCell className="font-medium">Sum Expenses</TableCell>
+                  <TableCell>{parseFloat(Sum).toFixed(2)}€</TableCell>
+                  <TableCell></TableCell>
+                  <TableCell></TableCell>
+                  <TableCell></TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
           </div>
         </div>
       )}
