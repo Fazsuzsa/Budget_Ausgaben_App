@@ -10,6 +10,7 @@ import {
 import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
+import { API_URL } from "../lib/utils";
 
 function Signup() {
   const [form, setForm] = useState({
