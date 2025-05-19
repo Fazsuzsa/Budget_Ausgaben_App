@@ -10,7 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
 import { API_URL } from "../lib/utils";
 
 function Expenses() {
@@ -20,16 +21,20 @@ function Expenses() {
   const [Sum, setSum] = useState(0);
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?.id;
-
+  const [selectedMonthYear, setSelectedMonthYear] = useState("");
   useEffect(() => {
     fetchExpenses();
     fetchExpensesSum();
   }, []);
-  const fetchExpenses = async () => {
+  const fetchExpenses = async (monthYear = "") => {
     const token = localStorage.getItem("token");
 
     try {
-      const res = await fetch(`${API_URL}/expenses/${userId}`, {
+      const url = monthYear
+        ? `${API_URL}/expenses/${userId}/search?monthYear=${monthYear}`
+        : `${API_URL}/expenses/${userId}`;
+
+      const res = await fetch(url, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -40,6 +45,7 @@ function Expenses() {
       if (!res.ok) {
         throw new Error("Failed to fetch expenses");
       }
+
       const data = await res.json();
       setExpenses(data);
       setLoading(false);
@@ -102,6 +108,21 @@ function Expenses() {
 
   return (
     <>
+      <div className="flex items-center justify-center gap-4 mb-6">
+        <Label htmlFor="month" className="text-right font-medium">
+          Filter by Month
+        </Label>
+        <Input
+          id="month"
+          type="month"
+          value={selectedMonthYear}
+          onChange={(e) => {
+            setSelectedMonthYear(e.target.value);
+            fetchExpenses(e.target.value);
+          }}
+          className="w-[200px]"
+        />
+      </div>
       <h1 className="text-2xl font-bold text-center my-6">Expenses</h1>
 
       {loading && <p className="text-center">Loading expenses...</p>}
