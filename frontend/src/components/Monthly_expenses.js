@@ -9,6 +9,9 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
+
+import { API_URL } from "../lib/utils";
+
 function Monthly_expenses() {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,16 +29,13 @@ function Monthly_expenses() {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch(
-        `http://localhost:5005/monthly_expenses/${userId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/monthly_expenses/${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) {
         throw new Error("Failed to fetch Expenses");
@@ -54,7 +54,7 @@ function Monthly_expenses() {
 
     try {
       const response = await fetch(
-        `http://localhost:5005/monthly_expenses/sum/${userId}`,
+        `${API_URL}/monthly_expenses/sum/${userId}`,
         {
           method: "GET",
           headers: {
@@ -82,16 +82,13 @@ function Monthly_expenses() {
     const token = localStorage.getItem("token");
 
     try {
-      const res = await fetch(
-        `http://localhost:5005/monthly_expenses/${userId}/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await fetch(`${API_URL}/monthly_expenses/${userId}/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!res.ok) {
         const data = await res.json();
@@ -100,6 +97,7 @@ function Monthly_expenses() {
 
       setExpenses((prev) => prev.filter((e) => e.id !== id));
       fetchMonthlyExpensesSum();
+      window.location.reload();
     } catch (err) {
       alert("Löschen fehlgeschlagen: " + err.message);
     }

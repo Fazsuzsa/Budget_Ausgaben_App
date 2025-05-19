@@ -34,24 +34,38 @@ function Navbar() {
       </button>
 
       <div className={`navbar-links ${menuOpen ? "open" : ""}`}>
-        <Link to="/" style={styles.linkb}>Monthly Reporting</Link>
-        <Link to="/expenses" style={styles.linkb}>Expenses</Link>
-        <Link to="/incomes" style={styles.linkb}>Income</Link>
+        <Link to="/" style={styles.linkb}>
+          Monthly Reporting
+        </Link>
+        <Link to="/expenses" style={styles.linkb}>
+          Expenses
+        </Link>
+        <Link to="/incomes" style={styles.linkb}>
+          Income
+        </Link>
         <div>
-          <Link to="/dark_light" style={styles.link}>Dark/Light</Link>
-          <br />
-          <Link to="/about" style={styles.link}>About ZENS</Link>
+          <Link to="/about" style={styles.linkb}>
+            About ZENS
+          </Link>
         </div>
         <div>
-          <span style={{ color: "black", fontWeight: "bold" }}>{user_name}</span>
+          <span style={{ color: "black", fontWeight: "bold" }}>
+            {user_name}
+          </span>
           <br />
           <button onClick={handleLogout} style={styles.logoutButton}>
             Logout
           </button>
         </div>
       </div>
-
-      <div style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)" }}>
+      <div
+        style={{
+          position: "absolute",
+          right: "10px",
+          top: "50%",
+          transform: "translateY(-50%)",
+        }}
+      >
         <ModeToggle />
       </div>
     </div>
@@ -59,17 +73,11 @@ function Navbar() {
 }
 
 const styles = {
-  link: {
-    textDecoration: "none",
-    color: "blue",
-    fontWeight: "bold",
-    fontSize: "16px",
-  },
   linkb: {
     textDecoration: "none",
     color: "blue",
     fontWeight: "bold",
-    fontSize: "24px",
+    fontSize: "20px",
   },
   logoutButton: {
     background: "none",

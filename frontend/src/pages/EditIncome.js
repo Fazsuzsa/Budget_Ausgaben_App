@@ -13,6 +13,7 @@ import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import Navbar from "../components/Navbar";
+import { API_URL } from "../lib/utils";
 
 export default function EditIncome() {
   const { state } = useLocation();
@@ -46,21 +47,18 @@ export default function EditIncome() {
     e.preventDefault();
 
     try {
-      const response = await fetch(
-        `http://localhost:5005/income/${userId}/${incomeId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({
-            amount: amount,
-            name: name,
-            date: date,
-          }),
-        }
-      );
+      const response = await fetch(`${API_URL}/income/${userId}/${incomeId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          amount: amount,
+          name: name,
+          date: date,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error("Error updating income");

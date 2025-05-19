@@ -15,8 +15,14 @@ function App() {
   return (
     <>
       <Navbar></Navbar>
-      <PieChart></PieChart>
-      <InExBarChart></InExBarChart>
+      <div className="flex flex-row gap-2 p-4">
+        <div className="w-1/2">
+          <PieChart></PieChart>
+        </div>
+        <div className="w-1/2">
+          <InExBarChart></InExBarChart>
+        </div>
+      </div>
     </>
   );
 }

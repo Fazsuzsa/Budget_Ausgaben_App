@@ -5,6 +5,8 @@ import { ChartLegend, ChartLegendContent } from "./ui/chart";
 import { ChartContainer } from "./ui/chart"; // No type imports in JS
 import { Navigate } from "react-router-dom";
 
+import { API_URL } from "../lib/utils";
+
 const user = JSON.parse(localStorage.getItem("user"));
 const user_id = user?.id; // ohne Token nur der user
 
@@ -49,17 +51,14 @@ const InExBarChart = () => {
       };
 
       try {
-        const res = await fetch(
-          `http://localhost:5005/barchartdata/${user_id}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(payload),
-          }
-        );
+        const res = await fetch(`${API_URL}/barchartdata/${user_id}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        });
 
         if (res.ok) {
           const data = await res.json();
