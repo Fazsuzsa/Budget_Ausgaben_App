@@ -73,12 +73,10 @@ const AddExpenseForm = () => {
 
   return (
     <div className="text-center mt-10">
-      <Button
-        onClick={() => setShowForm(!showForm)}
-        className="mb-4 bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
-      >
+      <Button onClick={() => setShowForm(!showForm)} className="mb-4">
         {showForm ? "Formular schließen" : "Neue Ausgabe hinzufügen"}
       </Button>
+
       {showForm && (
         <form
           onSubmit={handleSubmit(onSubmit)}
