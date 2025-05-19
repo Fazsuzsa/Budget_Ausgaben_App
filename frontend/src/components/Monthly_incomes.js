@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import AddIncomeForm from "./AddIncome";
 import {
   Table,
   TableBody,
@@ -103,6 +104,7 @@ function Monthly_incomes() {
 
   return (
     <>
+          <AddIncomeForm />
       <h1 className="text-2xl font-bold text-center my-6">Monthly Incomes</h1>
 
       {loading && <p className="text-center">Loading incomes...</p>}

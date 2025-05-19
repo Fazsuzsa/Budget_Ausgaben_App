@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import AddIncomeForm from "./AddIncome";
 import {
   Table,
   TableBody,
@@ -106,13 +105,14 @@ function Income() {
       {error && <p className="text-center text-red-500">{error}</p>}
       {!loading && !error && (
         <div className="max-w-4xl mx-auto">
-          <Table>
+          <Table className="incomes-table">
             <TableCaption></TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[100px]">Name</TableHead>
                 <TableHead>Price (€)</TableHead>
                 <TableHead className="text-right">Date</TableHead>
+                <TableHead className="text-right">Aktionen</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -160,7 +160,6 @@ function Income() {
           </Table>
         </div>
       )}
-      <AddIncomeForm />
     </>
   );
 }
