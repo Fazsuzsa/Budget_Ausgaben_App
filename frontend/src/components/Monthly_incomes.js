@@ -80,7 +80,7 @@ function Monthly_incomes() {
       "Diesen monatlichen Income-Eintrag löschen?"
     );
     if (!confirmed) return;
-
+    const token = localStorage.getItem("token");
     try {
       const res = await fetch(
         `http://localhost:5005/monthly_incomes/${user_id}/${id}`,
@@ -99,6 +99,8 @@ function Monthly_incomes() {
       }
 
       setIncome((prev) => prev.filter((item) => item.id !== id));
+      fetchMonthlyIncomesSum();
+      window.location.reload();
     } catch (err) {
       alert("Löschen fehlgeschlagen: " + err.message);
     }

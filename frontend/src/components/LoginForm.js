@@ -10,7 +10,7 @@ import {
 } from "./ui/card";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export function LoginForm({ className, ...props }) {
     const [email, setEmail] = useState("");
@@ -102,9 +102,9 @@ export function LoginForm({ className, ...props }) {
                             </div>
                             <div className="mt-4 text-center text-sm">
                                 Don&apos;t have an account?{" "}
-                                <a href="#" className="underline underline-offset-4">
-                                    Sign up
-                                </a>
+
+                                <Link to="/signup" className="underline underline-offset-4"> Sign up</Link>
+
                             </div>
                         </form>
 

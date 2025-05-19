@@ -101,6 +101,7 @@ function Monthly_expenses() {
 
       setExpenses((prev) => prev.filter((e) => e.id !== id));
       fetchMonthlyExpensesSum();
+      window.location.reload();
     } catch (err) {
       alert("Löschen fehlgeschlagen: " + err.message);
     }
