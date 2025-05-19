@@ -3,6 +3,8 @@ import Navbar from "./Navbar";
 import Monthly_expenses from "./Monthly_expenses";
 import Expenses from "./Expenses";
 
+import { API_URL } from "../lib/utils";
+
 function ExpensesNav() {
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?.id;
@@ -16,15 +18,12 @@ function ExpensesNav() {
 
   const fetchBalance = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:5005/total_balance/${userId}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/total_balance/${userId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
 
       const data = await response.json();
 

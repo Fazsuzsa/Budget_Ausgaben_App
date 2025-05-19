@@ -10,6 +10,8 @@ import {
   TableRow,
 } from "./ui/table";
 
+import { API_URL } from "../lib/utils";
+
 function Income() {
   const [income, setIncome] = useState([]);
   const [Sum, setSum] = useState(0);
@@ -26,7 +28,7 @@ function Income() {
     const token = localStorage.getItem("token");
 
     try {
-      const res = await fetch(`http://localhost:5005/incomes/${user_id}`, {
+      const res = await fetch(`${API_URL}/incomes/${user_id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -54,7 +56,7 @@ function Income() {
     const token = localStorage.getItem("token");
 
     try {
-      const res = await fetch(`http://localhost:5005/income/${user_id}/${id}`, {
+      const res = await fetch(`${API_URL}/income/${user_id}/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -68,7 +70,6 @@ function Income() {
       setIncome((prev) => prev.filter((i) => i.id !== id));
 
       window.location.reload();
-
     } catch (err) {
       alert("Löschen fehlgeschlagen: " + err.message);
     }
@@ -78,16 +79,13 @@ function Income() {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch(
-        `http://localhost:5005/incomes/sum/${user_id}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/incomes/sum/${user_id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) {
         throw new Error("Failed to fetch sum");
