@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import AddExpenseForm from "./AddExpense";
 import {
   Table,
   TableBody,
@@ -105,6 +106,7 @@ function Monthly_expenses() {
 
   return (
     <>
+              <AddExpenseForm />
       <h1 className="text-2xl font-bold text-center my-6">Monthly expenses</h1>
 
       {loading && <p className="text-center">Loading expenses...</p>}
@@ -112,6 +114,7 @@ function Monthly_expenses() {
 
       {!loading && !error && (
         <div className="max-w-4xl mx-auto">
+
           <Table>
             <TableCaption></TableCaption>
             <TableHeader>
