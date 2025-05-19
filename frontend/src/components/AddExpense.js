@@ -6,6 +6,8 @@ import { Input } from "./ui/input";
 import { FormItem, FormLabel, FormControl } from "./ui/form";
 import { Select, SelectItem } from "./ui/select";
 
+import { API_URL } from "../lib/utils";
+
 const AddExpenseForm = () => {
   const [showForm, setShowForm] = useState(false);
   const [type, setType] = useState("once");
@@ -41,8 +43,8 @@ const AddExpenseForm = () => {
 
     const url =
       type === "monthly"
-        ? "http://localhost:5005/monthly_expenses"
-        : "http://localhost:5005/expenses";
+        ? `${API_URL}/monthly_expenses`
+        : `${API_URL}/expenses`;
 
     const token = localStorage.getItem("token");
 

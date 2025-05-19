@@ -7,6 +7,7 @@ import { Navigate } from "react-router-dom";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels"; // Import the plugin
+import { API_URL } from "../lib/utils";
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title, ChartDataLabels);
 const token = localStorage.getItem("token");
@@ -17,7 +18,7 @@ const options = {
     legend: {
       position: "bottom",
       labels: {
-        boxWidth: 60,
+        boxWidth: 40,
         padding: 15,
       },
     },
@@ -25,7 +26,7 @@ const options = {
       color: "black", // Color of the data labels
       font: {
         // weight: "bold",
-        size: 18,
+        size: 12,
       },
       formatter: (value, context) => {
         if (value === 0) return ""; // Hide zero amounts
@@ -74,7 +75,7 @@ const PieChart = () => {
         month: parseFloat(month),
       };
       try {
-        const res = await fetch(`http://localhost:5005/piedata/${user_id}`, {
+        const res = await fetch(`${API_URL}/piedata/${user_id}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -108,52 +109,55 @@ const PieChart = () => {
   return (
     <>
       <div style={styles.chartBox}>
-        <Form>
-          <form className="max-w-sm mx-auto space-y-4">
-            <FormItem>
-              <FormLabel>Month</FormLabel>
-              <FormControl>
-                <Select {...register("month")} defaultValue={currentMonth}>
-                  <SelectItem value="1">January</SelectItem>
-                  <SelectItem value="2">February</SelectItem>
-                  <SelectItem value="3">March</SelectItem>
-                  <SelectItem value="4">April</SelectItem>
-                  <SelectItem value="5">May</SelectItem>
-                  <SelectItem value="6">June</SelectItem>
-                  <SelectItem value="7">July</SelectItem>
-                  <SelectItem value="8">August</SelectItem>
-                  <SelectItem value="9">September</SelectItem>
-                  <SelectItem value="10">October</SelectItem>
-                  <SelectItem value="11">November</SelectItem>
-                  <SelectItem value="12">December</SelectItem>
-                </Select>
-              </FormControl>
-            </FormItem>
-
-            <FormItem>
-              <FormLabel>Year</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="1"
-                  {...register("year")}
-                  defaultValue={currentYear}
-                  required
-                />
-              </FormControl>
-            </FormItem>
-          </form>
-        </Form>
-
-        <div className="w-full h-[500px] p-4 bg-white rounded shadow">
+        <div className="max-h-[400px] max-w-[800px] p-4 bg-white rounded shadow">
           {isChartEmpty ? (
             <p style={{ color: "red" }}>
               No expenses available for the selected month and year.
             </p>
           ) : (
-            <Pie data={chartData} options={options} />
+            <Pie data={chartData} options={options} width={400} height={400} />
           )}
         </div>
+
+        <Form className="p-4 rounded shadow w-1/2">
+          <FormItem className="text-[12pt]">
+            <FormLabel className="text-[12pt]">Month</FormLabel>
+            <FormControl>
+              <Select
+                {...register("month")}
+                defaultValue={currentMonth}
+                className="bg-blue-300 text-[12pt]"
+              >
+                <SelectItem value="1">January</SelectItem>
+                <SelectItem value="2">February</SelectItem>
+                <SelectItem value="3">March</SelectItem>
+                <SelectItem value="4">April</SelectItem>
+                <SelectItem value="5">May</SelectItem>
+                <SelectItem value="6">June</SelectItem>
+                <SelectItem value="7">July</SelectItem>
+                <SelectItem value="8">August</SelectItem>
+                <SelectItem value="9">September</SelectItem>
+                <SelectItem value="10">October</SelectItem>
+                <SelectItem value="11">November</SelectItem>
+                <SelectItem value="12">December</SelectItem>
+              </Select>
+            </FormControl>
+          </FormItem>
+
+          <FormItem className="text-[12pt]">
+            <FormLabel className="text-[12pt]">Year</FormLabel>
+            <FormControl className="bg-blue-200 text-[12pt]">
+              <Input
+                type="number"
+                step="1"
+                {...register("year")}
+                defaultValue={currentYear}
+                required
+                className="bg-blue-300 text-[12pt]"
+              />
+            </FormControl>
+          </FormItem>
+        </Form>
       </div>
     </>
   );
@@ -162,7 +166,11 @@ const PieChart = () => {
 const styles = {
   chartBox: {
     textAlign: "center",
-    maxWidth: "400px", // optional: control width
+    // maxWidth: "400px", // optional: control width
+    font: {
+      // weight: "bold",
+      size: 12,
+    },
   },
 };
 
