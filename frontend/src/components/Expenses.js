@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import AddExpenseForm from "./AddExpense";
 import {
   Table,
   TableBody,
@@ -174,8 +173,6 @@ function Expenses() {
           </div>
         </div>
       )}
-
-      <AddExpenseForm />
     </>
   );
 }

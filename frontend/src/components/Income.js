@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import AddIncomeForm from "./AddIncome";
 import {
   Table,
   TableBody,
@@ -160,7 +159,6 @@ function Income() {
           </Table>
         </div>
       )}
-      <AddIncomeForm />
     </>
   );
 }
