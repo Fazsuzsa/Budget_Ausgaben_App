@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Navbar from "./Navbar";
 import Monthly_expenses from "./Monthly_expenses";
 import Expenses from "./Expenses";
+import AddExpenseForm from "./AddExpense";
 
 import { API_URL } from "../lib/utils";
 import { Button } from "./ui/button";
@@ -140,6 +141,7 @@ function ExpensesNav() {
           </>
         )}
       </div>
+      <AddExpenseForm />
       <Monthly_expenses user_id={userId} />
       <Expenses user_id={userId} />
     </>

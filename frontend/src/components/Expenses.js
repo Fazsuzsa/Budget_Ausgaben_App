@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import {
   Table,
@@ -181,9 +182,12 @@ function Expenses({ columns, data }) {
                       <TableCell className="text-right space-x-2">
                         <Button
                           onClick={() =>
-                            navigate(`/edit-expense/${expense.user_id}/${expense.id}`, {
-                              state: { expense },
-                            })
+                            navigate(
+                              `/edit-expense/${expense.user_id}/${expense.id}`,
+                              {
+                                state: { expense },
+                              }
+                            )
                           }
                         >
                           Edit
