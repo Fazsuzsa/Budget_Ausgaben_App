@@ -156,7 +156,7 @@ function Income() {
                   color: "#333",
                 }}
               >
-                <TableCell>Sum One-Time Incomes</TableCell>
+                <TableCell>Total One-Time Incomes for this month</TableCell>
                 <TableCell>{parseFloat(Sum).toFixed(2)}€</TableCell>
                 <TableCell />
                 <TableCell />

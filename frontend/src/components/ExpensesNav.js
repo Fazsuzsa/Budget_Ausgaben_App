@@ -121,7 +121,7 @@ function ExpensesNav() {
                   fontWeight: "bold",
                 }}
               >
-                {balance} €
+                {balance.toFixed(2)} €
               </span>
             </p>
             {balance < 0 && debitPerMonth !== null && (
