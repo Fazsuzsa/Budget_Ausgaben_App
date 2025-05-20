@@ -146,7 +146,7 @@ const PieChart = () => {
 
           <FormItem className="text-[12pt]">
             <FormLabel className="text-[12pt]">Year</FormLabel>
-            <FormControl className="bg-blue-200 text-[12pt]">
+            <FormControl className="bg-blue-300 text-[12pt]">
               <Input
                 type="number"
                 step="1"
