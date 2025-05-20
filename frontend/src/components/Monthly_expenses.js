@@ -174,7 +174,7 @@ function Monthly_expenses() {
                 }}
               >
                 <TableCell className="font-medium">
-                  Sum Monthly Expenses
+                  Total Monthly expenses for this month
                 </TableCell>
                 <TableCell>{parseFloat(monthlySum).toFixed(2)} €</TableCell>
                 <TableCell />

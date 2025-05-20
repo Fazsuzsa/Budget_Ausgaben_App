@@ -210,7 +210,7 @@ function Expenses({ columns, data }) {
                     color: "#333",
                   }}
                 >
-                  <TableCell className="font-medium">Sum Expenses</TableCell>
+                  <TableCell className="font-medium">Total One-Time expenses for this month</TableCell>
                   <TableCell>{parseFloat(Sum).toFixed(2)}€</TableCell>
                   <TableCell></TableCell>
                   <TableCell></TableCell>
