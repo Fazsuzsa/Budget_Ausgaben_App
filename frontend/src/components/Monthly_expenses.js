@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-
 import {
   Table,
   TableBody,
@@ -148,9 +148,12 @@ function Monthly_expenses() {
                   <TableCell className="text-right">
                     <Button
                       onClick={() =>
-                        navigate(`/edit-monthlyexpense/${expense.user_id}/${expense.id}`, {
-                          state: { expense },
-                        })
+                        navigate(
+                          `/edit-monthlyexpense/${expense.user_id}/${expense.id}`,
+                          {
+                            state: { expense },
+                          }
+                        )
                       }
                     >
                       Edit
@@ -161,7 +164,6 @@ function Monthly_expenses() {
                     >
                       Delete
                     </Button>
-
                   </TableCell>
                 </TableRow>
               ))}
