@@ -59,24 +59,24 @@ const AddExpenseForm = () => {
       });
 
       if (res.ok) {
-        alert("Gespeichert!");
+        alert("Saved!");
         reset();
         setShowForm(false);
         window.location.reload();
       } else {
         const data = await res.json();
-        alert("Fehler: " + data.error);
+        alert("Error: " + data.error);
       }
     } catch (err) {
-      console.error("Fehler:", err);
-      alert("Serverfehler!");
+      console.error("Error:", err);
+      alert("Server Error!");
     }
   };
 
   return (
     <div className="text-center mt-10">
       <Button onClick={() => setShowForm(!showForm)} className="mb-4">
-        {showForm ? "Formular schließen" : "Neue Ausgabe hinzufügen"}
+        {showForm ? "Close form" : "Insert new Expense"}
       </Button>
       {showForm && (
         <form
@@ -87,8 +87,8 @@ const AddExpenseForm = () => {
             <FormLabel>Typ</FormLabel>
             <FormControl>
               <Select value={type} onChange={(e) => setType(e.target.value)}>
-                <SelectItem value="once">Einmalig</SelectItem>
-                <SelectItem value="monthly">Monatlich</SelectItem>
+                <SelectItem value="once">Once</SelectItem>
+                <SelectItem value="monthly">monthly</SelectItem>
               </Select>
             </FormControl>
           </FormItem>
@@ -97,7 +97,7 @@ const AddExpenseForm = () => {
             <FormLabel>Name</FormLabel>
             <FormControl>
               <Input
-                placeholder="Name der Ausgabe"
+                placeholder="Expense Name"
                 {...register("name")}
                 required
               />
@@ -105,7 +105,7 @@ const AddExpenseForm = () => {
           </FormItem>
 
           <FormItem>
-            <FormLabel>Betrag (€)</FormLabel>
+            <FormLabel>Amount (€)</FormLabel>
             <FormControl>
               <Input
                 type="number"
@@ -117,10 +117,10 @@ const AddExpenseForm = () => {
           </FormItem>
 
           <FormItem>
-            <FormLabel>Kategorie</FormLabel>
+            <FormLabel>category</FormLabel>
             <FormControl>
               <Select {...register("category_id")} required>
-                <SelectItem value="">-- Kategorie wählen --</SelectItem>
+                <SelectItem value="">-- choose category --</SelectItem>
                 <SelectItem value="1">Shopping</SelectItem>
                 <SelectItem value="2">Entertainment</SelectItem>
                 <SelectItem value="3">Transport</SelectItem>
@@ -132,7 +132,7 @@ const AddExpenseForm = () => {
 
           {type === "once" && (
             <FormItem>
-              <FormLabel>Datum</FormLabel>
+              <FormLabel>Date</FormLabel>
               <FormControl>
                 <Input type="date" {...register("date")} required />
               </FormControl>
@@ -142,7 +142,7 @@ const AddExpenseForm = () => {
           {type === "monthly" && (
             <>
               <FormItem>
-                <FormLabel>Startdatum</FormLabel>
+                <FormLabel>Start date</FormLabel>
                 <FormControl>
                   <Input type="month" {...register("date_start")} required />
                 </FormControl>
@@ -151,7 +151,7 @@ const AddExpenseForm = () => {
           )}
 
           <Button type="submit" className="w-full">
-            Speichern
+            Save
           </Button>
         </form>
       )}
