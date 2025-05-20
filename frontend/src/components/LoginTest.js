@@ -1,20 +1,21 @@
 import React from "react";
 import Navbar from "./Navbar";
-import { Button } from "./ui/Button";
+import { Button } from "./ui/button";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "./Accordion"
-
+} from "./Accordion";
 
 function Login() {
   return (
     <>
       <Navbar></Navbar>
       <h1>Login/Logout ...</h1>
-      <Button variant="destructive" size="lg">button test</Button>
+      <Button variant="destructive" size="lg">
+        button test
+      </Button>
       <Accordion type="single" collapsible>
         <AccordionItem value="item-1">
           <AccordionTrigger>Is it accessible?</AccordionTrigger>
@@ -23,8 +24,6 @@ function Login() {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-
-
     </>
   );
 }

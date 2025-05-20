@@ -14,16 +14,17 @@ function App() {
 
   return (
     <>
-      <Navbar></Navbar>
-      <div className="flex flex-row gap-2 p-4">
-        <div className="w-1/2">
-          <PieChart></PieChart>
+      <Navbar />
+      <div className="flex flex-col md:flex-row gap-2 p-4">
+        <div className="w-full md:w-1/2">
+          <PieChart />
         </div>
-        <div className="w-1/2">
-          <InExBarChart></InExBarChart>
+        <div className="w-full md:w-1/2">
+          <InExBarChart />
         </div>
       </div>
     </>
   );
 }
+
 export default App;

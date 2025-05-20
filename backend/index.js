@@ -708,10 +708,17 @@ app.post("/piedata/:id_user", authenticateToken, async (req, res) => {
 
   const backgroundColors = categories.map((_, index) => {
     const colors = [
-      "rgba(255, 99, 132, 0.6)",
-      "rgba(54, 162, 235, 0.6)",
-      "rgba(255, 206, 86, 0.6)",
+      // "rgba(255, 99, 132, 0.6)",
+      " rgba(230, 138, 129, 1)",
+      // "rgba(54, 162, 235, 0.6)",
+      // "rgba(255, 206, 86, 0.6)",
+      // "rgba(75, 192, 192, 0.6)",
+      // "rgba(110, 75, 192, 0.6)",
+      "rgba(4, 137, 169, 1)",
+      //"rgba(251, 191, 36, 1)",
+      "rgba(245, 200, 88, 1)",
       "rgba(75, 192, 192, 0.6)",
+      //"rgba(4, 137, 169, 1)",
       "rgba(110, 75, 192, 0.6)",
     ];
     return colors[index % colors.length]; // Repeat the colors if there are more than 5 categories
