@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -30,6 +30,8 @@ function Expenses({ columns, data }) {
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?.id;
   const [selectedMonthYear, setSelectedMonthYear] = useState("");
+  const navigate = useNavigate();
+
   useEffect(() => {
     fetchExpenses();
     fetchExpensesSum();
@@ -177,19 +179,21 @@ function Expenses({ columns, data }) {
                         {new Date(expense.date).toISOString().split("T")[0]}
                       </TableCell>
                       <TableCell className="text-right space-x-2">
-                        <Link
-                          to={`/edit-expense/${expense.user_id}/${expense.id}`}
-                          state={{ expense }}
-                          className="text-blue-500 underline"
+                        <Button
+                          onClick={() =>
+                            navigate(`/edit-expense/${expense.user_id}/${expense.id}`, {
+                              state: { expense },
+                            })
+                          }
                         >
                           Edit
-                        </Link>
-                        <button
+                        </Button>
+                        <Button
                           onClick={() => handleDelete(expense.id)}
                           className="text-red-500 underline"
                         >
                           Delete
-                        </button>
+                        </Button>
                       </TableCell>
                     </TableRow>
                   );

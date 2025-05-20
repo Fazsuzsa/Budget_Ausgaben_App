@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -11,6 +12,7 @@ import {
 } from "./ui/table";
 
 import { API_URL } from "../lib/utils";
+import { Button } from "./ui/button";
 
 function Monthly_expenses() {
   const [expenses, setExpenses] = useState([]);
@@ -19,6 +21,7 @@ function Monthly_expenses() {
   const [monthlySum, setMonthlySum] = useState(0);
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?.id;
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchMonthlyExpenses();
@@ -142,19 +145,24 @@ function Monthly_expenses() {
                   </TableCell>
 
                   <TableCell className="text-right">
-                    <Link
-                      to={`/edit-monthlyexpense/${expense.user_id}/${expense.id}`}
-                      state={{ expense }}
-                      className="text-blue-500 underline"
+                    <Button
+                      onClick={() =>
+                        navigate(
+                          `/edit-monthlyexpense/${expense.user_id}/${expense.id}`,
+                          {
+                            state: { expense },
+                          }
+                        )
+                      }
                     >
                       Edit
-                    </Link>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() => handleDelete(expense.id)}
                       className="text-red-500 underline"
                     >
                       Delete
-                    </button>
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
