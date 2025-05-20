@@ -38,7 +38,46 @@
   }
 }
 
+.navbar-links a {
+  color: #0489A9 !important;
+}
 
+.navbar-links span {
+  color: #043C53 !important;
+}
+
+.navbar-links button {
+  color: #FBBF24 !important;
+  font-weight: bold;
+}
+
+body {
+
+  background: linear-gradient(90deg, #0488a957, white);
+
+}
+
+.expenses-nav {
+  padding: 20px;
+  background-color: transparent !important;
+  margin-bottom: 20px;
+  border: 1px solid rgb(221, 221, 221);
+  border-radius: 8px;
+  box-shadow: rgb(0 0 0 / 50%) 0px 2px 8px;
+}
+
+.dark .expenses-nav {
+  padding: 20px;
+  background-color: black !important;
+  margin-bottom: 20px;
+  border: 1px solid rgb(221, 221, 221);
+  border-radius: 8px;
+  box-shadow: rgb(0 0 0 / 50%) 0px 2px 8px;
+}
+
+.dark body {
+  background: black !important;
+}
 
 .dark .navbar-links * {
   color: white !important
@@ -53,7 +92,13 @@
   color: red !important;
 }
 
-.dark form button {
+.dark button {
   color: white !important;
   border: 1px solid white;
+}
+
+td button {
+  margin-right: 5px !important;
+  margin-left: 5px;
+
 }

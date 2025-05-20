@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import Navbar from "./Navbar";
 import Monthly_expenses from "./Monthly_expenses";
 import Expenses from "./Expenses";
+import AddExpenseForm from "./AddExpense";
 
 import { API_URL } from "../lib/utils";
+import { Button } from "./ui/button";
 
 function ExpensesNav() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -43,6 +45,32 @@ function ExpensesNav() {
       setError("Could not load balance data.");
     }
   };
+  const handleDownloadPDF = async () => {
+    try {
+      const response = await fetch(`${API_URL}/download-expenses/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Error download PDF.");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "expenses.pdf");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error("Error PDF:", err);
+      alert("Error download.");
+    }
+  };
+
 
   useEffect(() => {
     if (userId) fetchBalance();
@@ -52,6 +80,8 @@ function ExpensesNav() {
   return (
     <>
       <Navbar />
+
+
 
       <div
         className="expenses-nav"
@@ -64,6 +94,7 @@ function ExpensesNav() {
           boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
         }}
       >
+        <Button onClick={handleDownloadPDF}>Download (PDF)</Button> <br /> <br />
         <h2 style={{ color: "#1e88e5", marginBottom: "16px" }}>
           Monthly Overview
         </h2>
@@ -91,7 +122,7 @@ function ExpensesNav() {
                   fontWeight: "bold",
                 }}
               >
-                {balance} €
+                {balance.toFixed(2)} €
               </span>
             </p>
             {balance < 0 && debitPerMonth !== null && (
@@ -110,6 +141,7 @@ function ExpensesNav() {
           </>
         )}
       </div>
+      <AddExpenseForm />
       <Monthly_expenses user_id={userId} />
       <Expenses user_id={userId} />
     </>
