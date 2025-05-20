@@ -73,8 +73,8 @@ app.get("/expenses/:user_id", authenticateToken, async (req, res) => {
     );
     res.json(result.rows);
   } catch (err) {
-    console.error("Fehler beim Abrufen der Ausgaben:", err);
-    res.status(500).json({ error: "Interner Serverfehler" });
+    console.error("Error while fetching the Expenses:", err);
+    res.status(500).json({ error: "Internal  Server Error" });
   }
 });
 
@@ -104,8 +104,8 @@ app.get("/expenses/:user_id/search", authenticateToken, async (req, res) => {
     const result = await pool.query(query, values);
     res.json(result.rows);
   } catch (err) {
-    console.error("Fehler beim Abrufen der Ausgaben:", err);
-    res.status(500).json({ error: "Interner Serverfehler" });
+    console.error("Error while fetching the Expenses:", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
@@ -125,8 +125,8 @@ app.post("/expenses", authenticateToken, async (req, res) => {
 
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error("Fehler beim Einfügen der Ausgabe:", err);
-    res.status(500).json({ error: "Interner Serverfehler" });
+    console.error("Error while fetching the Expenses:", err);
+    res.status(500).json({ error: "Internal  Server Error" });
   }
 });
 
@@ -141,14 +141,14 @@ app.delete("/expenses/:id_user/:id", authenticateToken, async (req, res) => {
 
     if (result.rowCount === 0) {
       return res.status(404).json({
-        error: "Eintrag nicht gefunden oder gehört nicht zu diesem User",
+        error: "Entry not found or does not belong to this user",
       });
     }
 
-    res.status(200).json({ message: "Erfolgreich gelöscht" });
+    res.status(200).json({ message: "Successfully deleted" });
   } catch (err) {
-    console.error("Fehler beim Löschen:", err);
-    res.status(500).json({ error: "Interner Serverfehler" });
+    console.error("Error while deleting:", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
@@ -161,8 +161,8 @@ app.get("/monthly_expenses/:user_id", authenticateToken, async (req, res) => {
     );
     res.json(result.rows);
   } catch (err) {
-    console.error("Fehler beim Abrufen der monatlichen Ausgaben:", err);
-    res.status(500).json({ error: "Interner Serverfehler" });
+    console.error("Error while fetching monthly Expenses:", err);
+    res.status(500).json({ error: "Internal  Server Error" });
   }
 });
 
@@ -182,8 +182,8 @@ app.post("/monthly_expenses", authenticateToken, async (req, res) => {
 
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error("Fehler beim Einfügen in monthly_expenses:", err);
-    res.status(500).json({ error: "Interner Serverfehler" });
+    console.error("Error while inserting monthly_expenses:", err);
+    res.status(500).json({ error: "Internal  Server Error" });
   }
 });
 
@@ -203,7 +203,7 @@ app.delete(
 
       if (existingResult.rowCount === 0) {
         return res.status(404).json({
-          error: "Eintrag nicht gefunden oder gehört nicht zu diesem User",
+          error: "Entry not found or does not belong to this user",
         });
       }
 
@@ -225,14 +225,14 @@ app.delete(
 
       if (result.rowCount === 0) {
         return res.status(404).json({
-          error: "Eintrag nicht gefunden oder gehört nicht zu diesem User",
+          error: "Entry not found or does not belong to this user",
         });
       }
 
-      res.status(200).json({ message: "Erfolgreich gelöscht" });
+      res.status(200).json({ message: "Successfully deleted " });
     } catch (err) {
-      console.error("Fehler beim Löschen:", err);
-      res.status(500).json({ error: "Interner Serverfehler" });
+      console.error("Error while deleting:", err);
+      res.status(500).json({ error: "Internal Server Error" });
     }
   }
 );
@@ -246,8 +246,8 @@ app.get("/incomes/:user_id", authenticateToken, async (req, res) => {
     );
     res.json(result.rows);
   } catch (err) {
-    console.error("Fehler beim Abrufen der Ausgaben:", err);
-    res.status(500).json({ error: "Interner Serverfehler" });
+    console.error("Error while fetching  Expenses:", err);
+    res.status(500).json({ error: "Internal  Server Error" });
   }
 });
 
@@ -267,7 +267,7 @@ app.post("/incomes", authenticateToken, async (req, res) => {
 
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error("Fehler beim Einfügen der Ausgabe:", err);
+    console.error("Error while inserting  Expenses:", err);
     res.status(500).json({ error: "Interner Serverfehler" });
   }
 });
@@ -288,8 +288,8 @@ app.post("/monthly_incomes", authenticateToken, async (req, res) => {
 
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error("Fehler beim Einfügen in monthly_incomes:", err);
-    res.status(500).json({ error: "Interner Serverfehler" });
+    console.error("Error while inserting monthly_incomes:", err);
+    res.status(500).json({ error: "Internal  Server Error" });
   }
 });
 
@@ -302,8 +302,8 @@ app.get("/monthly_incomes/:user_id", authenticateToken, async (req, res) => {
     );
     res.json(result.rows);
   } catch (err) {
-    console.error("Fehler beim Abrufen: ", err);
-    res.status(500).json({ error: "Interner Serverfehler" });
+    console.error("Error while fetching: ", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
@@ -468,7 +468,7 @@ app.delete(
 
       if (existingResult.rowCount === 0) {
         return res.status(404).json({
-          error: "Eintrag nicht gefunden oder gehört nicht zu diesem User",
+          error: "Entry not found or does not belong to this user",
         });
       }
 
@@ -480,7 +480,7 @@ app.delete(
           [id, id_user]
         );
 
-        return res.status(200).json({ message: "Erfolgreich gelöscht" });
+        return res.status(200).json({ message: "Successfully deleted" });
       }
 
       const result = await pool.query(
@@ -490,14 +490,14 @@ app.delete(
 
       if (result.rowCount === 0) {
         return res.status(404).json({
-          error: "Eintrag nicht gefunden oder gehört nicht zu diesem User",
+          error: "Entry not found or does not belong to this user",
         });
       }
 
-      res.status(200).json({ message: "Erfolgreich gelöscht" });
+      res.status(200).json({ message: "Successfully deleted" });
     } catch (err) {
-      console.error("Fehler beim Löschen:", err);
-      res.status(500).json({ error: "Interner Serverfehler" });
+      console.error("Error while deleting:", err);
+      res.status(500).json({ error: "Internal Server Error" });
     }
   }
 );
@@ -1216,23 +1216,32 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
       monthlyIncomes.length === 0 &&
       incomes.length === 0
     ) {
-      return res.status(404).json({ error: "No data found for the current month" });
+      return res
+        .status(404)
+        .json({ error: "No data found for the current month" });
     }
 
     // Calculate total expenses (one-time + monthly)
-    const totalExpenses = expenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0) +
+    const totalExpenses =
+      expenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0) +
       monthlyExpenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
 
     // Calculate total income (one-time + monthly)
-    const totalIncome = monthlyIncomes.reduce((sum, inc) => sum + parseFloat(inc.amount), 0) +
+    const totalIncome =
+      monthlyIncomes.reduce((sum, inc) => sum + parseFloat(inc.amount), 0) +
       incomes.reduce((sum, inc) => sum + parseFloat(inc.amount), 0);
 
     // Calculate balance (income - expenses)
     const balance = totalIncome - totalExpenses;
 
     // Add title and summary section
-    const currentMonth = new Date().toLocaleString("default", { month: "long", year: "numeric" });
-    doc.fontSize(20).text(`Monthly Overview - ${currentMonth}`, { align: "center" });
+    const currentMonth = new Date().toLocaleString("default", {
+      month: "long",
+      year: "numeric",
+    });
+    doc
+      .fontSize(20)
+      .text(`Monthly Overview - ${currentMonth}`, { align: "center" });
     doc.moveDown(1);
 
     doc.fontSize(14);
@@ -1247,13 +1256,24 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
       let y = startY;
 
       // Draw header background
-      doc.rect(startX, y, columnWidths.reduce((a, b) => a + b, 0), rowHeight).fill("#d3d3d3").stroke();
+      doc
+        .rect(
+          startX,
+          y,
+          columnWidths.reduce((a, b) => a + b, 0),
+          rowHeight
+        )
+        .fill("#d3d3d3")
+        .stroke();
       doc.fillColor("black").font("Helvetica-Bold").fontSize(12);
 
       // Draw headers
       let x = startX;
       headers.forEach((header, i) => {
-        doc.text(header, x + 5, y + 5, { width: columnWidths[i] - 10, align: "left" });
+        doc.text(header, x + 5, y + 5, {
+          width: columnWidths[i] - 10,
+          align: "left",
+        });
         x += columnWidths[i];
       });
 
@@ -1265,14 +1285,25 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
         x = startX;
 
         if (index % 2 === 0) {
-          doc.rect(startX, y, columnWidths.reduce((a, b) => a + b, 0), rowHeight).fill("#f9f9f9").stroke();
+          doc
+            .rect(
+              startX,
+              y,
+              columnWidths.reduce((a, b) => a + b, 0),
+              rowHeight
+            )
+            .fill("#f9f9f9")
+            .stroke();
           doc.fillColor("black");
         } else {
           doc.fillColor("black");
         }
 
         row.forEach((cell, i) => {
-          doc.text(cell, x + 5, y + 5, { width: columnWidths[i] - 10, align: "left" });
+          doc.text(cell, x + 5, y + 5, {
+            width: columnWidths[i] - 10,
+            align: "left",
+          });
           x += columnWidths[i];
         });
 
@@ -1293,16 +1324,19 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
 
     // One-Time Expenses table
     if (expenses.length > 0) {
-      doc.fontSize(16).fillColor("black").text("One-Time Expenses", { underline: true });
+      doc
+        .fontSize(16)
+        .fillColor("black")
+        .text("One-Time Expenses", { underline: true });
       cursorY += 20;
 
       const headers = ["Date", "Name", "Category", "Amount (€)"];
       const columnWidths = [100, 150, 150, 100];
-      const rows = expenses.map(exp => [
+      const rows = expenses.map((exp) => [
         new Date(exp.date).toLocaleDateString("en-GB"),
         exp.name,
         exp.category,
-        parseFloat(exp.amount).toFixed(2)
+        parseFloat(exp.amount).toFixed(2),
       ]);
 
       cursorY = drawTable(headers, rows, 50, cursorY, columnWidths) + 30;
@@ -1311,17 +1345,26 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
     // Monthly Expenses table
     if (monthlyExpenses.length > 0) {
       const leftMarginX = 50;
-      doc.fontSize(16).fillColor("black").text("Monthly Expenses", leftMarginX, cursorY, { underline: true });
+      doc
+        .fontSize(16)
+        .fillColor("black")
+        .text("Monthly Expenses", leftMarginX, cursorY, { underline: true });
       cursorY += 20;
 
-      const headers = ["Start Date", "End Date", "Name", "Category", "Amount (€)"];
+      const headers = [
+        "Start Date",
+        "End Date",
+        "Name",
+        "Category",
+        "Amount (€)",
+      ];
       const columnWidths = [80, 80, 150, 150, 100];
-      const rows = monthlyExpenses.map(exp => [
+      const rows = monthlyExpenses.map((exp) => [
         new Date(exp.date_start).toLocaleDateString("en-GB"),
         new Date(exp.date_end).toLocaleDateString("en-GB"),
         exp.name,
         exp.category,
-        parseFloat(exp.amount).toFixed(2)
+        parseFloat(exp.amount).toFixed(2),
       ]);
 
       cursorY = drawTable(headers, rows, 50, cursorY, columnWidths) + 30;
@@ -1331,15 +1374,18 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
     if (incomes.length > 0) {
       const leftMarginX = 50;
 
-      doc.fontSize(16).fillColor("black").text("One-Time Incomes", leftMarginX, cursorY, { underline: true });
+      doc
+        .fontSize(16)
+        .fillColor("black")
+        .text("One-Time Incomes", leftMarginX, cursorY, { underline: true });
       cursorY += 20;
 
       const headers = ["Date", "Name", "Amount (€)"];
       const columnWidths = [100, 200, 100];
-      const rows = incomes.map(inc => [
+      const rows = incomes.map((inc) => [
         new Date(inc.date).toLocaleDateString("en-GB"),
         inc.name,
-        parseFloat(inc.amount).toFixed(2)
+        parseFloat(inc.amount).toFixed(2),
       ]);
 
       cursorY = drawTable(headers, rows, 50, cursorY, columnWidths) + 30;
@@ -1347,29 +1393,30 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
 
     // Monthly Incomes table
     if (monthlyIncomes.length > 0) {
-      doc.fontSize(16).fillColor("black").text("Monthly Incomes", 50, cursorY, { underline: true });
+      doc
+        .fontSize(16)
+        .fillColor("black")
+        .text("Monthly Incomes", 50, cursorY, { underline: true });
       cursorY += 20;
 
       const headers = ["Start Date", "End Date", "Name", "Amount (€)"];
       const columnWidths = [80, 80, 200, 100];
-      const rows = monthlyIncomes.map(inc => [
+      const rows = monthlyIncomes.map((inc) => [
         new Date(inc.date_start).toLocaleDateString("en-GB"),
         new Date(inc.date_end).toLocaleDateString("en-GB"),
         inc.name,
-        parseFloat(inc.amount).toFixed(2)
+        parseFloat(inc.amount).toFixed(2),
       ]);
 
       drawTable(headers, rows, 50, cursorY, columnWidths);
     }
 
     doc.end();
-
   } catch (err) {
     console.error("Error generating PDF:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
 
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);
