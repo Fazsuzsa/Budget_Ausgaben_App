@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import AddIncomeForm from "./AddIncome";
 import {
   Table,
@@ -12,6 +12,7 @@ import {
 } from "./ui/table";
 
 import { API_URL } from "../lib/utils";
+import { Button } from "./ui/button";
 
 function Monthly_incomes() {
   const [income, setIncome] = useState([]);
@@ -20,6 +21,7 @@ function Monthly_incomes() {
   const [monthlySum, setMonthlySum] = useState(0);
   const user = JSON.parse(localStorage.getItem("user"));
   const user_id = user?.id;
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchMonthlyIncomes();
@@ -104,7 +106,7 @@ function Monthly_incomes() {
 
   return (
     <>
-          <AddIncomeForm />
+      <AddIncomeForm />
       <h1 className="text-2xl font-bold text-center my-6">Monthly Incomes</h1>
 
       {loading && <p className="text-center">Loading incomes...</p>}
@@ -139,19 +141,22 @@ function Monthly_incomes() {
                       : "Ongoing"}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Link
-                      to={`/edit-monthly-income/${income.user_id}/${income.id}`}
-                      state={{ income }}
-                      className="text-blue-500 underline"
+
+                    <Button
+                      onClick={() =>
+                        navigate(`/edit-monthly-income/${income.user_id}/${income.id}`, {
+                          state: { income },
+                        })
+                      }
                     >
                       Edit
-                    </Link>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() => handleDelete(income.id)}
                       className="text-red-500 underline"
                     >
                       Delete
-                    </button>
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

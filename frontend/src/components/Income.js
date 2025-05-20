@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { Button } from "./ui/button";
 import {
   Table,
   TableBody,
@@ -19,6 +20,7 @@ function Income() {
   const [error, setError] = useState(null);
   const user = JSON.parse(localStorage.getItem("user"));
   const user_id = user?.id;
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchIncomes();
@@ -128,19 +130,22 @@ function Income() {
                     {new Date(income.date).toISOString().split("T")[0]}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Link
-                      to={`/edit-income/${income.user_id}/${income.id}`}
-                      state={{ income }}
-                      className="text-blue-500 underline"
+
+                    <Button
+                      onClick={() =>
+                        navigate(`/edit-income/${income.user_id}/${income.id}`, {
+                          state: { income },
+                        })
+                      }
                     >
                       Edit
-                    </Link>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() => handleDelete(income.id)}
                       className="text-red-500 underline"
                     >
                       Delete
-                    </button>
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
