@@ -94,9 +94,14 @@ app.get("/expenses/:user_id/search", authenticateToken, async (req, res) => {
     const values = [user_id];
     if (monthYear) {
       const [year, month] = monthYear.split("-").map(Number);
-      query +=
-        " AND EXTRACT(MONTH FROM expenses.date) = $2 AND EXTRACT(YEAR FROM expenses.date) = $3";
-      values.push(month, year);
+      const monthStart = new Date(year, month - 1, 1);
+      const monthEnd = new Date(year, month, 0);
+
+      const isoStart = monthStart.toISOString().split("T")[0]; // YYYY-MM-DD
+      const isoEnd = monthEnd.toISOString().split("T")[0]; // YYYY-MM-DD
+
+      query += ` AND expenses.date BETWEEN $2 AND $3`;
+      values.push(isoStart, isoEnd);
     }
 
     query += " ORDER BY expenses.date DESC";
@@ -165,6 +170,59 @@ app.get("/monthly_expenses/:user_id", authenticateToken, async (req, res) => {
     res.status(500).json({ error: "Interner Serverfehler" });
   }
 });
+
+app.get(
+  "/monthly_expenses/:user_id/search",
+  authenticateToken,
+  async (req, res) => {
+    const { user_id } = req.params;
+    const { monthYear } = req.query;
+    // z.B.: localhost:5005/monthly_expenses/1/search?monthYear=2025-05
+
+    try {
+      let query = `
+      SELECT 
+        monthly_expenses.id, 
+        monthly_expenses.user_id, 
+        monthly_expenses.amount, 
+        monthly_expenses.name, 
+        monthly_expenses.category_id, 
+        categories.category, 
+        monthly_expenses.date_start, 
+        monthly_expenses.date_end
+      FROM public.monthly_expenses
+      JOIN public.categories ON monthly_expenses.category_id = categories.id
+      WHERE monthly_expenses.user_id = $1
+    `;
+
+      const values = [user_id];
+
+      if (monthYear) {
+        const [year, month] = monthYear.split("-").map(Number);
+
+        const monthStart = new Date(year, month - 1, 1);
+        const monthEnd = new Date(year, month, 0);
+        const isoMonthStart = monthStart.toISOString().split("T")[0];
+        const isoMonthEnd = monthEnd.toISOString().split("T")[0];
+
+        query += `
+        AND (
+          (monthly_expenses.date_start <= $2 AND (monthly_expenses.date_end IS NULL OR monthly_expenses.date_end >= $3))
+        )
+      `;
+        values.push(isoMonthEnd, isoMonthStart);
+      }
+
+      query += " ORDER BY monthly_expenses.date_start DESC";
+
+      const result = await pool.query(query, values);
+      res.json(result.rows);
+    } catch (err) {
+      console.error("Fehler beim Abrufen der monatlichen Ausgaben:", err);
+      res.status(500).json({ error: "Interner Serverfehler" });
+    }
+  }
+);
 
 app.post("/monthly_expenses", authenticateToken, async (req, res) => {
   const { user_id, category_id, amount, name, date_start, date_end } = req.body;
@@ -1209,23 +1267,32 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
       monthlyIncomes.length === 0 &&
       incomes.length === 0
     ) {
-      return res.status(404).json({ error: "No data found for the current month" });
+      return res
+        .status(404)
+        .json({ error: "No data found for the current month" });
     }
 
     // Calculate total expenses (one-time + monthly)
-    const totalExpenses = expenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0) +
+    const totalExpenses =
+      expenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0) +
       monthlyExpenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
 
     // Calculate total income (one-time + monthly)
-    const totalIncome = monthlyIncomes.reduce((sum, inc) => sum + parseFloat(inc.amount), 0) +
+    const totalIncome =
+      monthlyIncomes.reduce((sum, inc) => sum + parseFloat(inc.amount), 0) +
       incomes.reduce((sum, inc) => sum + parseFloat(inc.amount), 0);
 
     // Calculate balance (income - expenses)
     const balance = totalIncome - totalExpenses;
 
     // Add title and summary section
-    const currentMonth = new Date().toLocaleString("default", { month: "long", year: "numeric" });
-    doc.fontSize(20).text(`Monthly Overview - ${currentMonth}`, { align: "center" });
+    const currentMonth = new Date().toLocaleString("default", {
+      month: "long",
+      year: "numeric",
+    });
+    doc
+      .fontSize(20)
+      .text(`Monthly Overview - ${currentMonth}`, { align: "center" });
     doc.moveDown(1);
 
     doc.fontSize(14);
@@ -1240,13 +1307,24 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
       let y = startY;
 
       // Draw header background
-      doc.rect(startX, y, columnWidths.reduce((a, b) => a + b, 0), rowHeight).fill("#d3d3d3").stroke();
+      doc
+        .rect(
+          startX,
+          y,
+          columnWidths.reduce((a, b) => a + b, 0),
+          rowHeight
+        )
+        .fill("#d3d3d3")
+        .stroke();
       doc.fillColor("black").font("Helvetica-Bold").fontSize(12);
 
       // Draw headers
       let x = startX;
       headers.forEach((header, i) => {
-        doc.text(header, x + 5, y + 5, { width: columnWidths[i] - 10, align: "left" });
+        doc.text(header, x + 5, y + 5, {
+          width: columnWidths[i] - 10,
+          align: "left",
+        });
         x += columnWidths[i];
       });
 
@@ -1258,14 +1336,25 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
         x = startX;
 
         if (index % 2 === 0) {
-          doc.rect(startX, y, columnWidths.reduce((a, b) => a + b, 0), rowHeight).fill("#f9f9f9").stroke();
+          doc
+            .rect(
+              startX,
+              y,
+              columnWidths.reduce((a, b) => a + b, 0),
+              rowHeight
+            )
+            .fill("#f9f9f9")
+            .stroke();
           doc.fillColor("black");
         } else {
           doc.fillColor("black");
         }
 
         row.forEach((cell, i) => {
-          doc.text(cell, x + 5, y + 5, { width: columnWidths[i] - 10, align: "left" });
+          doc.text(cell, x + 5, y + 5, {
+            width: columnWidths[i] - 10,
+            align: "left",
+          });
           x += columnWidths[i];
         });
 
@@ -1286,16 +1375,19 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
 
     // One-Time Expenses table
     if (expenses.length > 0) {
-      doc.fontSize(16).fillColor("black").text("One-Time Expenses", { underline: true });
+      doc
+        .fontSize(16)
+        .fillColor("black")
+        .text("One-Time Expenses", { underline: true });
       cursorY += 20;
 
       const headers = ["Date", "Name", "Category", "Amount (€)"];
       const columnWidths = [100, 150, 150, 100];
-      const rows = expenses.map(exp => [
+      const rows = expenses.map((exp) => [
         new Date(exp.date).toLocaleDateString("en-GB"),
         exp.name,
         exp.category,
-        parseFloat(exp.amount).toFixed(2)
+        parseFloat(exp.amount).toFixed(2),
       ]);
 
       cursorY = drawTable(headers, rows, 50, cursorY, columnWidths) + 30;
@@ -1304,17 +1396,26 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
     // Monthly Expenses table
     if (monthlyExpenses.length > 0) {
       const leftMarginX = 50;
-      doc.fontSize(16).fillColor("black").text("Monthly Expenses", leftMarginX, cursorY, { underline: true });
+      doc
+        .fontSize(16)
+        .fillColor("black")
+        .text("Monthly Expenses", leftMarginX, cursorY, { underline: true });
       cursorY += 20;
 
-      const headers = ["Start Date", "End Date", "Name", "Category", "Amount (€)"];
+      const headers = [
+        "Start Date",
+        "End Date",
+        "Name",
+        "Category",
+        "Amount (€)",
+      ];
       const columnWidths = [80, 80, 150, 150, 100];
-      const rows = monthlyExpenses.map(exp => [
+      const rows = monthlyExpenses.map((exp) => [
         new Date(exp.date_start).toLocaleDateString("en-GB"),
         new Date(exp.date_end).toLocaleDateString("en-GB"),
         exp.name,
         exp.category,
-        parseFloat(exp.amount).toFixed(2)
+        parseFloat(exp.amount).toFixed(2),
       ]);
 
       cursorY = drawTable(headers, rows, 50, cursorY, columnWidths) + 30;
@@ -1324,15 +1425,18 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
     if (incomes.length > 0) {
       const leftMarginX = 50;
 
-      doc.fontSize(16).fillColor("black").text("One-Time Incomes", leftMarginX, cursorY, { underline: true });
+      doc
+        .fontSize(16)
+        .fillColor("black")
+        .text("One-Time Incomes", leftMarginX, cursorY, { underline: true });
       cursorY += 20;
 
       const headers = ["Date", "Name", "Amount (€)"];
       const columnWidths = [100, 200, 100];
-      const rows = incomes.map(inc => [
+      const rows = incomes.map((inc) => [
         new Date(inc.date).toLocaleDateString("en-GB"),
         inc.name,
-        parseFloat(inc.amount).toFixed(2)
+        parseFloat(inc.amount).toFixed(2),
       ]);
 
       cursorY = drawTable(headers, rows, 50, cursorY, columnWidths) + 30;
@@ -1340,29 +1444,30 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
 
     // Monthly Incomes table
     if (monthlyIncomes.length > 0) {
-      doc.fontSize(16).fillColor("black").text("Monthly Incomes", 50, cursorY, { underline: true });
+      doc
+        .fontSize(16)
+        .fillColor("black")
+        .text("Monthly Incomes", 50, cursorY, { underline: true });
       cursorY += 20;
 
       const headers = ["Start Date", "End Date", "Name", "Amount (€)"];
       const columnWidths = [80, 80, 200, 100];
-      const rows = monthlyIncomes.map(inc => [
+      const rows = monthlyIncomes.map((inc) => [
         new Date(inc.date_start).toLocaleDateString("en-GB"),
         new Date(inc.date_end).toLocaleDateString("en-GB"),
         inc.name,
-        parseFloat(inc.amount).toFixed(2)
+        parseFloat(inc.amount).toFixed(2),
       ]);
 
       drawTable(headers, rows, 50, cursorY, columnWidths);
     }
 
     doc.end();
-
   } catch (err) {
     console.error("Error generating PDF:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
 
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);
