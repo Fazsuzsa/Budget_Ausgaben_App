@@ -1,5 +1,15 @@
-import React, { useState } from "react";
-
+import React, { useState } from 'react';
+import { cn } from "../lib/utils";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Label } from "../components/ui/label";
+import { Input } from "../components/ui/input";
+import { Button } from "../components/ui/button";
 import { API_URL } from "../lib/utils";
 
 function Signup() {
@@ -41,38 +51,49 @@ function Signup() {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <>
       <h2>Create an Account</h2>
-      <input
-        type="text"
-        name="name"
-        placeholder="Name"
-        value={form.name}
-        onChange={handleChange}
-        required
-      />
-      <br />
-      <input
-        type="email"
-        name="e_mail"
-        placeholder="Email"
-        value={form.e_mail}
-        onChange={handleChange}
-        required
-      />
-      <br />
-      <input
-        type="password"
-        name="password"
-        placeholder="Password"
-        value={form.password}
-        onChange={handleChange}
-        required
-      />
-      <br />
-      <button type="submit">Sign Up</button>
-      <p>{message}</p>
-    </form>
+      <form onSubmit={handleSubmit}>
+        <div className="flex flex-col gap-6">
+          <div className="grid gap-2">
+            <Label>Your Name</Label>
+            <Input
+              type="text"
+              name="name"
+              placeholder="Name"
+              value={form.name}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label>Your Email</Label>
+            <Input
+              type="email"
+              name="e_mail"
+              placeholder="Email"
+              value={form.e_mail}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label>Your Password</Label>
+            <Input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <Button type="submit" className="w-full">
+            Signup
+          </Button>                    <p>{message}</p>
+        </div>
+      </form>
+    </>
   );
 }
 
