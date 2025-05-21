@@ -126,6 +126,8 @@ function MonthlyExpenses() {
     {
       accessorKey: "name",
       header: "Name",
+      size: 100,
+      cell: ({ row }) => row.getValue("name"),
     },
     {
       accessorKey: "amount",
@@ -158,7 +160,7 @@ function MonthlyExpenses() {
       cell: ({ row }) => {
         const expense = row.original;
         return (
-          <div className="text-right space-x-2">
+          <div>
             <Button
               onClick={() =>
                 navigate(
@@ -244,54 +246,68 @@ function MonthlyExpenses() {
 
       {!loading && !error && (
         <div className="max-w-5xl mx-auto">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+          <div className="table-wrapper">
+            <Table className="expenses-table">
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead
+                        key={header.id}
+                        className={`${
+                          header.column.id === "name" ? "w-[100px]" : ""
+                        } ${
+                          header.column.id === "actions" ? "text-right" : ""
+                        }`}
+                      >
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        key={cell.id}
+                        className={`font-medium ${
+                          cell.column.id === "name" ? "w-[100px]" : ""
+                        } ${cell.column.id === "actions" ? "text-right" : ""}`}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+                {selectedMonthYear === new Date().toISOString().slice(0, 7) && (
+                  <TableRow
+                    style={{
+                      backgroundColor: "#0489A9",
+                      fontWeight: "bold",
+                      color: "#333",
+                    }}
+                  >
+                    <TableCell className="font-medium">
+                      Total regular expenses for this month {selectedMonthYear}
                     </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-              {selectedMonthYear === new Date().toISOString().slice(0, 7) && (
-                <TableRow
-                  style={{
-                    backgroundColor: "#0489A9",
-                    fontWeight: "bold",
-                    color: "#333",
-                  }}
-                >
-                  <TableCell className="font-medium">
-                    Total regular expenses for this month {selectedMonthYear}
-                  </TableCell>
-                  <TableCell>{parseFloat(monthlySum).toFixed(2)} €</TableCell>
-                  <TableCell />
-                  <TableCell />
-                  <TableCell />
-                  <TableCell />
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                    <TableCell>{parseFloat(monthlySum).toFixed(2)} €</TableCell>
+                    <TableCell />
+                    <TableCell />
+                    <TableCell />
+                    <TableCell />
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       )}
     </>

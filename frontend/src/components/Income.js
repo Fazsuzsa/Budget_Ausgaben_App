@@ -114,7 +114,7 @@ function Income() {
                 <TableHead className="w-[100px]">Name</TableHead>
                 <TableHead>Price (€)</TableHead>
                 <TableHead className="text-right">Date</TableHead>
-                <TableHead className="text-right">Aktionen</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
