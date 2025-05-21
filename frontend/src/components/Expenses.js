@@ -221,54 +221,55 @@ function Expenses() {
 
       {!loading && !error && (
         <div className="max-w-4xl mx-auto">
-          <Table className="expenses-table">
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+          <div className="table-wrapper">
+            <Table className="expenses-table">
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id}>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+                {selectedMonthYear === new Date().toISOString().slice(0, 7) && (
+                  <TableRow
+                    style={{
+                      backgroundColor: "#0489A9",
+                      fontWeight: "bold",
+                      color: "#333",
+                    }}
+                  >
+                    <TableCell className="font-medium">
+                      Total one-time expenses for this month {selectedMonthYear}
                     </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-              {selectedMonthYear === new Date().toISOString().slice(0, 7) && (
-                <TableRow
-                  style={{
-                    backgroundColor: "#0489A9",
-                    fontWeight: "bold",
-                    color: "#333",
-                  }}
-                >
-                  <TableCell className="font-medium">
-                    Total one-time expenses for this month {selectedMonthYear}
-                  </TableCell>
-                  <TableCell>{parseFloat(sum).toFixed(2)}€</TableCell>
-                  <TableCell />
-                  <TableCell />
-                  <TableCell />
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-
+                    <TableCell>{parseFloat(sum).toFixed(2)}€</TableCell>
+                    <TableCell />
+                    <TableCell />
+                    <TableCell />
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
           <div className="flex items-center justify-end space-x-2 py-4">
             <Button
               variant="outline"
