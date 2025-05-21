@@ -1,39 +1,47 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "./ui/table";
-
-import { API_URL } from "../lib/utils";
 import { Button } from "./ui/button";
+import { FormItem, FormLabel, FormControl } from "./ui/form";
+import { Input } from "./ui/input";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  flexRender,
+} from "@tanstack/react-table";
+import { API_URL } from "../lib/utils";
 
-function Monthly_expenses() {
+function MonthlyExpenses() {
   const [expenses, setExpenses] = useState([]);
+  const [monthlySum, setMonthlySum] = useState(0);
+  const [selectedMonthYear, setSelectedMonthYear] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [monthlySum, setMonthlySum] = useState(0);
+  const [sorting, setSorting] = useState([]);
+  const [columnFilters, setColumnFilters] = useState([]);
+  const [showMonthFilter, setShowMonthFilter] = useState(false);
+
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?.id;
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchMonthlyExpenses();
-    fetchMonthlyExpensesSum();
-  }, []);
-
-  const fetchMonthlyExpenses = async () => {
+  const fetchMonthlyExpenses = async (monthYear = "") => {
     const token = localStorage.getItem("token");
+    const url = monthYear
+      ? `${API_URL}/monthly_expenses/${userId}/search?monthYear=${monthYear}`
+      : `${API_URL}/monthly_expenses/${userId}`;
 
     try {
-      const response = await fetch(`${API_URL}/monthly_expenses/${userId}`, {
-        method: "GET",
+      const response = await fetch(url, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -41,8 +49,9 @@ function Monthly_expenses() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch Expenses");
+        throw new Error("Failed to fetch monthly expenses.");
       }
+
       const data = await response.json();
       setExpenses(data);
       setLoading(false);
@@ -54,31 +63,27 @@ function Monthly_expenses() {
 
   const fetchMonthlyExpensesSum = async () => {
     const token = localStorage.getItem("token");
-
     try {
       const response = await fetch(
         `${API_URL}/monthly_expenses/sum/${userId}`,
         {
-          method: "GET",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         }
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch sum");
-      }
-
       const data = await response.json();
       setMonthlySum(data.totalMonthlyExpenses || 0);
     } catch (err) {
-      console.error("Error fetching sum:", err.message);
+      console.error("Error fetching total monthly expenses:", err.message);
     }
   };
 
   const handleDelete = async (id) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this entry?"
+    );
     const confirmed = window.confirm("Delete this monthly entry?");
     if (!confirmed) return;
 
@@ -106,82 +111,182 @@ function Monthly_expenses() {
     }
   };
 
+  useEffect(() => {
+    const today = new Date();
+    const currentMonth = today.toISOString().slice(0, 7);
+    setSelectedMonthYear(currentMonth);
+    fetchMonthlyExpenses(currentMonth);
+    fetchMonthlyExpensesSum();
+  }, []);
+
+  const columns = [
+    {
+      accessorKey: "name",
+      header: "Name",
+    },
+    {
+      accessorKey: "amount",
+      header: "Price (€)",
+      cell: ({ row }) => parseFloat(row.getValue("amount")).toFixed(2) + " €",
+    },
+    {
+      accessorKey: "category",
+      header: "Category",
+    },
+    {
+      accessorKey: "date_start",
+      header: "Start Date",
+      cell: ({ row }) =>
+        row.getValue("date_start")
+          ? new Date(row.getValue("date_start")).toLocaleDateString()
+          : "No start date",
+    },
+    {
+      accessorKey: "date_end",
+      header: "End Date",
+      cell: ({ row }) =>
+        row.getValue("date_end")
+          ? new Date(row.getValue("date_end")).toLocaleDateString()
+          : "Ongoing",
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        const expense = row.original;
+        return (
+          <div className="text-right space-x-2">
+            <Button
+              onClick={() =>
+                navigate(
+                  `/edit-monthlyexpense/${expense.user_id}/${expense.id}`,
+                  {
+                    state: { expense },
+                  }
+                )
+              }
+            >
+              Edit
+            </Button>
+            <Button
+              onClick={() => handleDelete(expense.id)}
+              className="text-red-500 underline"
+            >
+              Delete
+            </Button>
+          </div>
+        );
+      },
+    },
+  ];
+
+  const table = useReactTable({
+    data: expenses,
+    columns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    state: {
+      sorting,
+      columnFilters,
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+  });
+
   return (
     <>
-      <h1 className="text-2xl font-bold text-center my-6">Monthly expenses</h1>
+      <h1 className="text-2xl font-bold text-center my-6">
+        Regular expenses {selectedMonthYear}
+      </h1>
+      <div className="text-center mt-10">
+        <Button
+          onClick={() => setShowMonthFilter(!showMonthFilter)}
+          className="mb-4"
+        >
+          {showMonthFilter ? "Hide filter" : "Filter by Month"}
+        </Button>
+
+        {showMonthFilter && (
+          <div className="max-w-sm mx-auto mt-4">
+            <FormItem>
+              <FormLabel>Select Month</FormLabel>
+              <FormControl>
+                <Input
+                  type="month"
+                  value={selectedMonthYear}
+                  onChange={(e) => {
+                    setSelectedMonthYear(e.target.value);
+                    fetchMonthlyExpenses(e.target.value);
+                  }}
+                />
+              </FormControl>
+            </FormItem>
+            <br />
+            <Button
+              onClick={() => {
+                setSelectedMonthYear("");
+                fetchMonthlyExpenses();
+                setShowMonthFilter(false);
+              }}
+            >
+              Reset Filter
+            </Button>
+          </div>
+        )}
+      </div>
 
       {loading && <p className="text-center">Loading expenses...</p>}
       {error && <p className="text-center text-red-500">{error}</p>}
 
       {!loading && !error && (
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <Table>
-            <TableCaption></TableCaption>
             <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">Name</TableHead>
-                <TableHead>Price (€)</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Start Date</TableHead>
-                <TableHead>End Date</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {expenses.map((expense) => (
-                <TableRow key={expense.id}>
-                  <TableCell className="font-medium">{expense.name}</TableCell>
-                  <TableCell>{parseFloat(expense.amount).toFixed(2)}</TableCell>
-                  <TableCell>{expense.category}</TableCell>
-                  <TableCell>
-                    {expense.date_start
-                      ? new Date(expense.date_start).toLocaleDateString()
-                      : "No start date"}
-                  </TableCell>
-                  <TableCell>
-                    {expense.date_end
-                      ? new Date(expense.date_end).toLocaleDateString()
-                      : "Ongoing"}
-                  </TableCell>
-
-                  <TableCell className="text-right">
-                    <Button
-                      onClick={() =>
-                        navigate(
-                          `/edit-monthlyexpense/${expense.user_id}/${expense.id}`,
-                          {
-                            state: { expense },
-                          }
-                        )
-                      }
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      onClick={() => handleDelete(expense.id)}
-                      className="text-red-500 underline"
-                    >
-                      Delete
-                    </Button>
-                  </TableCell>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                    </TableHead>
+                  ))}
                 </TableRow>
               ))}
-              <TableRow
-                style={{
-                  backgroundColor: "#61DAFB",
-                  fontWeight: "bold",
-                  color: "#333",
-                }}
-              >
-                <TableCell className="font-medium">
-                  Total Monthly expenses for this month
-                </TableCell>
-                <TableCell>{parseFloat(monthlySum).toFixed(2)} €</TableCell>
-                <TableCell />
-                <TableCell />
-                <TableCell />
-                <TableCell />
-              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+              {selectedMonthYear === new Date().toISOString().slice(0, 7) && (
+                <TableRow
+                  style={{
+                    backgroundColor: "#0489A9",
+                    fontWeight: "bold",
+                    color: "#333",
+                  }}
+                >
+                  <TableCell className="font-medium">
+                    Total monthly expenses for this month {selectedMonthYear}
+                  </TableCell>
+                  <TableCell>{parseFloat(monthlySum).toFixed(2)} €</TableCell>
+                  <TableCell />
+                  <TableCell />
+                  <TableCell />
+                  <TableCell />
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>
@@ -190,4 +295,4 @@ function Monthly_expenses() {
   );
 }
 
-export default Monthly_expenses;
+export default MonthlyExpenses;
