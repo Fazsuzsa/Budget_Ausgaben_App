@@ -102,14 +102,14 @@ function ExpensesNav() {
             <p>
               <strong>Total Expenses:</strong>{" "}
               <span style={{ color: "red", fontWeight: "bold" }}>
-                {totalExpenses} €
+                {totalExpenses.toFixed(2)} €
               </span>
             </p>
             <p>
               <strong>Total Income:</strong>{" "}
               <span style={{ color: "green", fontWeight: "bold" }}>
                 {" "}
-                {totalIncome} €
+                {totalIncome.toFixed(2)} €
               </span>
             </p>
             <p>
