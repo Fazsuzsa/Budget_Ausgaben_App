@@ -157,7 +157,7 @@ function Expenses({ columns, data }) {
                   <TableHead>Price (€)</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Aktionen</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
