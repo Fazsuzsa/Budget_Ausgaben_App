@@ -22,11 +22,11 @@ const user_id = user?.id; // ohne Token nur der user
 const chartConfig = {
   expenses: {
     label: "Expenses",
-    color: "#2563eb",
+    color: " #F5C858", //  #FBBF24",
   },
   income: {
     label: "Income",
-    color: "#60a5fa",
+    color: " #0489A9",
   },
 };
 

@@ -66,9 +66,7 @@ function Expenses({ columns, data }) {
     }
   };
   const handleDelete = async (id) => {
-    const confirmed = window.confirm(
-      "Willst du diesen Eintrag wirklich löschen?"
-    );
+    const confirmed = window.confirm("Do you really want to delete this entry");
     if (!confirmed) return;
 
     const token = localStorage.getItem("token");
@@ -84,13 +82,13 @@ function Expenses({ columns, data }) {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Fehler beim Löschen");
+        throw new Error(data.error || "Error while deleting");
       }
 
       setExpenses((prev) => prev.filter((e) => e.id !== id));
       window.location.reload();
     } catch (err) {
-      alert("Löschen fehlgeschlagen: " + err.message);
+      alert("Failed to delete: " + err.message);
     }
   };
 
@@ -210,7 +208,9 @@ function Expenses({ columns, data }) {
                     color: "#333",
                   }}
                 >
-                  <TableCell className="font-medium">Sum Expenses</TableCell>
+                  <TableCell className="font-medium">
+                    Total One-Time expenses for this month
+                  </TableCell>
                   <TableCell>{parseFloat(Sum).toFixed(2)}€</TableCell>
                   <TableCell></TableCell>
                   <TableCell></TableCell>

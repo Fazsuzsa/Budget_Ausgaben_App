@@ -51,7 +51,7 @@ function Income() {
   };
   const handleDelete = async (id) => {
     const confirmed = window.confirm(
-      "Willst du diesen Eintrag wirklich löschen?"
+      "Do you really want to delete this entry?"
     );
     if (!confirmed) return;
 
@@ -67,13 +67,13 @@ function Income() {
       });
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Fehler beim Löschen");
+        throw new Error(data.error || "Error while deleting");
       }
       setIncome((prev) => prev.filter((i) => i.id !== id));
 
       window.location.reload();
     } catch (err) {
-      alert("Löschen fehlgeschlagen: " + err.message);
+      alert("Failed to delete: " + err.message);
     }
   };
 
@@ -130,12 +130,14 @@ function Income() {
                     {new Date(income.date).toISOString().split("T")[0]}
                   </TableCell>
                   <TableCell className="text-right">
-
                     <Button
                       onClick={() =>
-                        navigate(`/edit-income/${income.user_id}/${income.id}`, {
-                          state: { income },
-                        })
+                        navigate(
+                          `/edit-income/${income.user_id}/${income.id}`,
+                          {
+                            state: { income },
+                          }
+                        )
                       }
                     >
                       Edit
@@ -156,7 +158,7 @@ function Income() {
                   color: "#333",
                 }}
               >
-                <TableCell>Sum One-Time Incomes</TableCell>
+                <TableCell>Total One-Time Incomes for this month</TableCell>
                 <TableCell>{parseFloat(Sum).toFixed(2)}€</TableCell>
                 <TableCell />
                 <TableCell />

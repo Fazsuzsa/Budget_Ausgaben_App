@@ -79,7 +79,7 @@ function Monthly_expenses() {
   };
 
   const handleDelete = async (id) => {
-    const confirmed = window.confirm("Diesen monatlichen Eintrag löschen?");
+    const confirmed = window.confirm("Delete this monthly entry?");
     if (!confirmed) return;
 
     const token = localStorage.getItem("token");
@@ -95,14 +95,14 @@ function Monthly_expenses() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Fehler beim Löschen");
+        throw new Error(data.error || "Error while deleting");
       }
 
       setExpenses((prev) => prev.filter((e) => e.id !== id));
       fetchMonthlyExpensesSum();
       window.location.reload();
     } catch (err) {
-      alert("Löschen fehlgeschlagen: " + err.message);
+      alert("Failed to delete: " + err.message);
     }
   };
 
@@ -124,7 +124,7 @@ function Monthly_expenses() {
                 <TableHead>Category</TableHead>
                 <TableHead>Start Date</TableHead>
                 <TableHead>End Date</TableHead>
-                <TableHead className="text-right">Aktionen</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -174,7 +174,7 @@ function Monthly_expenses() {
                 }}
               >
                 <TableCell className="font-medium">
-                  Sum Monthly Expenses
+                  Total Monthly expenses for this month
                 </TableCell>
                 <TableCell>{parseFloat(monthlySum).toFixed(2)} €</TableCell>
                 <TableCell />

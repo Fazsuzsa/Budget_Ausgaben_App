@@ -78,7 +78,7 @@ function Monthly_incomes() {
 
   const handleDelete = async (id) => {
     const confirmed = window.confirm(
-      "Diesen monatlichen Income-Eintrag löschen?"
+      "Do you Want to delete this monthly income entry?"
     );
     if (!confirmed) return;
     const token = localStorage.getItem("token");
@@ -93,14 +93,14 @@ function Monthly_incomes() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Fehler beim Löschen");
+        throw new Error(data.error || "Error while deleting");
       }
 
       setIncome((prev) => prev.filter((item) => item.id !== id));
       fetchMonthlyIncomesSum();
       window.location.reload();
     } catch (err) {
-      alert("Löschen fehlgeschlagen: " + err.message);
+      alert("Failed to delete: " + err.message);
     }
   };
 
@@ -122,7 +122,7 @@ function Monthly_incomes() {
                 <TableHead>Price (€)</TableHead>
                 <TableHead>Start Date</TableHead>
                 <TableHead>End Date</TableHead>
-                <TableHead className="text-right">Aktionen</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -141,12 +141,14 @@ function Monthly_incomes() {
                       : "Ongoing"}
                   </TableCell>
                   <TableCell className="text-right">
-
                     <Button
                       onClick={() =>
-                        navigate(`/edit-monthly-income/${income.user_id}/${income.id}`, {
-                          state: { income },
-                        })
+                        navigate(
+                          `/edit-monthly-income/${income.user_id}/${income.id}`,
+                          {
+                            state: { income },
+                          }
+                        )
                       }
                     >
                       Edit
@@ -168,7 +170,7 @@ function Monthly_incomes() {
                 }}
               >
                 <TableCell className="font-medium">
-                  Sum Monthly Incomes
+                  Total Monthly Incomes for this month
                 </TableCell>
                 <TableCell>{parseFloat(monthlySum).toFixed(2)} €</TableCell>
 

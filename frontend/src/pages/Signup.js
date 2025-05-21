@@ -52,49 +52,62 @@ function Signup() {
 
   return (
     <>
-      <h2>Create an Account</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="flex flex-col gap-6">
-          <div className="grid gap-2">
-            <Label>Your Name</Label>
-            <Input
-              type="text"
-              name="name"
-              placeholder="Name"
-              value={form.name}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label>Your Email</Label>
-            <Input
-              type="email"
-              name="e_mail"
-              placeholder="Email"
-              value={form.e_mail}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label>Your Password</Label>
-            <Input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={form.password}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <Button type="submit" className="w-full">
-            Signup
-          </Button>                    <p>{message}</p>
-        </div>
-      </form>
+      <div className={cn("flex flex-col gap-6")}>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Signup</CardTitle>
+            <CardDescription>
+              Create your account
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit}>
+              <div className="flex flex-col gap-6">
+                <div className="grid gap-2">
+                  <Label>Your Name</Label>
+                  <Input
+                    type="text"
+                    name="name"
+                    placeholder="Name"
+                    value={form.name}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Your Email</Label>
+                  <Input
+                    type="email"
+                    name="e_mail"
+                    placeholder="Email"
+                    value={form.e_mail}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Your Password</Label>
+                  <Input
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                    value={form.password}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full">
+                  Signup
+                </Button>                    <p>{message}</p>
+              </div>
+            </form>
+
+          </CardContent>
+        </Card>
+      </div>
     </>
   );
 }
+
 
 export default Signup;

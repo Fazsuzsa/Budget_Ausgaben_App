@@ -71,7 +71,6 @@ function ExpensesNav() {
     }
   };
 
-
   useEffect(() => {
     if (userId) fetchBalance();
   }, [userId]);
@@ -80,8 +79,6 @@ function ExpensesNav() {
   return (
     <>
       <Navbar />
-
-
 
       <div
         className="expenses-nav"
@@ -94,7 +91,8 @@ function ExpensesNav() {
           boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
         }}
       >
-        <Button onClick={handleDownloadPDF}>Download (PDF)</Button> <br /> <br />
+        <Button onClick={handleDownloadPDF}>Download (PDF)</Button> <br />{" "}
+        <br />
         <h2 style={{ color: "#1e88e5", marginBottom: "16px" }}>
           Monthly Overview
         </h2>
@@ -122,7 +120,7 @@ function ExpensesNav() {
                   fontWeight: "bold",
                 }}
               >
-                {balance} €
+                {balance.toFixed(2)} €
               </span>
             </p>
             {balance < 0 && debitPerMonth !== null && (

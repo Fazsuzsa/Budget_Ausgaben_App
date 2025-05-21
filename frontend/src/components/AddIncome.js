@@ -55,7 +55,7 @@ const AddIncomeForm = () => {
       });
 
       if (res.ok) {
-        alert("Gespeichert!");
+        alert("Saved");
         reset();
         setShowForm(false);
         window.location.reload();
@@ -64,15 +64,15 @@ const AddIncomeForm = () => {
         alert("Fehler: " + data.error);
       }
     } catch (err) {
-      console.error("Fehler:", err);
-      alert("Serverfehler!");
+      console.error("Error:", err);
+      alert("Server error!");
     }
   };
 
   return (
     <div className="text-center mt-10">
       <Button onClick={() => setShowForm(!showForm)} className="mb-4">
-        {showForm ? "Formular schließen" : "Neue Einnahme hinzufügen"}
+        {showForm ? "Close form" : "Add new income"}
       </Button>
 
       {showForm && (
@@ -84,8 +84,8 @@ const AddIncomeForm = () => {
             <FormLabel>Typ</FormLabel>
             <FormControl>
               <Select value={type} onChange={(e) => setType(e.target.value)}>
-                <SelectItem value="once">Einmalig</SelectItem>
-                <SelectItem value="monthly">Monatlich</SelectItem>
+                <SelectItem value="once">Once</SelectItem>
+                <SelectItem value="monthly">Monthly</SelectItem>
               </Select>
             </FormControl>
           </FormItem>
@@ -93,11 +93,7 @@ const AddIncomeForm = () => {
           <FormItem>
             <FormLabel>Name</FormLabel>
             <FormControl>
-              <Input
-                placeholder="Name der Einnahme"
-                {...register("name")}
-                required
-              />
+              <Input placeholder="Income name" {...register("name")} required />
             </FormControl>
           </FormItem>
 
