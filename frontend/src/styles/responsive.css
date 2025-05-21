@@ -1,53 +1,63 @@
-/* Anvbar*/
-
+/* Nur Desktop */
+/* Hamburger*/
 .hamburger {
   display: none;
-  font-size: 2rem;
   background: none;
   border: none;
+  font-size: 2rem;
   cursor: pointer;
 }
 
-.navbar-links {
-  display: flex;
-  gap: 2rem;
-  align-items: center;
-}
-
-/* Mobile Dropdown - nur unter 768px */
 @media (max-width: 768px) {
   .hamburger {
     display: block;
   }
-
-  .navbar-links {
-    display: none;
-    flex-direction: column;
-    align-items: flex-start;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: white;
-    padding: 1rem;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    z-index: 1000;
-  }
-
-  .navbar-links.open {
-    display: flex;
-  }
 }
 
 
-/*Tabellen*/
+@media (min-width: 769px) {
+  .navbar-links {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+  }
+}
+
+/* Nur Mobile */
 @media (max-width: 768px) {
-  .expenses-table tbody tr td:nth-child(3),
-  .expenses-table tbody tr td:nth-child(4) {
-    display: none !important;
+  .navbar-links {
+    display: none;
+    flex-direction: column;
+    align-items: center; 
+    text-align: center; 
+    width: 100%;
+    background: white;
+    padding: 1rem;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    border-top: 2px solid #ccc;
   }
 
-  .incomes-table tbody tr td:nth-child(3) {
-    display: none !important;
+  .navbar-links.open {
+    display: flex !important;
   }
+}
+
+/*logo*/
+.logo-dark {
+  display: none;
+}
+.logo-light {
+  display: block;
+}
+
+.dark .logo-dark {
+  display: block;
+}
+.dark .logo-light {
+  display: none;
 }
