@@ -4,8 +4,6 @@ import sampleTable from "../assets/images/sampleTable.png";
 import barChart from "../assets/images/barChart.png";
 import pieChart from "../assets/images/pieChart.png";
 
-
-
 // import { Navigate } from "react-router-dom";
 
 function About() {
@@ -17,11 +15,8 @@ function About() {
     <>
       <Navbar />
 
-
       <div style={styles.pageContainer}>
-        <div style={{ color: "red" }}>
-          ZENS: About us (Work in progress ...)
-        </div>
+        <div style={{ color: "red" }}> About ZENS </div>
         <br />
         <div className="text-2xl font-bold text-center my-6">
           The Application for Your Budget Administration
