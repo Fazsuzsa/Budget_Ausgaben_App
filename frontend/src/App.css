@@ -80,7 +80,11 @@ body {
 }
 
 .dark .navbar-links * {
-  color: white !important
+  color: #0489A9 !important
+}
+
+.piechart {
+  background: transparent;
 }
 
 .dark .shadow,

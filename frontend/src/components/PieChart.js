@@ -109,7 +109,7 @@ const PieChart = () => {
   return (
     <>
       <div style={styles.chartBox}>
-        <div className="max-h-[400px] max-w-[800px] p-4 bg-white rounded shadow">
+        <div className="max-h-[400px] max-w-[800px] p-4 bg-white rounded shadow piechart">
           {isChartEmpty ? (
             <p style={{ color: "red" }}>
               No expenses available for the selected month and year.
