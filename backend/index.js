@@ -82,7 +82,8 @@ app.get("/expenses/:user_id/search", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
   const { monthYear } = req.query;
 
-  // z.B.: localhost:5005/expenses/1/search?monthYear=2025-05
+  // zum Beispiel
+  // localhost:5005/expenses/1/search?monthYear=2025-05
   try {
     let query = `
       SELECT expenses.id, expenses.user_id, expenses.amount, expenses.name,
@@ -94,9 +95,14 @@ app.get("/expenses/:user_id/search", authenticateToken, async (req, res) => {
     const values = [user_id];
     if (monthYear) {
       const [year, month] = monthYear.split("-").map(Number);
-      query +=
-        " AND EXTRACT(MONTH FROM expenses.date) = $2 AND EXTRACT(YEAR FROM expenses.date) = $3";
-      values.push(month, year);
+      const monthStart = new Date(year, month - 1, 1);
+      const monthEnd = new Date(year, month, 0);
+
+      const isoStart = monthStart.toISOString().split("T")[0]; // YYYY-MM-DD
+      const isoEnd = monthEnd.toISOString().split("T")[0]; // YYYY-MM-DD
+
+      query += ` AND expenses.date BETWEEN $2 AND $3`;
+      values.push(isoStart, isoEnd);
     }
 
     query += " ORDER BY expenses.date DESC";
@@ -165,6 +171,60 @@ app.get("/monthly_expenses/:user_id", authenticateToken, async (req, res) => {
     res.status(500).json({ error: "Internal  Server Error" });
   }
 });
+
+app.get(
+  "/monthly_expenses/:user_id/search",
+  authenticateToken,
+  async (req, res) => {
+    const { user_id } = req.params;
+    const { monthYear } = req.query;
+    // zum Beispiel
+    // localhost:5005/monthly_expenses/1/search?monthYear=2025-05
+
+    try {
+      let query = `
+      SELECT 
+        monthly_expenses.id, 
+        monthly_expenses.user_id, 
+        monthly_expenses.amount, 
+        monthly_expenses.name, 
+        monthly_expenses.category_id, 
+        categories.category, 
+        monthly_expenses.date_start, 
+        monthly_expenses.date_end
+      FROM public.monthly_expenses
+      JOIN public.categories ON monthly_expenses.category_id = categories.id
+      WHERE monthly_expenses.user_id = $1
+    `;
+
+      const values = [user_id];
+
+      if (monthYear) {
+        const [year, month] = monthYear.split("-").map(Number);
+
+        const monthStart = new Date(year, month - 1, 1);
+        const monthEnd = new Date(year, month, 0);
+        const isoMonthStart = monthStart.toISOString().split("T")[0];
+        const isoMonthEnd = monthEnd.toISOString().split("T")[0];
+
+        query += `
+        AND (
+          (monthly_expenses.date_start <= $2 AND (monthly_expenses.date_end IS NULL OR monthly_expenses.date_end >= $3))
+        )
+      `;
+        values.push(isoMonthEnd, isoMonthStart);
+      }
+
+      query += " ORDER BY monthly_expenses.date_start DESC";
+
+      const result = await pool.query(query, values);
+      res.json(result.rows);
+    } catch (err) {
+      console.error("Fehler beim Abrufen der monatlichen Ausgaben:", err);
+      res.status(500).json({ error: "Interner Serverfehler" });
+    }
+  }
+);
 
 app.post("/monthly_expenses", authenticateToken, async (req, res) => {
   const { user_id, category_id, amount, name, date_start, date_end } = req.body;

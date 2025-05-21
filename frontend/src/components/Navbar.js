@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import logo from "../assets/images/dark_logo.svg";
+import darkLogo from "../assets/images/dark_logo.svg";
+import lightLogo from "../assets/images/light_logo.svg";
 import "../styles/responsive.css";
 import { ModeToggle } from "./ModeToggle";
 
@@ -30,7 +31,8 @@ function Navbar() {
           >
           {/* Logo */}
       <div style={{ flexShrink: 0 }}>
-        <img src={logo} style={{ height: "70px" }} />
+        <img src={lightLogo} className="logo-dark" style={{ height: "70px" }} alt="light logo" />
+        <img src={darkLogo} className="logo-light" style={{ height: "70px" }} alt="dark logo" />
       </div>
       <button className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>
         ☰
