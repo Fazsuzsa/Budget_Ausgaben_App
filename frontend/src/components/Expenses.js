@@ -243,6 +243,7 @@ function Expenses() {
                   <TableRow key={row.id}>
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id} className="font-medium">
+
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
