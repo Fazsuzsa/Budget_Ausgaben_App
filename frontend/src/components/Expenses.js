@@ -131,11 +131,12 @@ function Expenses() {
     },
     {
       id: "actions",
-      header: "Aktionen",
+      header: "Actions",
+      className: "text-right",
       cell: ({ row }) => {
         const expense = row.original;
         return (
-          <div className="text-right space-x-2">
+          <div>
             <Button
               onClick={() =>
                 navigate(`/edit-expense/${expense.user_id}/${expense.id}`, {
@@ -177,10 +178,10 @@ function Expenses() {
       <h1 className="text-2xl font-bold text-center my-6">
         One-time expenses {selectedMonthYear}
       </h1>
-      <div className="text-center mt-10">
+      <div className="flex items-center justify-center gap-4 mb-6">
         <Button
           onClick={() => setShowMonthFilter(!showMonthFilter)}
-          className="mb-4"
+          className="text-right font-medium"
         >
           {"Filter by Month"}
         </Button>
@@ -197,13 +198,13 @@ function Expenses() {
                     setSelectedMonthYear(e.target.value);
                     fetchExpenses(e.target.value);
                   }}
-                  className="w-full"
+                  className="w-[200px]"
                 />
               </FormControl>
             </FormItem>
             <br />
             <Button
-              className="mb-4"
+              className="text-right font-medium"
               onClick={() => {
                 setSelectedMonthYear("");
                 fetchExpenses("");
@@ -220,7 +221,7 @@ function Expenses() {
       {error && <p className="text-center text-red-500">{error}</p>}
 
       {!loading && !error && (
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <div className="table-wrapper">
             <Table className="expenses-table">
               <TableHeader>
@@ -241,7 +242,7 @@ function Expenses() {
                 {table.getRowModel().rows.map((row) => (
                   <TableRow key={row.id}>
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell key={cell.id} className="font-medium">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
