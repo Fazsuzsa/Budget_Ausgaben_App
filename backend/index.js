@@ -82,7 +82,8 @@ app.get("/expenses/:user_id/search", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
   const { monthYear } = req.query;
 
-  // z.B.: localhost:5005/expenses/1/search?monthYear=2025-05
+  // zum Beispiel
+  // localhost:5005/expenses/1/search?monthYear=2025-05
   try {
     let query = `
       SELECT expenses.id, expenses.user_id, expenses.amount, expenses.name,
@@ -177,7 +178,8 @@ app.get(
   async (req, res) => {
     const { user_id } = req.params;
     const { monthYear } = req.query;
-    // z.B.: localhost:5005/monthly_expenses/1/search?monthYear=2025-05
+    // zum Beispiel
+    // localhost:5005/monthly_expenses/1/search?monthYear=2025-05
 
     try {
       let query = `

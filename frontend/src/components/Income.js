@@ -130,12 +130,14 @@ function Income() {
                     {new Date(income.date).toISOString().split("T")[0]}
                   </TableCell>
                   <TableCell className="text-right">
-
                     <Button
                       onClick={() =>
-                        navigate(`/edit-income/${income.user_id}/${income.id}`, {
-                          state: { income },
-                        })
+                        navigate(
+                          `/edit-income/${income.user_id}/${income.id}`,
+                          {
+                            state: { income },
+                          }
+                        )
                       }
                     >
                       Edit

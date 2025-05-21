@@ -264,20 +264,24 @@ function MonthlyExpenses() {
                   ))}
                 </TableRow>
               ))}
-              <TableRow
-                style={{
-                  backgroundColor: "#61DAFB",
-                  fontWeight: "bold",
-                  color: "#333",
-                }}
-              >
-                <TableCell className="font-medium">Total Monthly</TableCell>
-                <TableCell>{parseFloat(monthlySum).toFixed(2)} €</TableCell>
-                <TableCell />
-                <TableCell />
-                <TableCell />
-                <TableCell />
-              </TableRow>
+              {selectedMonthYear === new Date().toISOString().slice(0, 7) && (
+                <TableRow
+                  style={{
+                    backgroundColor: "#0489A9",
+                    fontWeight: "bold",
+                    color: "#333",
+                  }}
+                >
+                  <TableCell className="font-medium">
+                    Total {selectedMonthYear}
+                  </TableCell>
+                  <TableCell>{parseFloat(monthlySum).toFixed(2)} €</TableCell>
+                  <TableCell />
+                  <TableCell />
+                  <TableCell />
+                  <TableCell />
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>
