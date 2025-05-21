@@ -47,7 +47,19 @@
   }
 }
 
-/*logo*/
+/*Tabellen*/
+@media (max-width: 768px) {
+  .expenses-table tbody tr td:nth-child(3),
+  .expenses-table tbody tr td:nth-child(4) {
+    display: none !important;
+  }
+
+  .incomes-table tbody tr td:nth-child(3) {
+    display: none !important;
+  }
+}
+
+/* logo*/
 .logo-dark {
   display: none;
 }
