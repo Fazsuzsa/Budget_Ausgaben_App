@@ -58,8 +58,8 @@ function IncomesNav() {
         {error && <p style={{ color: "red" }}>{error}</p>}
         {totalExpenses !== null && totalIncome !== null && (
           <>
-            <p>Total Expenses: {totalExpenses} €</p>
-            <p>Total Income: {totalIncome} €</p>
+            <p>Total Expenses: {totalExpenses.toFixed(2)} €</p>
+            <p>Total Income: {totalIncome.toFixed(2)} €</p>
           </>
         )}
         {message && <p style={{ color: "red" }}>{message}</p>}
