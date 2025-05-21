@@ -71,12 +71,14 @@ function Expenses() {
       const data = await res.json();
       setSum(data.totalExpenses || 0);
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching sum:", err.message);
     }
   };
 
   const handleDelete = async (id) => {
-    const confirmed = window.confirm("Do you really want to delete this entry");
+    const confirmed = window.confirm(
+      "Do you really want to delete this entry?"
+    );
     if (!confirmed) return;
     const token = localStorage.getItem("token");
     try {
@@ -256,7 +258,7 @@ function Expenses() {
                   }}
                 >
                   <TableCell className="font-medium">
-                    Total one-time expenses for this month{selectedMonthYear}
+                    Total one-time expenses for this month {selectedMonthYear}
                   </TableCell>
                   <TableCell>{parseFloat(sum).toFixed(2)}€</TableCell>
                   <TableCell />

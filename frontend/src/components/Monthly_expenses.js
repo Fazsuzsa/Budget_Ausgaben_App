@@ -49,7 +49,7 @@ function MonthlyExpenses() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch monthly expenses.");
+        throw new Error("Failed to fetch expenses.");
       }
 
       const data = await response.json();
@@ -73,18 +73,21 @@ function MonthlyExpenses() {
           },
         }
       );
+      if (!response.ok) {
+        throw new Error("Failed to fetch sum");
+      }
+
       const data = await response.json();
       setMonthlySum(data.totalMonthlyExpenses || 0);
     } catch (err) {
-      console.error("Error fetching total monthly expenses:", err.message);
+      console.error("Error fetching sum:", err.message);
     }
   };
 
   const handleDelete = async (id) => {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this entry?"
+      "Do you really want to delete this entry?"
     );
-    const confirmed = window.confirm("Delete this monthly entry?");
     if (!confirmed) return;
 
     const token = localStorage.getItem("token");
@@ -278,7 +281,7 @@ function MonthlyExpenses() {
                   }}
                 >
                   <TableCell className="font-medium">
-                    Total monthly expenses for this month {selectedMonthYear}
+                    Total regular expenses for this month {selectedMonthYear}
                   </TableCell>
                   <TableCell>{parseFloat(monthlySum).toFixed(2)} €</TableCell>
                   <TableCell />
