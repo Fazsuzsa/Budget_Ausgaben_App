@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { cn } from "../lib/utils";
+import { useNavigate } from 'react-router-dom';
 import {
   Card,
   CardContent,
@@ -13,6 +14,7 @@ import { Button } from "../components/ui/button";
 import { API_URL } from "../lib/utils";
 
 function Signup() {
+  const Navigate = useNavigate();
   const [form, setForm] = useState({
     name: "",
     e_mail: "",
@@ -42,6 +44,7 @@ function Signup() {
 
       const data = await response.json();
       setMessage(`Signup successful! Welcome, ${data.name}`);
+      Navigate("/login");
       // Optional: store token if your backend sends it later
       // localStorage.setItem('token', data.token);
     } catch (error) {
