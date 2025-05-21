@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import logo from "../assets/images/AppIcon.png";
+import logo from "../assets/images/dark_logo.svg";
 import "../styles/responsive.css";
 import { ModeToggle } from "./ModeToggle";
 
@@ -17,58 +17,49 @@ function Navbar() {
   };
 
   return (
-    <div
+      <div
       style={{
+        position: "relative", // NEU
         display: "flex",
-        justifyContent: "space-around",
+        justifyContent: "space-between",
         alignItems: "center",
         borderBottom: "1px solid #ccc",
-        padding: "1.5rem 1.5rem",
-        position: "relative",
+        padding: "1.5rem 2rem",
+        gap: "2rem",
       }}
-    >
-      <img src={logo} style={{ height: "70px" }} />
-
+          >
+          {/* Logo */}
+      <div style={{ flexShrink: 0 }}>
+        <img src={logo} style={{ height: "70px" }} />
+      </div>
       <button className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>
         ☰
       </button>
+      {/* Links */}
+        <div className={`navbar-links ${menuOpen ? "open" : ""}`}>
+        <Link to="/" style={styles.linkb}>Monthly Reporting</Link>
+        <Link to="/expenses" style={styles.linkb}>Expenses</Link>
+        <Link to="/incomes" style={styles.linkb}>Income</Link>
+        <Link to="/about" style={styles.linkb}>About ZENS</Link>
+      </div>
 
-      <div className={`navbar-links ${menuOpen ? "open" : ""}`}>
-        <Link to="/" style={styles.linkb}>
-          Monthly Reporting
-        </Link>
-        <Link to="/expenses" style={styles.linkb}>
-          Expenses
-        </Link>
-        <Link to="/incomes" style={styles.linkb}>
-          Income
-        </Link>
-        <div>
-          <Link to="/about" style={styles.linkb}>
-            About ZENS
-          </Link>
+      {/* User & Dark-Light-Mode */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "1rem",
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+            <span className="username">{user_name}</span>
+            <button onClick={handleLogout} style={styles.logoutButton}>Logout</button>
+          </div>
+          <ModeToggle />
         </div>
-        <div>
-          <span style={{ color: "black", fontWeight: "bold" }}>
-            {user_name}
-          </span>
-          <br />
-          <button onClick={handleLogout} style={styles.logoutButton}>
-            Logout
-          </button>
-        </div>
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          right: "10px",
-          top: "50%",
-          transform: "translateY(-50%)",
-        }}
-      >
-        <ModeToggle />
-      </div>
     </div>
+
   );
 }
 
