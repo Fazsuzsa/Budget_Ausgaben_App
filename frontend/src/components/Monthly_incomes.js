@@ -114,7 +114,7 @@ function Monthly_incomes() {
 
       {!loading && !error && (
         <div className="max-w-4xl mx-auto">
-          <Table>
+          <Table className="incomes-table">
             <TableCaption></TableCaption>
             <TableHeader>
               <TableRow>
@@ -164,7 +164,7 @@ function Monthly_incomes() {
               ))}
               <TableRow
                 style={{
-                  backgroundColor: "#61DAFB",
+                  backgroundColor: "#7FDBFF",
                   fontWeight: "bold",
                   color: "#333",
                 }}

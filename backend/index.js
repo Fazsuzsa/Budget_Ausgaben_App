@@ -110,7 +110,7 @@ app.get("/expenses/:user_id/search", authenticateToken, async (req, res) => {
     const result = await pool.query(query, values);
     res.json(result.rows);
   } catch (err) {
-    console.error("Error while fetching the Expenses:", err);
+    console.error("Error while fetching the expenses: ", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -308,6 +308,41 @@ app.get("/incomes/:user_id", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error("Error while fetching  Expenses:", err);
     res.status(500).json({ error: "Internal  Server Error" });
+  }
+});
+
+app.get("/incomes/:user_id/search", authenticateToken, async (req, res) => {
+  const { user_id } = req.params;
+  const { monthYear } = req.query;
+
+  // zum Beispiel
+  // localhost:5005/incomes/1/search?monthYear=2025-05
+  try {
+    let query = `
+      SELECT incomes.id, incomes.user_id, incomes.amount, incomes.name, incomes.date 
+      FROM public.incomes 
+      WHERE incomes.user_id = $1
+    `;
+    const values = [user_id];
+    if (monthYear) {
+      const [year, month] = monthYear.split("-").map(Number);
+      const monthStart = new Date(year, month - 1, 1);
+      const monthEnd = new Date(year, month, 0);
+
+      const isoStart = monthStart.toISOString().split("T")[0]; // YYYY-MM-DD
+      const isoEnd = monthEnd.toISOString().split("T")[0]; // YYYY-MM-DD
+
+      query += ` AND incomes.date BETWEEN $2 AND $3`;
+      values.push(isoStart, isoEnd);
+    }
+
+    query += " ORDER BY incomes.date DESC";
+
+    const result = await pool.query(query, values);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error while fetching the incomes: ", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 

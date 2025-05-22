@@ -243,7 +243,6 @@ function Expenses() {
                   <TableRow key={row.id}>
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id} className="font-medium">
-
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
@@ -255,7 +254,7 @@ function Expenses() {
                 {selectedMonthYear === new Date().toISOString().slice(0, 7) && (
                   <TableRow
                     style={{
-                      backgroundColor: "#0489A9",
+                      backgroundColor: "#7FDBFF",
                       fontWeight: "bold",
                       color: "#333",
                     }}
