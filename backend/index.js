@@ -1245,6 +1245,7 @@ app.post("/signup", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
 app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
 
@@ -1257,54 +1258,51 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
     res.setHeader("Content-Type", "application/pdf");
     doc.pipe(res);
 
-    // Fetch one-time expenses for the current month
-    const expensesResult = await pool.query(
-      `SELECT expenses.id, expenses.user_id, expenses.amount, expenses.name, expenses.date, categories.category
-       FROM expenses
-       JOIN categories ON expenses.category_id = categories.id
-       WHERE expenses.user_id = $1
-         AND date_trunc('month', expenses.date) = date_trunc('month', CURRENT_DATE)
-       ORDER BY expenses.date DESC`,
-      [user_id]
-    );
+    // Fetch all expenses/incomes for table data
+    const [expensesResult, monthlyExpensesResult, incomesResult, monthlyIncomesResult] = await Promise.all([
+      pool.query(
+        `SELECT expenses.id, expenses.user_id, expenses.amount, expenses.name, expenses.date, categories.category
+         FROM expenses
+         JOIN categories ON expenses.category_id = categories.id
+         WHERE expenses.user_id = $1
+           AND date_trunc('month', expenses.date) = date_trunc('month', CURRENT_DATE)
+         ORDER BY expenses.date DESC`,
+        [user_id]
+      ),
+      pool.query(
+        `SELECT monthly_expenses.id, monthly_expenses.user_id, monthly_expenses.amount, monthly_expenses.name,
+                monthly_expenses.date_start, monthly_expenses.date_end, categories.category
+         FROM monthly_expenses
+         JOIN categories ON monthly_expenses.category_id = categories.id
+         WHERE monthly_expenses.user_id = $1
+           AND CURRENT_DATE BETWEEN date_start AND date_end
+         ORDER BY monthly_expenses.date_start DESC`,
+        [user_id]
+      ),
+      pool.query(
+        `SELECT id, user_id, amount, name, date
+         FROM incomes
+         WHERE user_id = $1
+           AND date_trunc('month', date) = date_trunc('month', CURRENT_DATE)
+         ORDER BY date DESC`,
+        [user_id]
+      ),
+      pool.query(
+        `SELECT id, user_id, amount, name, date_start, date_end
+         FROM monthly_incomes
+         WHERE user_id = $1
+           AND CURRENT_DATE BETWEEN date_start AND date_end
+         ORDER BY date_start DESC`,
+        [user_id]
+      ),
+    ]);
+
     const expenses = expensesResult.rows;
-
-    // Fetch monthly expenses currently active
-    const monthlyExpensesResult = await pool.query(
-      `SELECT monthly_expenses.id, monthly_expenses.user_id, monthly_expenses.amount, monthly_expenses.name,
-              monthly_expenses.date_start, monthly_expenses.date_end, categories.category
-       FROM monthly_expenses
-       JOIN categories ON monthly_expenses.category_id = categories.id
-       WHERE monthly_expenses.user_id = $1
-         AND CURRENT_DATE BETWEEN date_start AND date_end
-       ORDER BY monthly_expenses.date_start DESC`,
-      [user_id]
-    );
     const monthlyExpenses = monthlyExpensesResult.rows;
-
-    // Fetch monthly incomes currently active
-    const monthlyIncomesResult = await pool.query(
-      `SELECT id, user_id, amount, name, date_start, date_end
-       FROM monthly_incomes
-       WHERE user_id = $1
-         AND CURRENT_DATE BETWEEN date_start AND date_end
-       ORDER BY date_start DESC`,
-      [user_id]
-    );
+    const incomes = incomesResult.rows;
     const monthlyIncomes = monthlyIncomesResult.rows;
 
-    // Fetch one-time incomes for the current month
-    const incomesResult = await pool.query(
-      `SELECT id, user_id, amount, name, date
-       FROM incomes
-       WHERE user_id = $1
-         AND date_trunc('month', date) = date_trunc('month', CURRENT_DATE)
-       ORDER BY date DESC`,
-      [user_id]
-    );
-    const incomes = incomesResult.rows;
-
-    // If no data found for current month, return 404
+    // Return 404 if nothing found
     if (
       expenses.length === 0 &&
       monthlyExpenses.length === 0 &&
@@ -1316,84 +1314,89 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
         .json({ error: "No data found for the current month" });
     }
 
-    // Calculate total expenses (one-time + monthly)
+    // Fetch totals directly from DB (more accurate)
+    const [expTotalResult, monExpTotalResult, incTotalResult, monIncTotalResult] = await Promise.all([
+      pool.query(
+        `SELECT SUM(amount) AS total
+         FROM expenses
+         WHERE user_id = $1
+           AND EXTRACT(YEAR FROM date) = EXTRACT(YEAR FROM CURRENT_DATE)
+           AND EXTRACT(MONTH FROM date) = EXTRACT(MONTH FROM CURRENT_DATE)`,
+        [user_id]
+      ),
+      pool.query(
+        `SELECT SUM(amount) AS total
+         FROM monthly_expenses
+         WHERE user_id = $1
+           AND date_start <= DATE_TRUNC('month', CURRENT_DATE)
+           AND (date_end IS NULL OR date_end >= DATE_TRUNC('month', CURRENT_DATE))`,
+        [user_id]
+      ),
+      pool.query(
+        `SELECT SUM(amount) AS total
+         FROM incomes
+         WHERE user_id = $1
+           AND EXTRACT(YEAR FROM date) = EXTRACT(YEAR FROM CURRENT_DATE)
+           AND EXTRACT(MONTH FROM date) = EXTRACT(MONTH FROM CURRENT_DATE)`,
+        [user_id]
+      ),
+      pool.query(
+        `SELECT SUM(amount) AS total
+         FROM monthly_incomes
+         WHERE user_id = $1
+           AND date_start <= DATE_TRUNC('month', CURRENT_DATE)
+           AND (date_end IS NULL OR date_end >= DATE_TRUNC('month', CURRENT_DATE))`,
+        [user_id]
+      ),
+    ]);
+
     const totalExpenses =
-      expenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0) +
-      monthlyExpenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
-
-    // Calculate total income (one-time + monthly)
+      (expTotalResult.rows[0].total || 0) + (monExpTotalResult.rows[0].total || 0);
     const totalIncome =
-      monthlyIncomes.reduce((sum, inc) => sum + parseFloat(inc.amount), 0) +
-      incomes.reduce((sum, inc) => sum + parseFloat(inc.amount), 0);
-
-    // Calculate balance (income - expenses)
+      (incTotalResult.rows[0].total || 0) + (monIncTotalResult.rows[0].total || 0);
     const balance = totalIncome - totalExpenses;
 
-    // Add title and summary section
-    const currentMonth = new Date().toLocaleString("default", {
-      month: "long",
-      year: "numeric",
-    });
-    doc
-      .fontSize(20)
-      .text(`Monthly Overview - ${currentMonth}`, { align: "center" });
+    const currentMonth = new Date().toLocaleString("default", { month: "long", year: "numeric" });
+    doc.fontSize(20).text(`Monthly Overview - ${currentMonth}`, { align: "center" });
     doc.moveDown(1);
-
-    doc.fontSize(14);
-    doc.fillColor("red").text(`Total Expenses: ${totalExpenses.toFixed(2)} €`);
+    doc.fontSize(14).fillColor("red").text(`Total Expenses: ${totalExpenses.toFixed(2)} €`);
     doc.fillColor("green").text(`Total Income: ${totalIncome.toFixed(2)} €`);
     doc.fillColor("darkgreen").text(`Balance: ${balance.toFixed(2)} €`);
     doc.moveDown(2);
 
-    // Helper function to draw tables
+    // === Table drawing helper ===
     function drawTable(headers, rows, startX, startY, columnWidths) {
       const rowHeight = 20;
       let y = startY;
+      const tableWidth = columnWidths.reduce((a, b) => a + b, 0);
 
-      // Draw header background
-      doc
-        .rect(
-          startX,
-          y,
-          columnWidths.reduce((a, b) => a + b, 0),
-          rowHeight
-        )
-        .fill("#d3d3d3")
-        .stroke();
-      doc.fillColor("black").font("Helvetica-Bold").fontSize(12);
-
-      // Draw headers
-      let x = startX;
-      headers.forEach((header, i) => {
-        doc.text(header, x + 5, y + 5, {
-          width: columnWidths[i] - 10,
-          align: "left",
+      function drawHeader() {
+        doc.rect(startX, y, tableWidth, rowHeight).fill("#d3d3d3").stroke();
+        doc.fillColor("black").font("Helvetica-Bold").fontSize(12);
+        let x = startX;
+        headers.forEach((header, i) => {
+          doc.text(header, x + 5, y + 5, { width: columnWidths[i] - 10, align: "left" });
+          x += columnWidths[i];
         });
-        x += columnWidths[i];
-      });
+        y += rowHeight;
+        doc.font("Helvetica").fontSize(11);
+      }
 
-      y += rowHeight;
+      drawHeader();
 
-      // Draw rows with alternating background colors
-      doc.font("Helvetica").fontSize(11);
       rows.forEach((row, index) => {
-        x = startX;
-
-        if (index % 2 === 0) {
-          doc
-            .rect(
-              startX,
-              y,
-              columnWidths.reduce((a, b) => a + b, 0),
-              rowHeight
-            )
-            .fill("#f9f9f9")
-            .stroke();
-          doc.fillColor("black");
-        } else {
-          doc.fillColor("black");
+        if (y + rowHeight > doc.page.height - 50) {
+          doc.addPage();
+          y = 50;
+          drawHeader();
         }
 
+        let x = startX;
+        if (index % 2 === 0) {
+          doc.rect(startX, y, tableWidth, rowHeight).fill("#f9f9f9").stroke();
+        }
+
+        doc.fillColor("black");
         row.forEach((cell, i) => {
           doc.text(cell, x + 5, y + 5, {
             width: columnWidths[i] - 10,
@@ -1402,7 +1405,7 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
           x += columnWidths[i];
         });
 
-        // Draw column borders
+        // Borders
         x = startX;
         for (let i = 0; i < columnWidths.length; i++) {
           doc.rect(x, y, columnWidths[i], rowHeight).stroke();
@@ -1412,98 +1415,65 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
         y += rowHeight;
       });
 
-      return y;
+      return y + 10;
     }
 
     let cursorY = doc.y;
 
-    // One-Time Expenses table
     if (expenses.length > 0) {
-      doc
-        .fontSize(16)
-        .fillColor("black")
-        .text("One-Time Expenses", { underline: true });
+      doc.fontSize(16).fillColor("black").text("One-Time Expenses", { underline: true });
       cursorY += 20;
-
       const headers = ["Date", "Name", "Category", "Amount (€)"];
-      const columnWidths = [100, 150, 150, 100];
-      const rows = expenses.map((exp) => [
+      const widths = [100, 150, 150, 100];
+      const rows = expenses.map(exp => [
         new Date(exp.date).toLocaleDateString("en-GB"),
         exp.name,
         exp.category,
         parseFloat(exp.amount).toFixed(2),
       ]);
-
-      cursorY = drawTable(headers, rows, 50, cursorY, columnWidths) + 30;
+      cursorY = drawTable(headers, rows, 50, cursorY, widths);
     }
 
-    // Monthly Expenses table
     if (monthlyExpenses.length > 0) {
-      const leftMarginX = 50;
-      doc
-        .fontSize(16)
-        .fillColor("black")
-        .text("Monthly Expenses", leftMarginX, cursorY, { underline: true });
+      doc.fontSize(16).fillColor("black").text("Monthly Expenses", 50, cursorY, { underline: true });
       cursorY += 20;
-
-      const headers = [
-        "Start Date",
-        "End Date",
-        "Name",
-        "Category",
-        "Amount (€)",
-      ];
-      const columnWidths = [80, 80, 150, 150, 100];
-      const rows = monthlyExpenses.map((exp) => [
+      const headers = ["Start Date", "End Date", "Name", "Category", "Amount (€)"];
+      const widths = [80, 80, 150, 150, 100];
+      const rows = monthlyExpenses.map(exp => [
         new Date(exp.date_start).toLocaleDateString("en-GB"),
         new Date(exp.date_end).toLocaleDateString("en-GB"),
         exp.name,
         exp.category,
         parseFloat(exp.amount).toFixed(2),
       ]);
-
-      cursorY = drawTable(headers, rows, 50, cursorY, columnWidths) + 30;
+      cursorY = drawTable(headers, rows, 50, cursorY, widths);
     }
 
-    // One-Time Incomes table
     if (incomes.length > 0) {
-      const leftMarginX = 50;
-
-      doc
-        .fontSize(16)
-        .fillColor("black")
-        .text("One-Time Incomes", leftMarginX, cursorY, { underline: true });
+      doc.fontSize(16).fillColor("black").text("One-Time Incomes", 50, cursorY, { underline: true });
       cursorY += 20;
-
       const headers = ["Date", "Name", "Amount (€)"];
-      const columnWidths = [100, 200, 100];
-      const rows = incomes.map((inc) => [
+      const widths = [100, 200, 100];
+      const rows = incomes.map(inc => [
         new Date(inc.date).toLocaleDateString("en-GB"),
         inc.name,
         parseFloat(inc.amount).toFixed(2),
       ]);
-
-      cursorY = drawTable(headers, rows, 50, cursorY, columnWidths) + 30;
+      cursorY = drawTable(headers, rows, 50, cursorY, widths);
     }
 
-    // Monthly Incomes table
     if (monthlyIncomes.length > 0) {
-      doc
-        .fontSize(16)
-        .fillColor("black")
-        .text("Monthly Incomes", 50, cursorY, { underline: true });
+      doc.fontSize(16).fillColor("black").text("Monthly Incomes", 50, cursorY, { underline: true });
       cursorY += 20;
-
       const headers = ["Start Date", "End Date", "Name", "Amount (€)"];
-      const columnWidths = [80, 80, 200, 100];
-      const rows = monthlyIncomes.map((inc) => [
+      const widths = [80, 80, 200, 100];
+      const rows = monthlyIncomes.map(inc => [
         new Date(inc.date_start).toLocaleDateString("en-GB"),
         new Date(inc.date_end).toLocaleDateString("en-GB"),
         inc.name,
         parseFloat(inc.amount).toFixed(2),
       ]);
-
-      drawTable(headers, rows, 50, cursorY, columnWidths);
+      cursorY = drawTable(headers, rows, 50, cursorY, widths);
     }
 
     doc.end();
@@ -1512,7 +1482,6 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);
 });
