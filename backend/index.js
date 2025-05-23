@@ -1221,7 +1221,6 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
     res.setHeader("Content-Type", "application/pdf");
     doc.pipe(res);
 
-
     const [expensesResult, monthlyExpensesResult, incomesResult, monthlyIncomesResult] = await Promise.all([
       pool.query(`
         SELECT e.id, e.user_id, e.amount, e.name, e.date, c.category
@@ -1283,13 +1282,16 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
     const balance = totalIncome - totalExpenses;
     const currentMonth = new Date().toLocaleString("default", { month: "long", year: "numeric" });
 
-
     doc.fontSize(20).text(`Monthly Overview - ${currentMonth}`, { align: "center" });
     doc.moveDown(1);
     doc.fontSize(14).fillColor("red").text(`Total Expenses: ${totalExpenses.toFixed(2)} €`);
     doc.fillColor("green").text(`Total Income: ${totalIncome.toFixed(2)} €`);
     doc.fillColor("darkgreen").text(`Balance: ${balance.toFixed(2)} €`);
-    doc.addPage();
+    doc.moveDown(2);
+
+    // Récupérer la position Y courante après résumé
+    let currentY = doc.y;
+
     function drawTable(headers, rows, startX, startY, columnWidths) {
       const rowHeight = 20;
       let y = startY;
@@ -1333,8 +1335,10 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
       });
     }
 
+    // One-Time Expenses : affiche juste après résumé
     if (expenses.length > 0) {
-      doc.fontSize(16).fillColor("black").text("One-Time Expenses", 50, 50, { underline: true });
+      doc.fontSize(16).fillColor("black").text("One-Time Expenses", 50, currentY, { underline: true });
+      currentY += 25; // décaler pour le tableau
       const headers = ["Date", "Name", "Category", "Amount (€)"];
       const widths = [100, 150, 150, 100];
       const rows = expenses.map(exp => [
@@ -1343,13 +1347,11 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
         exp.category,
         parseFloat(exp.amount).toFixed(2),
       ]);
-      drawTable(headers, rows, 50, 80, widths);
-      doc.text("DEBUG PAGE - One-Time Expenses");
+      drawTable(headers, rows, 50, currentY, widths);
       doc.addPage();
-
     }
 
-
+    // Monthly Expenses (nouvelle page)
     if (monthlyExpenses.length > 0) {
       doc.fontSize(16).fillColor("black").text("Monthly Expenses", 50, 50, { underline: true });
       const headers = ["Start Date", "End Date", "Name", "Category", "Amount (€)"];
@@ -1362,12 +1364,10 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
         parseFloat(exp.amount).toFixed(2),
       ]);
       drawTable(headers, rows, 50, 80, widths);
-      doc.text("DEBUG PAGE - Should be Monthly Expenses");
       doc.addPage();
-
     }
 
-
+    // One-Time Incomes (nouvelle page)
     if (incomes.length > 0) {
       doc.fontSize(16).fillColor("black").text("One-Time Incomes", 50, 50, { underline: true });
       const headers = ["Date", "Name", "Amount (€)"];
@@ -1378,12 +1378,10 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
         parseFloat(inc.amount).toFixed(2),
       ]);
       drawTable(headers, rows, 50, 80, widths);
-      doc.text("DEBUG PAGE - Should be One-Time Incomes");
       doc.addPage();
-
     }
 
-
+    // Monthly Incomes (nouvelle page)
     if (monthlyIncomes.length > 0) {
       doc.fontSize(16).fillColor("black").text("Monthly Incomes", 50, 50, { underline: true });
       const headers = ["Start Date", "End Date", "Name", "Amount (€)"];
@@ -1394,7 +1392,6 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
         inc.name,
         parseFloat(inc.amount).toFixed(2),
       ]);
-      doc.text("DEBUG PAGE - Should be Monthly Incomes");
       drawTable(headers, rows, 50, 80, widths);
     }
 
