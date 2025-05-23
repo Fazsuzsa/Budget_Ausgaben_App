@@ -1344,7 +1344,9 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
         parseFloat(exp.amount).toFixed(2),
       ]);
       drawTable(headers, rows, 50, 80, widths);
+      doc.text("DEBUG PAGE - One-Time Expenses");
       doc.addPage();
+
     }
 
 
@@ -1360,7 +1362,9 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
         parseFloat(exp.amount).toFixed(2),
       ]);
       drawTable(headers, rows, 50, 80, widths);
+      doc.text("DEBUG PAGE - Should be Monthly Expenses");
       doc.addPage();
+
     }
 
 
@@ -1374,7 +1378,9 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
         parseFloat(inc.amount).toFixed(2),
       ]);
       drawTable(headers, rows, 50, 80, widths);
+      doc.text("DEBUG PAGE - Should be One-Time Incomes");
       doc.addPage();
+
     }
 
 
@@ -1388,6 +1394,7 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
         inc.name,
         parseFloat(inc.amount).toFixed(2),
       ]);
+      doc.text("DEBUG PAGE - Should be Monthly Incomes");
       drawTable(headers, rows, 50, 80, widths);
     }
 
