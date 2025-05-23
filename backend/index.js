@@ -1210,7 +1210,6 @@ app.post("/signup", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-
 app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
   const { user_id } = req.params;
 
@@ -1218,48 +1217,37 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
     const PDFDocument = require("pdfkit");
     const doc = new PDFDocument({ margin: 40, size: "A4" });
 
-    // Set response headers to trigger file download
     res.setHeader("Content-Disposition", "attachment; filename=expenses.pdf");
     res.setHeader("Content-Type", "application/pdf");
     doc.pipe(res);
 
-    // Fetch all expenses/incomes for table data
+
     const [expensesResult, monthlyExpensesResult, incomesResult, monthlyIncomesResult] = await Promise.all([
-      pool.query(
-        `SELECT expenses.id, expenses.user_id, expenses.amount, expenses.name, expenses.date, categories.category
-         FROM expenses
-         JOIN categories ON expenses.category_id = categories.id
-         WHERE expenses.user_id = $1
-           AND date_trunc('month', expenses.date) = date_trunc('month', CURRENT_DATE)
-         ORDER BY expenses.date DESC`,
-        [user_id]
-      ),
-      pool.query(
-        `SELECT monthly_expenses.id, monthly_expenses.user_id, monthly_expenses.amount, monthly_expenses.name,
-                monthly_expenses.date_start, monthly_expenses.date_end, categories.category
-         FROM monthly_expenses
-         JOIN categories ON monthly_expenses.category_id = categories.id
-         WHERE monthly_expenses.user_id = $1
-           AND CURRENT_DATE BETWEEN date_start AND date_end
-         ORDER BY monthly_expenses.date_start DESC`,
-        [user_id]
-      ),
-      pool.query(
-        `SELECT id, user_id, amount, name, date
-         FROM incomes
-         WHERE user_id = $1
-           AND date_trunc('month', date) = date_trunc('month', CURRENT_DATE)
-         ORDER BY date DESC`,
-        [user_id]
-      ),
-      pool.query(
-        `SELECT id, user_id, amount, name, date_start, date_end
-         FROM monthly_incomes
-         WHERE user_id = $1
-           AND CURRENT_DATE BETWEEN date_start AND date_end
-         ORDER BY date_start DESC`,
-        [user_id]
-      ),
+      pool.query(`
+        SELECT e.id, e.user_id, e.amount, e.name, e.date, c.category
+        FROM expenses e
+        JOIN categories c ON e.category_id = c.id
+        WHERE e.user_id = $1 AND date_trunc('month', e.date) = date_trunc('month', CURRENT_DATE)
+        ORDER BY e.date DESC`, [user_id]),
+
+      pool.query(`
+        SELECT me.id, me.user_id, me.amount, me.name, me.date_start, me.date_end, c.category
+        FROM monthly_expenses me
+        JOIN categories c ON me.category_id = c.id
+        WHERE me.user_id = $1 AND CURRENT_DATE BETWEEN me.date_start AND me.date_end
+        ORDER BY me.date_start DESC`, [user_id]),
+
+      pool.query(`
+        SELECT id, user_id, amount, name, date
+        FROM incomes
+        WHERE user_id = $1 AND date_trunc('month', date) = date_trunc('month', CURRENT_DATE)
+        ORDER BY date DESC`, [user_id]),
+
+      pool.query(`
+        SELECT id, user_id, amount, name, date_start, date_end
+        FROM monthly_incomes
+        WHERE user_id = $1 AND CURRENT_DATE BETWEEN date_start AND date_end
+        ORDER BY date_start DESC`, [user_id]),
     ]);
 
     const expenses = expensesResult.rows;
@@ -1267,69 +1255,41 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
     const incomes = incomesResult.rows;
     const monthlyIncomes = monthlyIncomesResult.rows;
 
-    // Return 404 if nothing found
-    if (
-      expenses.length === 0 &&
-      monthlyExpenses.length === 0 &&
-      monthlyIncomes.length === 0 &&
-      incomes.length === 0
-    ) {
-      return res
-        .status(404)
-        .json({ error: "No data found for the current month" });
+    if (expenses.length === 0 && monthlyExpenses.length === 0 && incomes.length === 0 && monthlyIncomes.length === 0) {
+      return res.status(404).json({ error: "No data found for the current month" });
     }
 
-    // Fetch totals directly from DB (more accurate)
     const [expTotalResult, monExpTotalResult, incTotalResult, monIncTotalResult] = await Promise.all([
-      pool.query(
-        `SELECT SUM(amount) AS total
-         FROM expenses
-         WHERE user_id = $1
-           AND EXTRACT(YEAR FROM date) = EXTRACT(YEAR FROM CURRENT_DATE)
-           AND EXTRACT(MONTH FROM date) = EXTRACT(MONTH FROM CURRENT_DATE)`,
-        [user_id]
-      ),
-      pool.query(
-        `SELECT SUM(amount) AS total
-         FROM monthly_expenses
-         WHERE user_id = $1
-           AND date_start <= DATE_TRUNC('month', CURRENT_DATE)
-           AND (date_end IS NULL OR date_end >= DATE_TRUNC('month', CURRENT_DATE))`,
-        [user_id]
-      ),
-      pool.query(
-        `SELECT SUM(amount) AS total
-         FROM incomes
-         WHERE user_id = $1
-           AND EXTRACT(YEAR FROM date) = EXTRACT(YEAR FROM CURRENT_DATE)
-           AND EXTRACT(MONTH FROM date) = EXTRACT(MONTH FROM CURRENT_DATE)`,
-        [user_id]
-      ),
-      pool.query(
-        `SELECT SUM(amount) AS total
-         FROM monthly_incomes
-         WHERE user_id = $1
-           AND date_start <= DATE_TRUNC('month', CURRENT_DATE)
-           AND (date_end IS NULL OR date_end >= DATE_TRUNC('month', CURRENT_DATE))`,
-        [user_id]
-      ),
+      pool.query(`
+        SELECT SUM(amount) AS total FROM expenses
+        WHERE user_id = $1 AND EXTRACT(YEAR FROM date) = EXTRACT(YEAR FROM CURRENT_DATE)
+        AND EXTRACT(MONTH FROM date) = EXTRACT(MONTH FROM CURRENT_DATE)`, [user_id]),
+      pool.query(`
+        SELECT SUM(amount) AS total FROM monthly_expenses
+        WHERE user_id = $1 AND date_start <= DATE_TRUNC('month', CURRENT_DATE)
+        AND (date_end IS NULL OR date_end >= DATE_TRUNC('month', CURRENT_DATE))`, [user_id]),
+      pool.query(`
+        SELECT SUM(amount) AS total FROM incomes
+        WHERE user_id = $1 AND EXTRACT(YEAR FROM date) = EXTRACT(YEAR FROM CURRENT_DATE)
+        AND EXTRACT(MONTH FROM date) = EXTRACT(MONTH FROM CURRENT_DATE)`, [user_id]),
+      pool.query(`
+        SELECT SUM(amount) AS total FROM monthly_incomes
+        WHERE user_id = $1 AND date_start <= DATE_TRUNC('month', CURRENT_DATE)
+        AND (date_end IS NULL OR date_end >= DATE_TRUNC('month', CURRENT_DATE))`, [user_id]),
     ]);
 
-    const totalExpenses =
-      (expTotalResult.rows[0].total || 0) + (monExpTotalResult.rows[0].total || 0);
-    const totalIncome =
-      (incTotalResult.rows[0].total || 0) + (monIncTotalResult.rows[0].total || 0);
+    const totalExpenses = (expTotalResult.rows[0].total || 0) + (monExpTotalResult.rows[0].total || 0);
+    const totalIncome = (incTotalResult.rows[0].total || 0) + (monIncTotalResult.rows[0].total || 0);
     const balance = totalIncome - totalExpenses;
-
     const currentMonth = new Date().toLocaleString("default", { month: "long", year: "numeric" });
+
+
     doc.fontSize(20).text(`Monthly Overview - ${currentMonth}`, { align: "center" });
     doc.moveDown(1);
     doc.fontSize(14).fillColor("red").text(`Total Expenses: ${totalExpenses.toFixed(2)} €`);
     doc.fillColor("green").text(`Total Income: ${totalIncome.toFixed(2)} €`);
     doc.fillColor("darkgreen").text(`Balance: ${balance.toFixed(2)} €`);
-    doc.moveDown(2);
-
-    // === Table drawing helper ===
+    doc.addPage();
     function drawTable(headers, rows, startX, startY, columnWidths) {
       const rowHeight = 20;
       let y = startY;
@@ -1340,7 +1300,7 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
         doc.fillColor("black").font("Helvetica-Bold").fontSize(12);
         let x = startX;
         headers.forEach((header, i) => {
-          doc.text(header, x + 5, y + 5, { width: columnWidths[i] - 10, align: "left" });
+          doc.text(header, x + 5, y + 5, { width: columnWidths[i] - 10 });
           x += columnWidths[i];
         });
         y += rowHeight;
@@ -1355,39 +1315,26 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
           y = 50;
           drawHeader();
         }
-
         let x = startX;
         if (index % 2 === 0) {
           doc.rect(startX, y, tableWidth, rowHeight).fill("#f9f9f9").stroke();
         }
-
         doc.fillColor("black");
         row.forEach((cell, i) => {
-          doc.text(cell, x + 5, y + 5, {
-            width: columnWidths[i] - 10,
-            align: "left",
-          });
+          doc.text(cell, x + 5, y + 5, { width: columnWidths[i] - 10 });
           x += columnWidths[i];
         });
-
-        // Borders
         x = startX;
         for (let i = 0; i < columnWidths.length; i++) {
           doc.rect(x, y, columnWidths[i], rowHeight).stroke();
           x += columnWidths[i];
         }
-
         y += rowHeight;
       });
-
-      return y + 10;
     }
 
-    let cursorY = doc.y;
-
     if (expenses.length > 0) {
-      doc.fontSize(16).fillColor("black").text("One-Time Expenses", { underline: true });
-      cursorY += 20;
+      doc.fontSize(16).fillColor("black").text("One-Time Expenses", 50, 50, { underline: true });
       const headers = ["Date", "Name", "Category", "Amount (€)"];
       const widths = [100, 150, 150, 100];
       const rows = expenses.map(exp => [
@@ -1396,12 +1343,13 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
         exp.category,
         parseFloat(exp.amount).toFixed(2),
       ]);
-      cursorY = drawTable(headers, rows, 50, cursorY, widths);
+      drawTable(headers, rows, 50, 80, widths);
+      doc.addPage();
     }
 
+
     if (monthlyExpenses.length > 0) {
-      doc.fontSize(16).fillColor("black").text("Monthly Expenses", 50, cursorY, { underline: true });
-      cursorY += 20;
+      doc.fontSize(16).fillColor("black").text("Monthly Expenses", 50, 50, { underline: true });
       const headers = ["Start Date", "End Date", "Name", "Category", "Amount (€)"];
       const widths = [80, 80, 150, 150, 100];
       const rows = monthlyExpenses.map(exp => [
@@ -1411,12 +1359,13 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
         exp.category,
         parseFloat(exp.amount).toFixed(2),
       ]);
-      cursorY = drawTable(headers, rows, 50, cursorY, widths);
+      drawTable(headers, rows, 50, 80, widths);
+      doc.addPage();
     }
 
+
     if (incomes.length > 0) {
-      doc.fontSize(16).fillColor("black").text("One-Time Incomes", 50, cursorY, { underline: true });
-      cursorY += 20;
+      doc.fontSize(16).fillColor("black").text("One-Time Incomes", 50, 50, { underline: true });
       const headers = ["Date", "Name", "Amount (€)"];
       const widths = [100, 200, 100];
       const rows = incomes.map(inc => [
@@ -1424,12 +1373,13 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
         inc.name,
         parseFloat(inc.amount).toFixed(2),
       ]);
-      cursorY = drawTable(headers, rows, 50, cursorY, widths);
+      drawTable(headers, rows, 50, 80, widths);
+      doc.addPage();
     }
 
+
     if (monthlyIncomes.length > 0) {
-      doc.fontSize(16).fillColor("black").text("Monthly Incomes", 50, cursorY, { underline: true });
-      cursorY += 20;
+      doc.fontSize(16).fillColor("black").text("Monthly Incomes", 50, 50, { underline: true });
       const headers = ["Start Date", "End Date", "Name", "Amount (€)"];
       const widths = [80, 80, 200, 100];
       const rows = monthlyIncomes.map(inc => [
@@ -1438,7 +1388,7 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
         inc.name,
         parseFloat(inc.amount).toFixed(2),
       ]);
-      cursorY = drawTable(headers, rows, 50, cursorY, widths);
+      drawTable(headers, rows, 50, 80, widths);
     }
 
     doc.end();
@@ -1447,6 +1397,7 @@ app.get("/download-expenses/:user_id", authenticateToken, async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 app.listen(PORT, () => {
   console.log(`Server läuft: http://localhost:${PORT}`);
 });
