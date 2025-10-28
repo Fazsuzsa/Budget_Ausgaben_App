@@ -178,12 +178,12 @@ function Expenses() {
       <h1 className="text-2xl font-bold text-center my-6">
         One-time expenses {selectedMonthYear}
       </h1>
-      <div className="flex items-center justify-center gap-4 mb-6">
+      <div className="text-center mt-10">
         <Button
           onClick={() => setShowMonthFilter(!showMonthFilter)}
-          className="text-right font-medium"
+          className="mb-4"
         >
-          {"Filter by Month"}
+          {showMonthFilter ? "Hide filter" : "Filter by Month"}
         </Button>
 
         {showMonthFilter && (
@@ -198,7 +198,6 @@ function Expenses() {
                     setSelectedMonthYear(e.target.value);
                     fetchExpenses(e.target.value);
                   }}
-                  className="w-[200px]"
                 />
               </FormControl>
             </FormItem>

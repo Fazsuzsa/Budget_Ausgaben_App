@@ -13,18 +13,24 @@ import {
 
 import { API_URL } from "../lib/utils";
 import { Button } from "./ui/button";
-
+import { FormItem, FormLabel, FormControl } from "./ui/form";
+import { Input } from "./ui/input";
 function Monthly_incomes() {
   const [income, setIncome] = useState([]);
+  const [selectedMonthYear, setSelectedMonthYear] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [monthlySum, setMonthlySum] = useState(0);
   const user = JSON.parse(localStorage.getItem("user"));
   const user_id = user?.id;
   const navigate = useNavigate();
+  const [showMonthFilter, setShowMonthFilter] = useState(false);
 
   useEffect(() => {
-    fetchMonthlyIncomes();
+    const today = new Date();
+    const currentMonth = today.toISOString().slice(0, 7);
+    setSelectedMonthYear(currentMonth);
+    fetchMonthlyIncomes(currentMonth);
     fetchMonthlyIncomesSum();
   }, []);
   const fetchMonthlyIncomesSum = async () => {
@@ -53,10 +59,13 @@ function Monthly_incomes() {
     }
   };
 
-  const fetchMonthlyIncomes = async () => {
+  const fetchMonthlyIncomes = async (monthYear = "") => {
     const token = localStorage.getItem("token");
+    const url = monthYear
+      ? `${API_URL}/monthly_incomes/${user_id}/search?monthYear=${monthYear}`
+      : `${API_URL}/monthly_incomes/${user_id}`;
     try {
-      const response = await fetch(`${API_URL}/monthly_incomes/${user_id}`, {
+      const response = await fetch(url, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -107,7 +116,46 @@ function Monthly_incomes() {
   return (
     <>
       <AddIncomeForm />
-      <h1 className="text-2xl font-bold text-center my-6">Monthly Incomes</h1>
+      <h1 className="text-2xl font-bold text-center my-6">
+        Monthly Incomes {selectedMonthYear}
+      </h1>
+
+      <div className="text-center mt-10">
+        <Button
+          onClick={() => setShowMonthFilter(!showMonthFilter)}
+          className="mb-4"
+        >
+          {showMonthFilter ? "Hide filter" : "Filter by Month"}
+        </Button>
+
+        {showMonthFilter && (
+          <div className="max-w-sm mx-auto mt-4">
+            <FormItem>
+              <FormLabel>Select Month</FormLabel>
+              <FormControl>
+                <Input
+                  type="month"
+                  value={selectedMonthYear}
+                  onChange={(e) => {
+                    setSelectedMonthYear(e.target.value);
+                    fetchMonthlyIncomes(e.target.value);
+                  }}
+                />
+              </FormControl>
+            </FormItem>
+            <br />
+            <Button
+              onClick={() => {
+                setSelectedMonthYear("");
+                fetchMonthlyIncomes();
+                setShowMonthFilter(false);
+              }}
+            >
+              Reset Filter
+            </Button>
+          </div>
+        )}
+      </div>
 
       {loading && <p className="text-center">Loading incomes...</p>}
       {error && <p className="text-center text-red-500">{error}</p>}
@@ -162,22 +210,24 @@ function Monthly_incomes() {
                   </TableCell>
                 </TableRow>
               ))}
-              <TableRow
-                style={{
-                  backgroundColor: "#7FDBFF",
-                  fontWeight: "bold",
-                  color: "#333",
-                }}
-              >
-                <TableCell className="font-medium">
-                  Total Monthly Incomes for this month
-                </TableCell>
-                <TableCell>{parseFloat(monthlySum).toFixed(2)} €</TableCell>
+              {selectedMonthYear === new Date().toISOString().slice(0, 7) && (
+                <TableRow
+                  style={{
+                    backgroundColor: "#7FDBFF",
+                    fontWeight: "bold",
+                    color: "#333",
+                  }}
+                >
+                  <TableCell className="font-medium">
+                    Total Monthly Incomes for this month {selectedMonthYear}
+                  </TableCell>
+                  <TableCell>{parseFloat(monthlySum).toFixed(2)} €</TableCell>
 
-                <TableCell />
-                <TableCell />
-                <TableCell />
-              </TableRow>
+                  <TableCell />
+                  <TableCell />
+                  <TableCell />
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>

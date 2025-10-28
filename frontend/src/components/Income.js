@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "./ui/button";
 import {
   Table,
   TableBody,
@@ -10,27 +9,30 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-
+import { Button } from "./ui/button";
+import { FormItem, FormLabel, FormControl } from "./ui/form";
+import { Input } from "./ui/input";
 import { API_URL } from "../lib/utils";
 
 function Income() {
   const [income, setIncome] = useState([]);
   const [Sum, setSum] = useState(0);
+  const [selectedMonthYear, setSelectedMonthYear] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const user = JSON.parse(localStorage.getItem("user"));
   const user_id = user?.id;
   const navigate = useNavigate();
+  const [showMonthFilter, setShowMonthFilter] = useState(false);
 
-  useEffect(() => {
-    fetchIncomes();
-    fetchIncomesSum();
-  }, []);
-  const fetchIncomes = async () => {
+  const fetchIncomes = async (monthYear = "") => {
     const token = localStorage.getItem("token");
 
     try {
-      const res = await fetch(`${API_URL}/incomes/${user_id}`, {
+      const url = monthYear
+        ? `${API_URL}/incomes/${user_id}/search?monthYear=${monthYear}`
+        : `${API_URL}/incomes/${user_id}`;
+      const res = await fetch(url, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -99,10 +101,55 @@ function Income() {
       console.error("Error fetching sum:", err.message);
     }
   };
+  useEffect(() => {
+    const today = new Date();
+    const currentMonth = today.toISOString().slice(0, 7); // "YYYY-MM"
+    setSelectedMonthYear(currentMonth);
+    fetchIncomes(currentMonth);
+    fetchIncomesSum();
+  }, []);
 
   return (
     <>
-      <h1 className="text-2xl font-bold text-center my-6">One-Time Incomes</h1>
+      <h1 className="text-2xl font-bold text-center my-6">
+        One-Time Incomes {selectedMonthYear}
+      </h1>
+      <div className="text-center mt-10">
+        <Button
+          onClick={() => setShowMonthFilter(!showMonthFilter)}
+          className="mb-4"
+        >
+          {showMonthFilter ? "Hide filter" : "Filter by Month"}
+        </Button>
+
+        {showMonthFilter && (
+          <div className="max-w-sm mx-auto mt-4">
+            <FormItem>
+              <FormLabel>Select Filter</FormLabel>
+              <FormControl>
+                <Input
+                  type="month"
+                  value={selectedMonthYear}
+                  onChange={(e) => {
+                    setSelectedMonthYear(e.target.value);
+                    fetchIncomes(e.target.value);
+                  }}
+                />
+              </FormControl>
+            </FormItem>
+            <br />
+            <Button
+              onClick={() => {
+                setSelectedMonthYear("");
+                fetchIncomes();
+                setShowMonthFilter(false);
+              }}
+            >
+              Reset filter
+            </Button>
+          </div>
+        )}
+      </div>
       {loading && <p className="text-center">Loading income...</p>}
       {error && <p className="text-center text-red-500">{error}</p>}
       {!loading && !error && (
@@ -121,11 +168,7 @@ function Income() {
               {income.map((income) => (
                 <TableRow key={income.id}>
                   <TableCell className="font-medium">{income.name}</TableCell>
-                  <TableCell>
-                    {parseFloat(parseFloat(income.amount).toFixed(2)).toFixed(
-                      2
-                    )}
-                  </TableCell>
+                  <TableCell>{parseFloat(income.amount).toFixed(2)}</TableCell>
                   <TableCell>
                     {new Date(income.date).toISOString().split("T")[0]}
                   </TableCell>
@@ -151,18 +194,22 @@ function Income() {
                   </TableCell>
                 </TableRow>
               ))}
-              <TableRow
-                style={{
-                  backgroundColor: "#7FDBFF",
-                  fontWeight: "bold",
-                  color: "#333",
-                }}
-              >
-                <TableCell>Total One-Time Incomes for this month</TableCell>
-                <TableCell>{parseFloat(Sum).toFixed(2)}€</TableCell>
-                <TableCell />
-                <TableCell />
-              </TableRow>
+              {selectedMonthYear === new Date().toISOString().slice(0, 7) && (
+                <TableRow
+                  style={{
+                    backgroundColor: "#7FDBFF",
+                    fontWeight: "bold",
+                    color: "#333",
+                  }}
+                >
+                  <TableCell>
+                    Total One-Time Incomes for this month {selectedMonthYear}
+                  </TableCell>
+                  <TableCell>{parseFloat(Sum).toFixed(2)}€</TableCell>
+                  <TableCell />
+                  <TableCell />
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>
