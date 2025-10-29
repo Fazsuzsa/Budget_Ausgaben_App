@@ -10,21 +10,21 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-
-import { API_URL } from "../lib/utils";
 import { Button } from "./ui/button";
 import { FormItem, FormLabel, FormControl } from "./ui/form";
 import { Input } from "./ui/input";
-function Monthly_incomes() {
+import { API_URL } from "../lib/utils";
+function MonthlyIncomes() {
   const [income, setIncome] = useState([]);
+  const [monthlySum, setMonthlySum] = useState(0);
   const [selectedMonthYear, setSelectedMonthYear] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [monthlySum, setMonthlySum] = useState(0);
-  const user = JSON.parse(localStorage.getItem("user"));
-  const user_id = user?.id;
-  const navigate = useNavigate();
   const [showMonthFilter, setShowMonthFilter] = useState(false);
+
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userId = user?.id;
+  const navigate = useNavigate();
 
   useEffect(() => {
     const today = new Date();
@@ -37,16 +37,13 @@ function Monthly_incomes() {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch(
-        `${API_URL}/monthly_incomes/sum/${user_id}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/monthly_incomes/sum/${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) {
         throw new Error("Failed to fetch sum");
@@ -62,8 +59,8 @@ function Monthly_incomes() {
   const fetchMonthlyIncomes = async (monthYear = "") => {
     const token = localStorage.getItem("token");
     const url = monthYear
-      ? `${API_URL}/monthly_incomes/${user_id}/search?monthYear=${monthYear}`
-      : `${API_URL}/monthly_incomes/${user_id}`;
+      ? `${API_URL}/monthly_incomes/${userId}/search?monthYear=${monthYear}`
+      : `${API_URL}/monthly_incomes/${userId}`;
     try {
       const response = await fetch(url, {
         method: "GET",
@@ -92,11 +89,11 @@ function Monthly_incomes() {
     if (!confirmed) return;
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch(`${API_URL}/monthly_incomes/${user_id}/${id}`, {
+      const res = await fetch(`${API_URL}/monthly_incomes/${userId}/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -192,7 +189,7 @@ function Monthly_incomes() {
                     <Button
                       onClick={() =>
                         navigate(
-                          `/edit-monthly-income/${income.user_id}/${income.id}`,
+                          `/edit-monthly-income/${income.userId}/${income.id}`,
                           {
                             state: { income },
                           }
@@ -236,4 +233,4 @@ function Monthly_incomes() {
   );
 }
 
-export default Monthly_incomes;
+export default MonthlyIncomes;

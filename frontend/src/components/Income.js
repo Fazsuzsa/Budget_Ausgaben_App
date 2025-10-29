@@ -21,17 +21,23 @@ function Income() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const user = JSON.parse(localStorage.getItem("user"));
-  const user_id = user?.id;
+  const userId = user?.id;
   const navigate = useNavigate();
   const [showMonthFilter, setShowMonthFilter] = useState(false);
 
+  useEffect(() => {
+    const today = new Date();
+    const currentMonth = today.toISOString().slice(0, 7); // "YYYY-MM"
+    setSelectedMonthYear(currentMonth);
+    fetchIncomes(currentMonth);
+    fetchIncomesSum();
+  }, []);
   const fetchIncomes = async (monthYear = "") => {
     const token = localStorage.getItem("token");
-
+    const url = monthYear
+      ? `${API_URL}/incomes/${userId}/search?monthYear=${monthYear}`
+      : `${API_URL}/incomes/${userId}`;
     try {
-      const url = monthYear
-        ? `${API_URL}/incomes/${user_id}/search?monthYear=${monthYear}`
-        : `${API_URL}/incomes/${user_id}`;
       const res = await fetch(url, {
         method: "GET",
         headers: {
@@ -56,11 +62,9 @@ function Income() {
       "Do you really want to delete this entry?"
     );
     if (!confirmed) return;
-
     const token = localStorage.getItem("token");
-
     try {
-      const res = await fetch(`${API_URL}/income/${user_id}/${id}`, {
+      const res = await fetch(`${API_URL}/income/${userId}/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -72,7 +76,7 @@ function Income() {
         throw new Error(data.error || "Error while deleting");
       }
       setIncome((prev) => prev.filter((i) => i.id !== id));
-
+      fetchIncomesSum();
       window.location.reload();
     } catch (err) {
       alert("Failed to delete: " + err.message);
@@ -83,7 +87,7 @@ function Income() {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch(`${API_URL}/incomes/sum/${user_id}`, {
+      const response = await fetch(`${API_URL}/incomes/sum/${userId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -101,13 +105,6 @@ function Income() {
       console.error("Error fetching sum:", err.message);
     }
   };
-  useEffect(() => {
-    const today = new Date();
-    const currentMonth = today.toISOString().slice(0, 7); // "YYYY-MM"
-    setSelectedMonthYear(currentMonth);
-    fetchIncomes(currentMonth);
-    fetchIncomesSum();
-  }, []);
 
   return (
     <>

@@ -443,12 +443,12 @@ app.get(
         values.push(isoMonthEnd, isoMonthStart);
       }
 
-      query += " ORDER BY monthly_expenses.date_start DESC";
+      query += " ORDER BY monthly_incomes.date_start DESC";
 
       const result = await pool.query(query, values);
       res.json(result.rows);
     } catch (err) {
-      console.error("Fehler beim Abrufen der monatlichen Ausgaben:", err);
+      console.error("Fehler beim Abrufen der monatlichen Einnahmen:", err);
       res.status(500).json({ error: "Interner Serverfehler" });
     }
   }
